@@ -37,4 +37,17 @@
 - **What's next**:
   - Agent 4: Query Layer (`lib/queries.ts`, `/api/stats/[metric]/route.ts`, `/api/live/route.ts`).
 
+## Agent 4: Query Layer
+- **What was built**:
+  - Implemented typed SQL analytics query functions in `lib/queries.ts`: `getTimeseries`, `getTopPages`, `getTopReferrers`, `getTopCountries`, `getDevices`, `getBrowsers`, `getHourWeekdayMatrix`, `getSankeyFlows`, `getPageStream`, `getLiveEvents`, and `getKpis`.
+  - Added cutoff optimization: reads from pre-aggregated `daily_stats` table for date ranges older than 2 days, and `events` table for recent data.
+  - Implemented Zod-validated `/api/stats/[metric]/route.ts` supporting metrics (`timeseries`, `pages`, `referrers`, `countries`, `devices`, `browsers`, `hour-weekday`, `flows`, `stream`, `kpis`, `live`, `all`).
+  - Implemented `/api/live/route.ts` supporting both standard JSON polling and SSE (Server-Sent Events) live streaming for the 30-minute realtime window.
+  - Added unit test suite `tests/unit/queries.test.ts` covering all SQL shapes, calculations, deltas, and API validation.
+- **How verified**:
+  - All 29 unit tests passed, lint passed, Next.js build compiled `/api/stats/[metric]` and `/api/live` dynamically.
+- **What's next**:
+  - Agent 5: Visualizations (`components/viz/*` for all 8 components and `/viz-gallery`).
+
+
 
