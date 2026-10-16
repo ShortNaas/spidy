@@ -84,3 +84,18 @@
   - `pnpm lint`, `pnpm test`, and `pnpm build` passed with zero errors or warnings.
 - **What's next**:
   - Agent 7: Rollup and Retention (`/api/cron/rollup/route.ts`, `vercel.json`).
+
+## Agent 7: Rollup and Retention
+- **What was built**:
+  - Implemented `lib/rollup.ts` executing idempotent daily rollups aggregating yesterday's events into `daily_stats` using `ON CONFLICT (day, site_id, path, referrer, country, device) DO UPDATE SET views = EXCLUDED.views, visitors = EXCLUDED.visitors`.
+  - Added retention policy deleting raw events older than 90 days (`DELETE FROM events WHERE ts < (CURRENT_DATE - INTERVAL '90 days')`).
+  - Implemented `/api/cron/rollup` route (supporting `GET` and `POST`) secured by constant-time verification against `Authorization: Bearer CRON_SECRET`.
+  - Configured `vercel.json` with Vercel Cron schedule (`0 3 * * *`, daily at 03:00 UTC).
+  - Added unit test suite `tests/unit/rollup.test.ts` (9 tests) verifying authorization checks, idempotent multi-run stability, date format parsing, and 90-day retention query generation.
+- **How verified**:
+  - Unit tests in `tests/unit/rollup.test.ts` passed (9/9).
+  - All 44 unit tests passed (`pnpm test`).
+  - Playwright E2E tests passed.
+  - `pnpm lint` and `pnpm build` passed with zero errors or warnings.
+- **What's next**:
+  - Agent 8: Hardening and Deploy (`next.config.ts` security headers & neutral script rewrites, `README.md`).
