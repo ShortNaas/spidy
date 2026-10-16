@@ -49,5 +49,25 @@
 - **What's next**:
   - Agent 5: Visualizations (`components/viz/*` for all 8 components and `/viz-gallery`).
 
+## Agent 5: Visualizations
+- **What was built**:
+  - Implemented all 8 required visual components in `components/viz/`:
+    1. `GlobeLive.tsx`: 3D interactive rotating globe built with `cobe` WebGL canvas, pulsing beacons from recent geo-coordinates, responsive resizing, and drag controls.
+    2. `FlowSankey.tsx`: Visualized user journey transitions (Referrer → Landing → Next Page) using `d3-sankey`, featuring interactive full-path hover highlighting.
+    3. `CalendarHeatmap.tsx`: 12-month GitHub-style daily activity heatmap with 5-stage sequential cyan/viridis color gradient and date tooltip.
+    4. `HourWeekdayHeatmap.tsx`: 7x24 diurnal matrix grid revealing peak activity hours across days of the week.
+    5. `PageStream.tsx`: Smooth silhouette streamgraph using `d3-shape` stack/area curves showing top 8 pages over time.
+    6. `PulseLive.tsx`: Realtime ticking visitor counter and 30-minute minute-by-minute sparkline with pulsing indicator.
+    7. `WorldChoropleth.tsx`: Natural Earth geographic map projection rendered with `d3-geo`, country density color scale, and hover tooltips.
+    8. `KpiStrip.tsx`: Key metrics cards (Pageviews, Visitors, Bounce Proxy, Top Country) with Framer Motion entry animations and delta comparison badges.
+  - Built interactive preview gallery `/viz-gallery` with loading skeleton toggle and seeded datasets.
+  - Added Playwright e2e test suite `tests/e2e/viz-gallery.spec.ts` capturing 8 component screenshots to `test-results/screenshots/`.
+- **How verified**:
+  - All 8 Playwright screenshots generated successfully.
+  - All 29 unit tests passed. `pnpm lint`, `pnpm test`, and `pnpm build` passed with zero errors or warnings.
+- **What's next**:
+  - Agent 6: Dashboard & Authentication (`middleware.ts`, `app/login/page.tsx`, `app/(dashboard)/page.tsx`, `app/(dashboard)/sites/[id]/page.tsx`).
+
+
 
 
