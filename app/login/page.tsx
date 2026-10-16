@@ -2,14 +2,24 @@
 
 import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+
+function getSafeNextUrl(rawNext: string | null, fallback = "/dashboard"): string {
+  if (!rawNext) return fallback;
+  if (rawNext.startsWith("/") && !rawNext.startsWith("//") && !rawNext.includes("\\")) {
+    return rawNext;
+  }
+  return fallback;
+}
 
 function LoginForm() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("next") || "/";
+  const nextUrl = getSafeNextUrl(searchParams.get("next"));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -17,15 +27,16 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, password }),
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Invalid password");
+        setError(data.error || "Invalid email or password");
         setLoading(false);
         return;
       }
@@ -54,17 +65,32 @@ function LoginForm() {
       )}
 
       <div className="space-y-1.5">
-        <label
-          htmlFor="password"
-          className="block text-xs font-medium text-zinc-300 font-mono"
-        >
+        <label htmlFor="email" className="block text-xs font-medium text-zinc-300 font-mono">
+          Email address
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          autoFocus
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="user@example.com"
+          className="w-full bg-zinc-900 border border-zinc-700/80 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none transition-all font-mono"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <label htmlFor="password" className="block text-xs font-medium text-zinc-300 font-mono">
           Password
         </label>
         <input
           id="password"
           name="password"
           type="password"
-          autoFocus
+          autoComplete="current-password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -78,8 +104,15 @@ function LoginForm() {
         disabled={loading}
         className="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs tracking-wide uppercase py-2.5 rounded-lg transition-colors disabled:opacity-50 font-mono mt-2 cursor-pointer"
       >
-        {loading ? "Authenticating..." : "Unlock Dashboard"}
+        {loading ? "Authenticating..." : "Sign In"}
       </button>
+
+      <div className="pt-2 text-center text-xs text-zinc-400 font-mono">
+        Don&apos;t have an account?{" "}
+        <Link href="/register" className="text-cyan-400 hover:text-cyan-300 underline font-medium">
+          Create account
+        </Link>
+      </div>
     </form>
   );
 }
@@ -90,7 +123,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Brand header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-950/60 border border-cyan-800/60 text-cyan-400 mb-3 shadow-[0_0_24px_rgba(6,182,212,0.15)]">
+          <Link href="/" className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-950/60 border border-cyan-800/60 text-cyan-400 mb-3 shadow-[0_0_24px_rgba(6,182,212,0.15)] hover:scale-105 transition-transform">
             <svg
               className="w-6 h-6"
               fill="none"
@@ -102,17 +135,21 @@ export default function LoginPage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
               />
             </svg>
-          </div>
+          </Link>
           <h1 className="text-xl font-bold tracking-tight text-white">Spidy Analytics</h1>
           <p className="text-xs text-zinc-400 mt-1 font-mono">
-            Enter dashboard password to unlock metrics
+            Sign in to access your analytics dashboard
           </p>
         </div>
 
-        <Suspense fallback={<div className="h-44 bg-zinc-950 border border-zinc-800/80 rounded-2xl animate-pulse" />}>
+        <Suspense
+          fallback={
+            <div className="h-56 bg-zinc-950 border border-zinc-800/80 rounded-2xl animate-pulse" />
+          }
+        >
           <LoginForm />
         </Suspense>
 

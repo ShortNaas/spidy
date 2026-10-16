@@ -20,13 +20,12 @@ export interface GlobeLiveProps {
 
 export function GlobeLive({ markers = [], loading = false, className = "" }: GlobeLiveProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const pointerInteracting = useRef<number | null>(null);
-  const pointerInteractionMovement = useRef(0);
+  const phiRef = useRef(0);
+  const pointerStartRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current || loading) return;
 
-    let phi = 0;
     let width = canvasRef.current.offsetWidth || 400;
 
     const onResize = () => {
@@ -49,7 +48,7 @@ export function GlobeLive({ markers = [], loading = false, className = "" }: Glo
       devicePixelRatio: 2,
       width: width * 2,
       height: width * 2,
-      phi: 0,
+      phi: phiRef.current,
       theta: 0.25,
       dark: 1,
       diffuse: 1.2,
@@ -64,11 +63,11 @@ export function GlobeLive({ markers = [], loading = false, className = "" }: Glo
     let animationFrameId: number;
 
     const animate = () => {
-      if (!pointerInteracting.current && !prefersReducedMotion) {
-        phi += 0.003;
+      if (pointerStartRef.current === null && !prefersReducedMotion) {
+        phiRef.current += 0.003;
       }
       globe.update({
-        phi: phi + pointerInteractionMovement.current,
+        phi: phiRef.current,
         width: width * 2,
         height: width * 2,
       });
@@ -119,27 +118,31 @@ export function GlobeLive({ markers = [], loading = false, className = "" }: Glo
           ref={canvasRef}
           style={{ width: "100%", height: "100%", contain: "layout paint size" }}
           onPointerDown={(e) => {
-            pointerInteracting.current = e.clientX - pointerInteractionMovement.current;
+            pointerStartRef.current = e.clientX;
+            try {
+              canvasRef.current?.setPointerCapture(e.pointerId);
+            } catch {}
             if (canvasRef.current) canvasRef.current.style.cursor = "grabbing";
           }}
-          onPointerUp={() => {
-            pointerInteracting.current = null;
+          onPointerUp={(e) => {
+            pointerStartRef.current = null;
+            try {
+              canvasRef.current?.releasePointerCapture(e.pointerId);
+            } catch {}
             if (canvasRef.current) canvasRef.current.style.cursor = "grab";
           }}
-          onPointerOut={() => {
-            pointerInteracting.current = null;
+          onPointerCancel={(e) => {
+            pointerStartRef.current = null;
+            try {
+              canvasRef.current?.releasePointerCapture(e.pointerId);
+            } catch {}
             if (canvasRef.current) canvasRef.current.style.cursor = "grab";
           }}
-          onMouseMove={(e) => {
-            if (pointerInteracting.current !== null) {
-              const delta = e.clientX - pointerInteracting.current;
-              pointerInteractionMovement.current = delta * 0.005;
-            }
-          }}
-          onTouchMove={(e) => {
-            if (pointerInteracting.current !== null && e.touches[0]) {
-              const delta = e.touches[0].clientX - pointerInteracting.current;
-              pointerInteractionMovement.current = delta * 0.005;
+          onPointerMove={(e) => {
+            if (pointerStartRef.current !== null) {
+              const delta = e.clientX - pointerStartRef.current;
+              phiRef.current += delta * 0.005;
+              pointerStartRef.current = e.clientX;
             }
           }}
           className="cursor-grab transition-opacity duration-500"

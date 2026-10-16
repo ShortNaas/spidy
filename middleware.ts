@@ -1,59 +1,81 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_COOKIE_NAME, verifySessionToken } from "./lib/auth";
 
-export async function middleware(request: NextRequest): Promise<NextResponse> {
+export const SESSION_COOKIE_NAME = "spidy_session";
+
+function addSecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.headers.set(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' https:; font-src 'self' data:;"
+  );
+  return response;
+}
+
+export function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
+  const method = request.method;
 
-  // 1. Unprotected public routes and static assets
-  if (
-    pathname.startsWith("/api/collect") ||
-    pathname.startsWith("/api/e") ||
-    pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/cron") ||
-    pathname === "/a.js" ||
-    pathname === "/s.js" ||
-    pathname === "/world.geojson" ||
-    pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico" ||
-    pathname.startsWith("/viz-gallery") ||
-    /\.(svg|png|jpg|jpeg|gif|webp|ico|css|js)$/.test(pathname)
-  ) {
-    return NextResponse.next();
+  // 1. CSRF Protection: reject non-GET auth/site requests whose Origin does not match the host
+  if (method !== "GET" && method !== "HEAD" && method !== "OPTIONS") {
+    if (pathname.startsWith("/api/auth/") || pathname.startsWith("/api/sites")) {
+      const origin = request.headers.get("origin");
+      if (origin) {
+        try {
+          const originHost = new URL(origin).host;
+          const hostHeader = request.headers.get("host") || request.nextUrl.host;
+          if (originHost !== hostHeader) {
+            return NextResponse.json(
+              { error: "Forbidden: CSRF check failed" },
+              { status: 403 }
+            );
+          }
+        } catch {
+          return NextResponse.json(
+            { error: "Forbidden: Invalid origin header" },
+            { status: 403 }
+          );
+        }
+      }
+    }
   }
 
-  // 2. Check session token from cookie
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  const isAuthenticated = await verifySessionToken(sessionCookie);
+  const hasSession = Boolean(sessionCookie && sessionCookie.length === 64);
 
-  // 3. Handle /login route
-  if (pathname === "/login") {
-    if (isAuthenticated) {
-      return NextResponse.redirect(new URL("/", request.url));
+  // 2. Logged-in users hitting /login or /register redirect to /dashboard
+  if (pathname === "/login" || pathname === "/register") {
+    if (hasSession) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-    return NextResponse.next();
+    return addSecurityHeaders(NextResponse.next());
   }
 
-  // 4. Protect all dashboard pages and stats APIs
-  if (!isAuthenticated) {
-    if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  // 3. Protect /dashboard and /api/stats
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/api/stats")) {
+    if (!hasSession) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
 
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
-  return NextResponse.next();
+  return addSecurityHeaders(NextResponse.next());
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     */
-    "/((?!_next/static|_next/image).*)",
+    "/dashboard/:path*",
+    "/api/stats/:path*",
+    "/api/auth/:path*",
+    "/api/sites/:path*",
+    "/login",
+    "/register",
   ],
 };

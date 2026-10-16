@@ -14,8 +14,18 @@ export interface CalendarHeatmapProps {
 }
 
 const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 export function CalendarHeatmap({
@@ -102,7 +112,9 @@ export function CalendarHeatmap({
         aria-busy="true"
       >
         <div className="w-full h-24 bg-zinc-900 rounded" />
-        <span className="text-xs text-zinc-500 font-mono mt-4">Loading 12-month calendar activity...</span>
+        <span className="text-xs text-zinc-500 font-mono mt-4">
+          Loading 12-month calendar activity...
+        </span>
       </div>
     );
   }
@@ -159,13 +171,31 @@ export function CalendarHeatmap({
 
           {/* Weekday labels */}
           <g transform="translate(0, 24)">
-            <text x={0} y={1 * (cellSize + cellGap) + 9} fontSize={8} fontFamily="monospace" fill="#71717a">
+            <text
+              x={0}
+              y={1 * (cellSize + cellGap) + 9}
+              fontSize={8}
+              fontFamily="monospace"
+              fill="#71717a"
+            >
               Mon
             </text>
-            <text x={0} y={3 * (cellSize + cellGap) + 9} fontSize={8} fontFamily="monospace" fill="#71717a">
+            <text
+              x={0}
+              y={3 * (cellSize + cellGap) + 9}
+              fontSize={8}
+              fontFamily="monospace"
+              fill="#71717a"
+            >
               Wed
             </text>
-            <text x={0} y={5 * (cellSize + cellGap) + 9} fontSize={8} fontFamily="monospace" fill="#71717a">
+            <text
+              x={0}
+              y={5 * (cellSize + cellGap) + 9}
+              fontSize={8}
+              fontFamily="monospace"
+              fill="#71717a"
+            >
               Fri
             </text>
           </g>

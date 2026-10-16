@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
 import type { KpiResult } from "@/lib/queries";
 
 export interface KpiStripProps {
@@ -70,13 +69,12 @@ export function KpiStrip({ data, loading = false, className = "" }: KpiStripProp
       role="region"
       aria-label="Key Performance Indicators"
     >
-      {cards.map((card, idx) => {
+      {cards.map((card) => {
         let badgeColor = "text-zinc-400 bg-zinc-900 border-zinc-800";
         let sign = "";
 
         if (card.deltaPct !== null) {
-          const isGood =
-            card.isPositiveGood ? card.deltaPct >= 0 : card.deltaPct <= 0;
+          const isGood = card.isPositiveGood ? card.deltaPct >= 0 : card.deltaPct <= 0;
           sign = card.deltaPct > 0 ? "+" : "";
 
           if (card.deltaPct === 0) {
@@ -89,11 +87,8 @@ export function KpiStrip({ data, loading = false, className = "" }: KpiStripProp
         }
 
         return (
-          <motion.div
+          <div
             key={card.title}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: idx * 0.08 }}
             className="flex flex-col justify-between bg-zinc-950 rounded-xl border border-zinc-800/80 p-5 shadow-xs hover:border-zinc-700/80 transition-colors"
           >
             <div className="flex items-center justify-between">
@@ -115,7 +110,7 @@ export function KpiStrip({ data, loading = false, className = "" }: KpiStripProp
             </div>
 
             <div className="text-[11px] font-mono text-zinc-500">{card.subtext}</div>
-          </motion.div>
+          </div>
         );
       })}
     </div>

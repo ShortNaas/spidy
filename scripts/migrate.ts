@@ -3,9 +3,9 @@ import path from "node:path";
 import { neon } from "@neondatabase/serverless";
 
 function getDatabaseUrl(): string {
-  const url = process.env.DATABASE_URL;
+  const url = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
   if (!url) {
-    console.error("Error: DATABASE_URL is not set.");
+    console.error("Error: Neither DATABASE_URL_UNPOOLED nor DATABASE_URL is set.");
     console.error("Please set DATABASE_URL in your environment or in .env / .env.local file.");
     process.exit(1);
   }
@@ -46,18 +46,25 @@ export async function runMigrations(): Promise<void> {
     const filePath = path.join(migrationsDir, file);
     const sqlContent = await readFile(filePath, "utf-8");
 
-    // Execute statements
-    // Split by semicolons while ignoring commented lines
-    const statements = sqlContent
+    // Strip SQL comments before splitting statements
+    const cleanSql = sqlContent
+      .split("\n")
+      .map((line) => line.replace(/--.*$/, "").trim())
+      .join("\n");
+
+    const statements = cleanSql
       .split(";")
       .map((s) => s.trim())
-      .filter((s) => s.length > 0 && !s.startsWith("--"));
+      .filter((s) => s.length > 0);
 
     for (const stmt of statements) {
       if (stmt.length > 0) {
-        // Tagged template neon function can also be called directly with string or unsafe
-        // For DDL execution, calling the sql function directly:
-        await (sql as unknown as (s: string) => Promise<unknown>)(stmt);
+        // Tagged template neon function provides sql.query for conventional string execution
+        if ("query" in sql && typeof (sql as { query?: unknown }).query === "function") {
+          await (sql as { query: (s: string) => Promise<unknown> }).query(stmt);
+        } else {
+          await (sql as unknown as (s: string) => Promise<unknown>)(stmt);
+        }
       }
     }
 

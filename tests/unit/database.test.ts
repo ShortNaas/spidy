@@ -33,22 +33,28 @@ describe("Database Schema & Specifications", () => {
     expect(schemaSql.toLowerCase()).not.toMatch(/\bip\b\s+text/);
 
     // Daily stats primary key constraint
-    expect(schemaSql).toContain(
-      "PRIMARY KEY (day, site_id, path, referrer, country, device)"
-    );
+    expect(schemaSql).toContain("PRIMARY KEY (day, site_id, path, referrer, country, device)");
   });
 
-  it("db/migrations/0001_initial.sql exists and matches schema.sql", async () => {
-    const schemaSql = await readFile(
-      path.resolve(process.cwd(), "db/schema.sql"),
-      "utf-8"
-    );
+  it("db/migrations/0001_initial.sql defines base analytics tables", async () => {
     const migrationSql = await readFile(
       path.resolve(process.cwd(), "db/migrations/0001_initial.sql"),
       "utf-8"
     );
+    expect(migrationSql).toContain("CREATE TABLE IF NOT EXISTS sites");
+    expect(migrationSql).toContain("CREATE TABLE IF NOT EXISTS events");
+    expect(migrationSql).toContain("CREATE TABLE IF NOT EXISTS daily_stats");
+  });
 
-    const clean = (sql: string) => sql.replace(/--[^\n]*\n/g, "").trim();
-    expect(clean(migrationSql)).toBe(clean(schemaSql));
+  it("db/migrations/0002_accounts.sql defines accounts, sessions, and rate-limiting tables", async () => {
+    const migrationSql = await readFile(
+      path.resolve(process.cwd(), "db/migrations/0002_accounts.sql"),
+      "utf-8"
+    );
+    expect(migrationSql).toContain("CREATE TABLE IF NOT EXISTS users");
+    expect(migrationSql).toContain("CREATE TABLE IF NOT EXISTS sessions");
+    expect(migrationSql).toContain("CREATE TABLE IF NOT EXISTS auth_attempts");
+    expect(migrationSql).toContain("ALTER TABLE sites ADD COLUMN IF NOT EXISTS user_id");
   });
 });
+

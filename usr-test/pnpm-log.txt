@@ -1,0 +1,29 @@
+pnpm start
+$ NODE_OPTIONS='--no-network-family-autoselection' next start▲ Next.js 16.4.1
+- Local:         http://localhost:3000
+- Network:       http://10.251.47.40:3000
+✓ Ready in 271ms✓ Running next.config.ts took 76ms
+Error querying metric 'all': Error [NeonDbError]: column "events.ts" must appear in the GROUP BY clause or be used in an aggregate function
+    at tu.execute (.next/server/chunks/lib_db_ts_1ttuckbd3em8v._.js:15:2912)
+    at async i (.next/server/chunks/lib_queries_ts_15_fo7wo3a6xr._.js:12:14)
+    at async n (.next/server/chunks/_1vkj3-xqgg7_9._.js:1:1731)
+    at async W (.next/server/chunks/_1vkj3-xqgg7_9._.js:1:5282)
+    at async X (.next/server/chunks/_1vkj3-xqgg7_9._.js:1:6276) {
+  severity: 'ERROR',
+  code: '42803',
+  detail: undefined,
+  hint: undefined,
+  position: '34',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_agg.c',
+  line: '1552',
+  routine: 'substitute_grouped_columns_mutator',
+  sourceError: undefined
+}

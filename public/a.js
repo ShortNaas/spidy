@@ -5,7 +5,11 @@
   if (!s) return;
   var id = s.getAttribute("data-site");
   if (!id) return;
-  var ep = s.getAttribute("data-endpoint") || (s.src ? s.src.replace(/\/s\.js(\?.*)?$/, "/api/e").replace(/\/a\.js(\?.*)?$/, "/api/collect") : "/api/collect");
+  var ep =
+    s.getAttribute("data-endpoint") ||
+    (s.src
+      ? s.src.replace(/\/s\.js(\?.*)?$/, "/api/e").replace(/\/a\.js(\?.*)?$/, "/api/collect")
+      : "/api/collect");
   var prev = "";
 
   function track() {

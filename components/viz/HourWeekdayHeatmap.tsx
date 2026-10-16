@@ -58,7 +58,9 @@ export function HourWeekdayHeatmap({
         aria-busy="true"
       >
         <div className="w-full h-32 bg-zinc-900 rounded" />
-        <span className="text-xs text-zinc-500 font-mono mt-4">Computing hourly seasonality matrix...</span>
+        <span className="text-xs text-zinc-500 font-mono mt-4">
+          Computing hourly seasonality matrix...
+        </span>
       </div>
     );
   }

@@ -25,7 +25,10 @@ export function PulseLive({
   const points = useMemo(() => {
     // Fill to 30 points if fewer
     const rawCounts = perMinute.map((p) => p.count);
-    const dataPoints = rawCounts.length >= 30 ? rawCounts.slice(-30) : [...Array(30 - rawCounts.length).fill(0), ...rawCounts];
+    const dataPoints =
+      rawCounts.length >= 30
+        ? rawCounts.slice(-30)
+        : [...Array(30 - rawCounts.length).fill(0), ...rawCounts];
     const max = Math.max(...dataPoints, 5);
 
     const padX = 4;
@@ -82,9 +85,7 @@ export function PulseLive({
           <div className="text-3xl font-bold font-mono tabular-nums text-white tracking-tight">
             {activeVisitors.toLocaleString()}
           </div>
-          <div className="text-[11px] font-mono text-zinc-500 mt-0.5">
-            visitors in last 5 min
-          </div>
+          <div className="text-[11px] font-mono text-zinc-500 mt-0.5">visitors in last 5 min</div>
         </div>
 
         <div className="text-right">
@@ -112,9 +113,7 @@ export function PulseLive({
           </defs>
 
           {/* Area fill */}
-          {points.areaD && (
-            <path d={points.areaD} fill="url(#pulseGradient)" />
-          )}
+          {points.areaD && <path d={points.areaD} fill="url(#pulseGradient)" />}
 
           {/* Stroke path */}
           {points.pathD && (

@@ -77,12 +77,21 @@ export interface KpiResult {
   };
 }
 
-/**
- * Cutoff helper: check if date range is entirely older than 2 days ago.
- */
-function isOlderThanTwoDays(to: Date): boolean {
-  const twoDaysAgo = new Date(Date.now() - 2 * 86400000);
-  return to.getTime() < twoDaysAgo.getTime();
+export class SiteNotFoundError extends Error {
+  constructor(message = "Site not found") {
+    super(message);
+    this.name = "SiteNotFoundError";
+  }
+}
+
+export async function verifySiteOwnership(siteId: string, userId?: string): Promise<void> {
+  if (!userId) return;
+  const rows = (await sql`
+    SELECT id FROM sites WHERE id = ${siteId} AND user_id = ${userId}::uuid;
+  `) as Array<{ id: string }>;
+  if (!rows || rows.length === 0) {
+    throw new SiteNotFoundError();
+  }
 }
 
 /**
@@ -92,19 +101,43 @@ export async function getTimeseries(
   siteId: string,
   from: Date,
   to: Date,
-  interval: "hour" | "day" = "day"
+  interval: "hour" | "day" = "day",
+  userId?: string
 ): Promise<TimeseriesPoint[]> {
+  await verifySiteOwnership(siteId, userId);
   const fromIso = from.toISOString();
   const toIso = to.toISOString();
 
-  // If interval is day and range is older than 2 days, read from daily_stats
-  if (interval === "day" && isOlderThanTwoDays(to)) {
-    const fromDay = fromIso.slice(0, 10);
-    const toDay = toIso.slice(0, 10);
-
+  // If interval is hour, aggregate directly from events grouped by hour
+  if (interval === "hour") {
     const rows = (await sql`
       SELECT
-        day::text as ts,
+        date_trunc('hour', ts)::text as ts,
+        count(*)::int as views,
+        count(DISTINCT visitor)::int as visitors
+      FROM events
+      WHERE site_id = ${siteId}
+        AND ts >= ${fromIso}::timestamptz
+        AND ts <= ${toIso}::timestamptz
+      GROUP BY 1
+      ORDER BY 1 ASC;
+    `) as Array<{ ts: string; views: number; visitors: number }>;
+
+    return rows;
+  }
+
+  // Otherwise (interval === "day"): seamlessly combine daily_stats and real-time events
+  const fromDay = fromIso.slice(0, 10);
+  const toDay = toIso.slice(0, 10);
+
+  const rows = (await sql`
+    SELECT
+      day::text as ts,
+      SUM(views)::int as views,
+      SUM(visitors)::int as visitors
+    FROM (
+      SELECT
+        day,
         COALESCE(SUM(views), 0)::int as views,
         COALESCE(SUM(visitors), 0)::int as visitors
       FROM daily_stats
@@ -112,24 +145,24 @@ export async function getTimeseries(
         AND day >= ${fromDay}::date
         AND day <= ${toDay}::date
       GROUP BY day
-      ORDER BY day ASC;
-    `) as Array<{ ts: string; views: number; visitors: number }>;
 
-    return rows;
-  }
+      UNION ALL
 
-  // Otherwise aggregate directly from raw events
-  const rows = (await sql`
-    SELECT
-      date_trunc(${interval}, ts)::text as ts,
-      count(*)::int as views,
-      count(DISTINCT visitor)::int as visitors
-    FROM events
-    WHERE site_id = ${siteId}
-      AND ts >= ${fromIso}::timestamptz
-      AND ts <= ${toIso}::timestamptz
-    GROUP BY date_trunc(${interval}, ts)
-    ORDER BY ts ASC;
+      SELECT
+        ts::date as day,
+        count(*)::int as views,
+        count(DISTINCT visitor)::int as visitors
+      FROM events
+      WHERE site_id = ${siteId}
+        AND ts::date NOT IN (
+          SELECT DISTINCT day FROM daily_stats WHERE site_id = ${siteId} AND day >= ${fromDay}::date
+        )
+        AND ts >= ${fromIso}::timestamptz
+        AND ts <= ${toIso}::timestamptz
+      GROUP BY ts::date
+    ) sub
+    GROUP BY day
+    ORDER BY day ASC;
   `) as Array<{ ts: string; views: number; visitors: number }>;
 
   return rows;
@@ -146,12 +179,15 @@ export async function getTopPages(
 ): Promise<ItemCount[]> {
   const fromIso = from.toISOString();
   const toIso = to.toISOString();
+  const fromDay = fromIso.slice(0, 10);
+  const toDay = toIso.slice(0, 10);
 
-  if (isOlderThanTwoDays(to)) {
-    const fromDay = fromIso.slice(0, 10);
-    const toDay = toIso.slice(0, 10);
-
-    const rows = (await sql`
+  const rows = (await sql`
+    SELECT
+      name,
+      SUM(views)::int as views,
+      SUM(visitors)::int as visitors
+    FROM (
       SELECT
         path as name,
         COALESCE(SUM(views), 0)::int as views,
@@ -161,23 +197,23 @@ export async function getTopPages(
         AND day >= ${fromDay}::date
         AND day <= ${toDay}::date
       GROUP BY path
-      ORDER BY views DESC
-      LIMIT ${limit};
-    `) as ItemCount[];
 
-    return rows;
-  }
+      UNION ALL
 
-  const rows = (await sql`
-    SELECT
-      path as name,
-      count(*)::int as views,
-      count(DISTINCT visitor)::int as visitors
-    FROM events
-    WHERE site_id = ${siteId}
-      AND ts >= ${fromIso}::timestamptz
-      AND ts <= ${toIso}::timestamptz
-    GROUP BY path
+      SELECT
+        path as name,
+        count(*)::int as views,
+        count(DISTINCT visitor)::int as visitors
+      FROM events
+      WHERE site_id = ${siteId}
+        AND ts::date NOT IN (
+          SELECT DISTINCT day FROM daily_stats WHERE site_id = ${siteId} AND day >= ${fromDay}::date
+        )
+        AND ts >= ${fromIso}::timestamptz
+        AND ts <= ${toIso}::timestamptz
+      GROUP BY path
+    ) combined
+    GROUP BY name
     ORDER BY views DESC
     LIMIT ${limit};
   `) as ItemCount[];
@@ -196,12 +232,15 @@ export async function getTopReferrers(
 ): Promise<ItemCount[]> {
   const fromIso = from.toISOString();
   const toIso = to.toISOString();
+  const fromDay = fromIso.slice(0, 10);
+  const toDay = toIso.slice(0, 10);
 
-  if (isOlderThanTwoDays(to)) {
-    const fromDay = fromIso.slice(0, 10);
-    const toDay = toIso.slice(0, 10);
-
-    const rows = (await sql`
+  const rows = (await sql`
+    SELECT
+      name,
+      SUM(views)::int as views,
+      SUM(visitors)::int as visitors
+    FROM (
       SELECT
         CASE WHEN referrer = '' OR referrer IS NULL THEN 'Direct / None' ELSE referrer END as name,
         COALESCE(SUM(views), 0)::int as views,
@@ -211,22 +250,22 @@ export async function getTopReferrers(
         AND day >= ${fromDay}::date
         AND day <= ${toDay}::date
       GROUP BY name
-      ORDER BY views DESC
-      LIMIT ${limit};
-    `) as ItemCount[];
 
-    return rows;
-  }
+      UNION ALL
 
-  const rows = (await sql`
-    SELECT
-      CASE WHEN referrer = '' OR referrer IS NULL THEN 'Direct / None' ELSE referrer END as name,
-      count(*)::int as views,
-      count(DISTINCT visitor)::int as visitors
-    FROM events
-    WHERE site_id = ${siteId}
-      AND ts >= ${fromIso}::timestamptz
-      AND ts <= ${toIso}::timestamptz
+      SELECT
+        CASE WHEN referrer = '' OR referrer IS NULL THEN 'Direct / None' ELSE referrer END as name,
+        count(*)::int as views,
+        count(DISTINCT visitor)::int as visitors
+      FROM events
+      WHERE site_id = ${siteId}
+        AND ts::date NOT IN (
+          SELECT DISTINCT day FROM daily_stats WHERE site_id = ${siteId} AND day >= ${fromDay}::date
+        )
+        AND ts >= ${fromIso}::timestamptz
+        AND ts <= ${toIso}::timestamptz
+      GROUP BY name
+    ) combined
     GROUP BY name
     ORDER BY views DESC
     LIMIT ${limit};
@@ -246,12 +285,15 @@ export async function getTopCountries(
 ): Promise<ItemCount[]> {
   const fromIso = from.toISOString();
   const toIso = to.toISOString();
+  const fromDay = fromIso.slice(0, 10);
+  const toDay = toIso.slice(0, 10);
 
-  if (isOlderThanTwoDays(to)) {
-    const fromDay = fromIso.slice(0, 10);
-    const toDay = toIso.slice(0, 10);
-
-    const rows = (await sql`
+  const rows = (await sql`
+    SELECT
+      name,
+      SUM(views)::int as views,
+      SUM(visitors)::int as visitors
+    FROM (
       SELECT
         COALESCE(NULLIF(country, ''), 'Unknown') as name,
         COALESCE(SUM(views), 0)::int as views,
@@ -261,22 +303,22 @@ export async function getTopCountries(
         AND day >= ${fromDay}::date
         AND day <= ${toDay}::date
       GROUP BY name
-      ORDER BY views DESC
-      LIMIT ${limit};
-    `) as ItemCount[];
 
-    return rows;
-  }
+      UNION ALL
 
-  const rows = (await sql`
-    SELECT
-      COALESCE(NULLIF(country, ''), 'Unknown') as name,
-      count(*)::int as views,
-      count(DISTINCT visitor)::int as visitors
-    FROM events
-    WHERE site_id = ${siteId}
-      AND ts >= ${fromIso}::timestamptz
-      AND ts <= ${toIso}::timestamptz
+      SELECT
+        COALESCE(NULLIF(country, ''), 'Unknown') as name,
+        count(*)::int as views,
+        count(DISTINCT visitor)::int as visitors
+      FROM events
+      WHERE site_id = ${siteId}
+        AND ts::date NOT IN (
+          SELECT DISTINCT day FROM daily_stats WHERE site_id = ${siteId} AND day >= ${fromDay}::date
+        )
+        AND ts >= ${fromIso}::timestamptz
+        AND ts <= ${toIso}::timestamptz
+      GROUP BY name
+    ) combined
     GROUP BY name
     ORDER BY views DESC
     LIMIT ${limit};
@@ -288,19 +330,18 @@ export async function getTopCountries(
 /**
  * 5. Devices Breakdown
  */
-export async function getDevices(
-  siteId: string,
-  from: Date,
-  to: Date
-): Promise<ItemCount[]> {
+export async function getDevices(siteId: string, from: Date, to: Date): Promise<ItemCount[]> {
   const fromIso = from.toISOString();
   const toIso = to.toISOString();
+  const fromDay = fromIso.slice(0, 10);
+  const toDay = toIso.slice(0, 10);
 
-  if (isOlderThanTwoDays(to)) {
-    const fromDay = fromIso.slice(0, 10);
-    const toDay = toIso.slice(0, 10);
-
-    const rows = (await sql`
+  const rows = (await sql`
+    SELECT
+      name,
+      SUM(views)::int as views,
+      SUM(visitors)::int as visitors
+    FROM (
       SELECT
         COALESCE(NULLIF(device, ''), 'desktop') as name,
         COALESCE(SUM(views), 0)::int as views,
@@ -310,21 +351,22 @@ export async function getDevices(
         AND day >= ${fromDay}::date
         AND day <= ${toDay}::date
       GROUP BY name
-      ORDER BY views DESC;
-    `) as ItemCount[];
 
-    return rows;
-  }
+      UNION ALL
 
-  const rows = (await sql`
-    SELECT
-      COALESCE(NULLIF(device, ''), 'desktop') as name,
-      count(*)::int as views,
-      count(DISTINCT visitor)::int as visitors
-    FROM events
-    WHERE site_id = ${siteId}
-      AND ts >= ${fromIso}::timestamptz
-      AND ts <= ${toIso}::timestamptz
+      SELECT
+        COALESCE(NULLIF(device, ''), 'desktop') as name,
+        count(*)::int as views,
+        count(DISTINCT visitor)::int as visitors
+      FROM events
+      WHERE site_id = ${siteId}
+        AND ts::date NOT IN (
+          SELECT DISTINCT day FROM daily_stats WHERE site_id = ${siteId} AND day >= ${fromDay}::date
+        )
+        AND ts >= ${fromIso}::timestamptz
+        AND ts <= ${toIso}::timestamptz
+      GROUP BY name
+    ) combined
     GROUP BY name
     ORDER BY views DESC;
   `) as ItemCount[];
@@ -335,11 +377,7 @@ export async function getDevices(
 /**
  * 6. Browsers Breakdown
  */
-export async function getBrowsers(
-  siteId: string,
-  from: Date,
-  to: Date
-): Promise<ItemCount[]> {
+export async function getBrowsers(siteId: string, from: Date, to: Date): Promise<ItemCount[]> {
   const fromIso = from.toISOString();
   const toIso = to.toISOString();
 
@@ -506,8 +544,8 @@ export async function getPageStream(
       AND path = ANY(${topPaths})
       AND ts >= ${fromIso}::timestamptz
       AND ts <= ${toIso}::timestamptz
-    GROUP BY date, path
-    ORDER BY date ASC, views DESC;
+    GROUP BY 1, 2
+    ORDER BY 1 ASC, views DESC;
   `) as StreamDataPoint[];
 
   return rows;
@@ -516,10 +554,7 @@ export async function getPageStream(
 /**
  * 10. Live Events (last 30 minutes)
  */
-export async function getLiveEvents(
-  siteId: string,
-  windowMinutes = 30
-): Promise<LiveStats> {
+export async function getLiveEvents(siteId: string, windowMinutes = 30): Promise<LiveStats> {
   const now = new Date();
   const windowStart = new Date(now.getTime() - windowMinutes * 60 * 1000).toISOString();
   const fiveMinAgo = new Date(now.getTime() - 5 * 60 * 1000).toISOString();
@@ -582,11 +617,7 @@ export async function getLiveEvents(
 /**
  * 11. KPI Summary with delta comparison to previous period
  */
-export async function getKpis(
-  siteId: string,
-  from: Date,
-  to: Date
-): Promise<KpiResult> {
+export async function getKpis(siteId: string, from: Date, to: Date): Promise<KpiResult> {
   const durationMs = to.getTime() - from.getTime();
   const prevTo = new Date(from.getTime());
   const prevFrom = new Date(from.getTime() - durationMs);
@@ -638,8 +669,7 @@ export async function getKpis(
     const visitors = aggRes[0]?.visitors || 0;
     const totalSessions = aggRes[0]?.total_sessions || 0;
     const bounceCount = bounceRes[0]?.bounce_count || 0;
-    const bounceRate =
-      totalSessions > 0 ? Math.round((bounceCount / totalSessions) * 100) : 0;
+    const bounceRate = totalSessions > 0 ? Math.round((bounceCount / totalSessions) * 100) : 0;
     const topCountry = topCountryRes[0]?.country || "—";
 
     return { views, visitors, bounceRate, topCountry };

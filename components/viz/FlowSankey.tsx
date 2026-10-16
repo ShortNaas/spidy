@@ -81,7 +81,9 @@ export function FlowSankey({
           <div className="h-4 w-24 bg-zinc-800 rounded" />
         </div>
         <div className="w-full h-48 bg-zinc-900/50 rounded-lg border border-zinc-800/40" />
-        <span className="text-xs text-zinc-500 font-mono mt-4">Computing user journey pathways...</span>
+        <span className="text-xs text-zinc-500 font-mono mt-4">
+          Computing user journey pathways...
+        </span>
       </div>
     );
   }
@@ -144,9 +146,7 @@ export function FlowSankey({
               const targetIndex = typeof link.target === "object" ? link.target.index : link.target;
 
               const isHighlighted =
-                hoveredLink === idx ||
-                hoveredNode === sourceIndex ||
-                hoveredNode === targetIndex;
+                hoveredLink === idx || hoveredNode === sourceIndex || hoveredNode === targetIndex;
 
               return (
                 <path
@@ -160,9 +160,7 @@ export function FlowSankey({
                   onMouseEnter={() => setHoveredLink(idx)}
                   onMouseLeave={() => setHoveredLink(null)}
                 >
-                  <title>
-                    {`${sourceNode.name} → ${targetNode.name}: ${link.value} sessions`}
-                  </title>
+                  <title>{`${sourceNode.name} → ${targetNode.name}: ${link.value} sessions`}</title>
                 </path>
               );
             })}
@@ -176,8 +174,16 @@ export function FlowSankey({
               const nodeHeight = Math.max(4, y1 - y0);
 
               const activeLink = hoveredLink !== null ? layout.links[hoveredLink] : null;
-              const activeSrc = activeLink ? (typeof activeLink.source === "object" ? activeLink.source.index : activeLink.source) : null;
-              const activeTgt = activeLink ? (typeof activeLink.target === "object" ? activeLink.target.index : activeLink.target) : null;
+              const activeSrc = activeLink
+                ? typeof activeLink.source === "object"
+                  ? activeLink.source.index
+                  : activeLink.source
+                : null;
+              const activeTgt = activeLink
+                ? typeof activeLink.target === "object"
+                  ? activeLink.target.index
+                  : activeLink.target
+                : null;
 
               const isHighlighted =
                 hoveredNode === idx ||
@@ -187,8 +193,8 @@ export function FlowSankey({
                 node.category === "referrer"
                   ? "#06b6d4" // Cyan
                   : node.category === "landing"
-                  ? "#6366f1" // Indigo
-                  : "#10b981"; // Emerald
+                    ? "#6366f1" // Indigo
+                    : "#10b981"; // Emerald
 
               const isLeftAligned = x0 < innerWidth / 2;
 

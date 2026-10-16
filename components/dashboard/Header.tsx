@@ -38,18 +38,27 @@ export function Header({ currentSiteId, sites }: HeaderProps) {
   }
 
   function handleSiteChange(siteId: string) {
+    if (siteId === "new") {
+      router.push("/dashboard/sites/new");
+      return;
+    }
     const params = new URLSearchParams(searchParams.toString());
-    params.set("siteId", siteId);
-    router.push(`/sites/${siteId}?${params.toString()}`);
+    router.push(`/dashboard/sites/${siteId}?${params.toString()}`);
   }
 
   async function handleLogout() {
-    await fetch("/api/auth", { method: "DELETE" });
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore network errors on logout
+    }
     router.push("/login");
     router.refresh();
   }
 
-  const embedSnippet = `<script defer src="${typeof window !== "undefined" ? window.location.origin : ""}/a.js" data-site="${currentSiteId}"></script>`;
+  const embedSnippet = `<script defer src="${
+    typeof window !== "undefined" ? window.location.origin : ""
+  }/a.js" data-site="${currentSiteId}"></script>`;
 
   function copySnippet() {
     navigator.clipboard.writeText(embedSnippet);
@@ -62,10 +71,15 @@ export function Header({ currentSiteId, sites }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Left: Brand and Site switcher */}
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2 text-white font-bold tracking-tight">
+          <Link href="/dashboard" className="flex items-center gap-2 text-white font-bold tracking-tight">
             <span className="w-7 h-7 rounded-lg bg-cyan-950 border border-cyan-800/80 flex items-center justify-center text-cyan-400">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
               </svg>
             </span>
             <span className="text-base tracking-tight hidden sm:inline">Spidy</span>
@@ -83,6 +97,7 @@ export function Header({ currentSiteId, sites }: HeaderProps) {
                   {s.domain} ({s.id})
                 </option>
               ))}
+              <option value="new">+ Add site...</option>
             </select>
           </div>
         </div>
@@ -96,7 +111,7 @@ export function Header({ currentSiteId, sites }: HeaderProps) {
                 key={p.value}
                 type="button"
                 onClick={() => updateQuery("range", p.value)}
-                className={`text-xs font-mono px-3 py-1 rounded-md transition-all ${
+                className={`text-xs font-mono px-3 py-1 rounded-md transition-all cursor-pointer ${
                   isActive
                     ? "bg-zinc-800 text-cyan-400 font-semibold shadow-xs"
                     : "text-zinc-400 hover:text-zinc-200"
@@ -108,29 +123,38 @@ export function Header({ currentSiteId, sites }: HeaderProps) {
           })}
         </div>
 
-        {/* Right: Embed snippet, gallery link, logout */}
+        {/* Right: Embed snippet, gallery, settings, logout */}
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowEmbedModal(true)}
-            className="text-xs font-mono px-2.5 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors hidden md:inline-flex items-center gap-1.5"
-          >
-            <span>&lt;/&gt;</span>
-            <span>Embed</span>
-          </button>
+          {currentSiteId && (
+            <button
+              type="button"
+              onClick={() => setShowEmbedModal(true)}
+              className="text-xs font-mono px-2.5 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors hidden md:inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>&lt;/&gt;</span>
+              <span>Embed</span>
+            </button>
+          )}
 
           <Link
-            href="/viz-gallery"
+            href="/dashboard/sites/new"
+            className="text-xs font-mono px-2.5 py-1.5 rounded-lg border border-cyan-800/60 bg-cyan-950/40 text-cyan-300 hover:bg-cyan-900/40 transition-colors hidden sm:inline-flex items-center gap-1"
+          >
+            + Site
+          </Link>
+
+          <Link
+            href="/dashboard/settings"
             className="text-xs font-mono px-2.5 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors"
           >
-            Gallery
+            Settings
           </Link>
 
           <button
             type="button"
             onClick={handleLogout}
             title="Log out"
-            className="text-xs font-mono px-2.5 py-1.5 rounded-lg text-zinc-400 hover:text-rose-400 transition-colors"
+            className="text-xs font-mono px-2.5 py-1.5 rounded-lg text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
           >
             Logout
           </button>
@@ -144,7 +168,11 @@ export function Header({ currentSiteId, sites }: HeaderProps) {
           {currentCountry && (
             <span className="inline-flex items-center gap-1 bg-cyan-950/60 text-cyan-400 border border-cyan-800/50 px-2 py-0.5 rounded-md">
               Country: {currentCountry}
-              <button type="button" onClick={() => updateQuery("country", null)} className="hover:text-white">
+              <button
+                type="button"
+                onClick={() => updateQuery("country", null)}
+                className="hover:text-white cursor-pointer"
+              >
                 ×
               </button>
             </span>
@@ -152,7 +180,11 @@ export function Header({ currentSiteId, sites }: HeaderProps) {
           {currentPath && (
             <span className="inline-flex items-center gap-1 bg-indigo-950/60 text-indigo-400 border border-indigo-800/50 px-2 py-0.5 rounded-md">
               Path: {currentPath}
-              <button type="button" onClick={() => updateQuery("path", null)} className="hover:text-white">
+              <button
+                type="button"
+                onClick={() => updateQuery("path", null)}
+                className="hover:text-white cursor-pointer"
+              >
                 ×
               </button>
             </span>
@@ -160,7 +192,11 @@ export function Header({ currentSiteId, sites }: HeaderProps) {
           {currentReferrer && (
             <span className="inline-flex items-center gap-1 bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 px-2 py-0.5 rounded-md">
               Referrer: {currentReferrer}
-              <button type="button" onClick={() => updateQuery("referrer", null)} className="hover:text-white">
+              <button
+                type="button"
+                onClick={() => updateQuery("referrer", null)}
+                className="hover:text-white cursor-pointer"
+              >
                 ×
               </button>
             </span>
@@ -177,13 +213,14 @@ export function Header({ currentSiteId, sites }: HeaderProps) {
               <button
                 type="button"
                 onClick={() => setShowEmbedModal(false)}
-                className="text-zinc-400 hover:text-white text-lg font-mono"
+                className="text-zinc-400 hover:text-white text-lg font-mono cursor-pointer"
               >
                 ×
               </button>
             </div>
             <p className="text-xs text-zinc-400">
-              Add this lightweight (&lt;1 KB), cookieless tag to your website header or before &lt;/body&gt;:
+              Add this lightweight (&lt;1 KB), cookieless tag to your website header or before
+              &lt;/body&gt;:
             </p>
             <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 font-mono text-xs text-cyan-300 break-all select-all">
               {embedSnippet}
@@ -192,7 +229,7 @@ export function Header({ currentSiteId, sites }: HeaderProps) {
               <button
                 type="button"
                 onClick={copySnippet}
-                className="bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-semibold px-4 py-2 rounded-lg font-mono transition-colors"
+                className="bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-semibold px-4 py-2 rounded-lg font-mono transition-colors cursor-pointer"
               >
                 {copied ? "Copied!" : "Copy Snippet"}
               </button>

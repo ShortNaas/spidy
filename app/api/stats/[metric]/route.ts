@@ -22,11 +22,22 @@ const statsQuerySchema = z.object({
   limit: z.coerce.number().positive().max(100).optional(),
 });
 
+import { SESSION_COOKIE_NAME, getSessionUser } from "@/lib/auth";
+import { sql } from "@/lib/db";
+
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ metric: string }> }
 ): Promise<NextResponse> {
   const { metric } = await context.params;
+
+  // 1. Authenticate session user
+  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  const user = await getSessionUser(token);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const searchParams = Object.fromEntries(request.nextUrl.searchParams.entries());
 
   const parseResult = statsQuerySchema.safeParse(searchParams);
@@ -38,6 +49,15 @@ export async function GET(
   }
 
   const { siteId, interval, limit } = parseResult.data;
+
+  // 2. Enforce site ownership: return 404 if user does not own site
+  const ownSites = (await sql`
+    SELECT id FROM sites WHERE id = ${siteId} AND user_id = ${user.id}::uuid;
+  `) as Array<{ id: string }>;
+
+  if (!ownSites || ownSites.length === 0) {
+    return NextResponse.json({ error: "Site not found" }, { status: 404 });
+  }
 
   // Default date range: last 7 days
   const now = new Date();
@@ -100,20 +120,31 @@ export async function GET(
         return NextResponse.json(data);
       }
       case "all": {
-        const [timeseries, pages, referrers, countries, devices, browsers, hourWeekday, flows, stream, kpis, live] =
-          await Promise.all([
-            getTimeseries(siteId, fromDate, toDate, interval || "day"),
-            getTopPages(siteId, fromDate, toDate, 8),
-            getTopReferrers(siteId, fromDate, toDate, 8),
-            getTopCountries(siteId, fromDate, toDate, 10),
-            getDevices(siteId, fromDate, toDate),
-            getBrowsers(siteId, fromDate, toDate),
-            getHourWeekdayMatrix(siteId, fromDate, toDate),
-            getSankeyFlows(siteId, fromDate, toDate, 15),
-            getPageStream(siteId, fromDate, toDate, 8),
-            getKpis(siteId, fromDate, toDate),
-            getLiveEvents(siteId, 30),
-          ]);
+        const [
+          timeseries,
+          pages,
+          referrers,
+          countries,
+          devices,
+          browsers,
+          hourWeekday,
+          flows,
+          stream,
+          kpis,
+          live,
+        ] = await Promise.all([
+          getTimeseries(siteId, fromDate, toDate, interval || "day"),
+          getTopPages(siteId, fromDate, toDate, 8),
+          getTopReferrers(siteId, fromDate, toDate, 8),
+          getTopCountries(siteId, fromDate, toDate, 10),
+          getDevices(siteId, fromDate, toDate),
+          getBrowsers(siteId, fromDate, toDate),
+          getHourWeekdayMatrix(siteId, fromDate, toDate),
+          getSankeyFlows(siteId, fromDate, toDate, 15),
+          getPageStream(siteId, fromDate, toDate, 8),
+          getKpis(siteId, fromDate, toDate),
+          getLiveEvents(siteId, 30),
+        ]);
 
         return NextResponse.json({
           timeseries,
@@ -131,7 +162,9 @@ export async function GET(
       }
       default:
         return NextResponse.json(
-          { error: `Unknown metric '${metric}'. Valid metrics: timeseries, pages, referrers, countries, devices, browsers, hour-weekday, flows, stream, kpis, live, all.` },
+          {
+            error: `Unknown metric '${metric}'. Valid metrics: timeseries, pages, referrers, countries, devices, browsers, hour-weekday, flows, stream, kpis, live, all.`,
+          },
           { status: 404 }
         );
     }

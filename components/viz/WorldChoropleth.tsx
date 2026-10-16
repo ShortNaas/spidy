@@ -23,12 +23,36 @@ interface GeoJsonFeature {
 
 // Alpha-2 to Alpha-3 ISO country mapping for standard 110m world datasets
 const ALPHA2_TO_ALPHA3: Record<string, string> = {
-  US: "USA", GB: "GBR", DE: "DEU", FR: "FRA", JP: "JPN",
-  CA: "CAN", AU: "AUS", NL: "NLD", SE: "SWE", IN: "IND",
-  BR: "BRA", SG: "SGP", ES: "ESP", IT: "ITA", PL: "POL",
-  CH: "CHE", AT: "AUT", BE: "BEL", DK: "DNK", NO: "NOR",
-  FI: "FIN", IE: "IRL", NZ: "NZL", MX: "MEX", KR: "KOR",
-  CN: "CHN", ZA: "ZAF", IL: "ISR", PT: "PRT", CZ: "CZE",
+  US: "USA",
+  GB: "GBR",
+  DE: "DEU",
+  FR: "FRA",
+  JP: "JPN",
+  CA: "CAN",
+  AU: "AUS",
+  NL: "NLD",
+  SE: "SWE",
+  IN: "IND",
+  BR: "BRA",
+  SG: "SGP",
+  ES: "ESP",
+  IT: "ITA",
+  PL: "POL",
+  CH: "CHE",
+  AT: "AUT",
+  BE: "BEL",
+  DK: "DNK",
+  NO: "NOR",
+  FI: "FIN",
+  IE: "IRL",
+  NZ: "NZL",
+  MX: "MEX",
+  KR: "KOR",
+  CN: "CHN",
+  ZA: "ZAF",
+  IL: "ISR",
+  PT: "PRT",
+  CZ: "CZE",
 };
 
 export function WorldChoropleth({
@@ -129,7 +153,9 @@ export function WorldChoropleth({
         aria-busy="true"
       >
         <div className="w-full h-56 bg-zinc-900 rounded-lg" />
-        <span className="text-xs text-zinc-500 font-mono mt-4">Rendering geographic choropleth projection...</span>
+        <span className="text-xs text-zinc-500 font-mono mt-4">
+          Rendering geographic choropleth projection...
+        </span>
       </div>
     );
   }

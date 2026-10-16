@@ -63,14 +63,12 @@ describe("Tracker & Collector Unit Tests", () => {
     });
 
     it("detects search crawlers and bots", () => {
-      expect(isBot("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")).toBe(
+      expect(
+        isBot("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
+      ).toBe(true);
+      expect(isBot("Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)")).toBe(
         true
       );
-      expect(
-        isBot(
-          "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)"
-        )
-      ).toBe(true);
       expect(isBot("DuckDuckBot/1.0; (+http://duckduckgo.com/duckduckbot.html)")).toBe(true);
     });
 
@@ -121,12 +119,8 @@ describe("Tracker & Collector Unit Tests", () => {
 
     it("validates payload schema rejects invalid inputs", () => {
       expect(collectPayloadSchema.safeParse({}).success).toBe(false);
-      expect(
-        collectPayloadSchema.safeParse({ site_id: "", path: "/valid" }).success
-      ).toBe(false);
-      expect(
-        collectPayloadSchema.safeParse({ site_id: "site-1", path: "" }).success
-      ).toBe(false);
+      expect(collectPayloadSchema.safeParse({ site_id: "", path: "/valid" }).success).toBe(false);
+      expect(collectPayloadSchema.safeParse({ site_id: "site-1", path: "" }).success).toBe(false);
       expect(
         collectPayloadSchema.safeParse({
           site_id: "site-1",
@@ -201,11 +195,16 @@ describe("Tracker & Collector Unit Tests", () => {
 
   describe("Collector API Route (app/api/collect/route.ts)", () => {
     it("inserts event into database without raw IP", async () => {
-      const { POST } = await import("@/app/api/collect/route");
+      const { POST, resetSiteCacheForTesting } = await import("@/app/api/collect/route");
+      resetSiteCacheForTesting();
       const insertedRows: unknown[][] = [];
 
       // Mock database tagged template executor
-      const mockSql = ((_strings: TemplateStringsArray, ...values: unknown[]) => {
+      const mockSql = ((strings: TemplateStringsArray, ...values: unknown[]) => {
+        const text = strings.join("?");
+        if (text.includes("FROM sites WHERE id =")) {
+          return Promise.resolve([{ id: "spidy-test", domain: "example.com" }]);
+        }
         insertedRows.push(values);
         return Promise.resolve([]);
       }) as unknown as QueryExecutor;
@@ -216,6 +215,7 @@ describe("Tracker & Collector Unit Tests", () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "origin": "https://example.com",
           "user-agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
           "x-forwarded-for": "198.51.100.42",
@@ -246,6 +246,54 @@ describe("Tracker & Collector Unit Tests", () => {
 
       // Verify Hard Constraint 2: Raw IP is NEVER in the inserted values
       expect(values).not.toContain("198.51.100.42");
+    });
+
+    it("rejects unknown site_id with 400", async () => {
+      const { POST, resetSiteCacheForTesting } = await import("@/app/api/collect/route");
+      resetSiteCacheForTesting();
+
+      const mockSql = (() => Promise.resolve([])) as unknown as QueryExecutor;
+      setDbClient(mockSql);
+
+      const req = new NextRequest("http://localhost:3000/api/collect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0",
+        },
+        body: JSON.stringify({ site_id: "non-existent", path: "/" }),
+      });
+
+      const response = await POST(req);
+      expect(response.status).toBe(400);
+      expect(await response.text()).toContain("Unknown site_id");
+    });
+
+    it("rejects events from mismatched origin with 403 Forbidden", async () => {
+      const { POST, resetSiteCacheForTesting } = await import("@/app/api/collect/route");
+      resetSiteCacheForTesting();
+
+      const mockSql = ((strings: TemplateStringsArray) => {
+        if (strings.join("?").includes("FROM sites WHERE id =")) {
+          return Promise.resolve([{ id: "spidy-test", domain: "legitimate.com" }]);
+        }
+        return Promise.resolve([]);
+      }) as unknown as QueryExecutor;
+      setDbClient(mockSql);
+
+      const req = new NextRequest("http://localhost:3000/api/collect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0",
+          origin: "https://evil-attacker.com",
+        },
+        body: JSON.stringify({ site_id: "spidy-test", path: "/" }),
+      });
+
+      const response = await POST(req);
+      expect(response.status).toBe(403);
+      expect(await response.text()).toContain("Origin not allowed for this site");
     });
 
     it("rejects payloads exceeding the 16 KB size limit with 413 Payload Too Large", async () => {

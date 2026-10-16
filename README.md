@@ -22,16 +22,16 @@ Spidy was architected from the ground up to respect user sovereignty and comply 
 
 ## ⚡ Tech Stack
 
-| Layer | Choice |
-|---|---|
-| Framework | Next.js (App Router, strict TypeScript, Tailwind CSS v4) |
-| Hosting & Edge | Vercel (Fluid/Serverless Functions, Vercel Cron) |
-| Database | Neon Serverless Postgres via `@neondatabase/serverless` |
+| Layer               | Choice                                                                   |
+| ------------------- | ------------------------------------------------------------------------ |
+| Framework           | Next.js (App Router, strict TypeScript, Tailwind CSS v4)                 |
+| Hosting & Edge      | Vercel (Fluid/Serverless Functions, Vercel Cron)                         |
+| Database            | Neon Serverless Postgres via `@neondatabase/serverless`                  |
 | Visualizations (2D) | D3 (`d3-geo`, `d3-scale`, `d3-sankey`, `d3-shape`), `@observablehq/plot` |
-| 3D Globe | `cobe` (WebGL interactive globe) |
-| Animations | `framer-motion` |
-| Validation | `zod` |
-| Testing | Vitest (unit), Playwright (E2E) |
+| 3D Globe            | `cobe` (WebGL interactive globe)                                         |
+| Animations          | `framer-motion`                                                          |
+| Validation          | `zod`                                                                    |
+| Testing             | Vitest (unit), Playwright (E2E)                                          |
 
 ---
 
@@ -40,22 +40,17 @@ Spidy was architected from the ground up to respect user sovereignty and comply 
 Add the embed script to your website's `<head>` or `<body>`.
 
 ### Standard Embed
+
 ```html
-<script
-  defer
-  data-site="your-site-id"
-  src="https://your-spidy-instance.vercel.app/a.js"
-></script>
+<script defer data-site="your-site-id" src="https://your-spidy-instance.vercel.app/a.js"></script>
 ```
 
 ### Adblock-Resilient Embed
+
 Spidy includes neutral alias endpoints out of the box (`/s.js` serving the tracker and `/api/e` receiving beacons) to prevent false-positive adblock disruptions:
+
 ```html
-<script
-  defer
-  data-site="your-site-id"
-  src="https://your-spidy-instance.vercel.app/s.js"
-></script>
+<script defer data-site="your-site-id" src="https://your-spidy-instance.vercel.app/s.js"></script>
 ```
 
 ---
@@ -71,14 +66,15 @@ DATABASE_URL="postgres://user:password@endpoint-pooler.region.neon.tech/neondb?s
 # Random 32+ byte hex string used for daily salted visitor hashing
 SALT="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 
-# Dashboard unlock password
-DASHBOARD_PASSWORD="your-strong-dashboard-password"
+# Optional: Seeds initial admin account and claims existing unassigned sites
+ADMIN_EMAIL="admin@example.com"
+ADMIN_PASSWORD="super-strong-admin-password"
+
+# Registration toggle (default: true; set to false to close public registration)
+ALLOW_REGISTRATION=true
 
 # Authorization secret for Vercel Cron rollup
 CRON_SECRET="your-cron-secret-token"
-
-# Comma-separated list of allowed origins (or * to allow any)
-ALLOWED_ORIGINS="*"
 
 # Optional: Custom neutral paths for tracker & collector
 TRACKER_PATH="/s.js"
@@ -90,12 +86,15 @@ COLLECTOR_PATH="/api/e"
 ## 🚀 Getting Started
 
 ### 1. Install Dependencies
+
 ```bash
 pnpm install
 ```
 
 ### 2. Database Migration & Seeding
+
 Ensure `DATABASE_URL` is configured in your `.env`, then run:
+
 ```bash
 # Run database schema migrations (creates sites, events, daily_stats)
 pnpm db:migrate
@@ -105,9 +104,11 @@ pnpm db:seed
 ```
 
 ### 3. Run Development Server
+
 ```bash
 pnpm dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) to log into the dashboard (or view the component gallery at [http://localhost:3000/viz-gallery](http://localhost:3000/viz-gallery)).
 
 ---
@@ -130,6 +131,7 @@ Spidy features 8 custom data visualizations:
 ## ⏰ Cron Rollup & Retention
 
 A nightly rollup function runs via Vercel Cron (configured in `vercel.json` at `0 3 * * *`):
+
 - **Aggregation**: Idempotently aggregates raw events into `daily_stats` using `ON CONFLICT (day, site_id, path, referrer, country, device) DO UPDATE`.
 - **Retention**: Automatically deletes raw event rows older than 90 days (`DELETE FROM events WHERE ts < (CURRENT_DATE - INTERVAL '90 days')`).
 - **Endpoint**: `/api/cron/rollup` (protected via `Authorization: Bearer <CRON_SECRET>`).
@@ -155,4 +157,5 @@ pnpm test:e2e
 ---
 
 ## 📄 License
+
 MIT

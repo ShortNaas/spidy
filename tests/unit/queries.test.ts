@@ -26,6 +26,14 @@ describe("Query Layer Unit Tests (lib/queries.ts)", () => {
     const mockDb = ((strings: TemplateStringsArray | string) => {
       const sqlText = typeof strings === "string" ? strings : strings.join("?");
 
+      if (sqlText.includes("FROM sessions") && sqlText.includes("JOIN users")) {
+        return Promise.resolve([{ id: "test-user-id", email: "test@example.com" }]);
+      }
+
+      if (sqlText.includes("FROM sites WHERE id =")) {
+        return Promise.resolve([{ id: "test" }]);
+      }
+
       if (sqlText.includes("date_trunc") && sqlText.includes("count(DISTINCT visitor)")) {
         return Promise.resolve([
           { ts: "2026-10-14 00:00:00+00", views: 42, visitors: 30 },
@@ -110,7 +118,10 @@ describe("Query Layer Unit Tests (lib/queries.ts)", () => {
         ]);
       }
 
-      if (sqlText.includes("count(DISTINCT visitor)::int as count") && sqlText.includes("fiveMinAgo")) {
+      if (
+        sqlText.includes("count(DISTINCT visitor)::int as count") &&
+        sqlText.includes("fiveMinAgo")
+      ) {
         return Promise.resolve([{ count: 12 }]);
       }
 
@@ -227,20 +238,30 @@ describe("Query Layer Unit Tests (lib/queries.ts)", () => {
   });
 
   it("/api/stats/[metric] endpoint handles validation and dispatch", async () => {
+    const authHeaders = {
+      Cookie: "spidy_session=valid-test-token-64-characters-000000000000000000000000000000000",
+    };
+
     // Missing siteId -> 400
-    const badReq = new NextRequest("http://localhost:3000/api/stats/pages");
+    const badReq = new NextRequest("http://localhost:3000/api/stats/pages", {
+      headers: authHeaders,
+    });
     const badRes = await GET(badReq, { params: Promise.resolve({ metric: "pages" }) });
     expect(badRes.status).toBe(400);
 
     // Unknown metric -> 404
-    const unknownReq = new NextRequest("http://localhost:3000/api/stats/invalid?siteId=test");
+    const unknownReq = new NextRequest("http://localhost:3000/api/stats/invalid?siteId=test", {
+      headers: authHeaders,
+    });
     const unknownRes = await GET(unknownReq, {
       params: Promise.resolve({ metric: "invalid" }),
     });
     expect(unknownRes.status).toBe(404);
 
     // Valid metric -> 200
-    const validReq = new NextRequest("http://localhost:3000/api/stats/pages?siteId=test");
+    const validReq = new NextRequest("http://localhost:3000/api/stats/pages?siteId=test", {
+      headers: authHeaders,
+    });
     const validRes = await GET(validReq, { params: Promise.resolve({ metric: "pages" }) });
     expect(validRes.status).toBe(200);
     const data = await validRes.json();

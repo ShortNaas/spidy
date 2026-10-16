@@ -4,6 +4,7 @@ export interface RollupResult {
   date: string;
   upsertedRows: number;
   deletedOldEvents: number;
+  archivedToStorage?: boolean;
 }
 
 /**
@@ -44,18 +45,54 @@ export async function performRollup(targetDateStr?: string): Promise<RollupResul
       views = EXCLUDED.views,
       visitors = EXCLUDED.visitors
     RETURNING 1;
-  `) as Array<{ '?column?': number }>;
+  `) as Array<{ "?column?": number }>;
 
   // 2. Retention cleanup: delete raw events older than 90 days
   const deleteRes = (await sql`
     DELETE FROM events
     WHERE ts < (CURRENT_DATE - INTERVAL '90 days')
     RETURNING 1;
-  `) as Array<{ '?column?': number }>;
+  `) as Array<{ "?column?": number }>;
+
+  const upsertedRows = Array.isArray(upsertRes) ? upsertRes.length : 0;
+  const deletedOldEvents = Array.isArray(deleteRes) ? deleteRes.length : 0;
+
+  // 3. Clean up expired sessions and old auth_attempts (older than 1 day)
+  try {
+    await sql`DELETE FROM sessions WHERE expires_at < now();`;
+    await sql`DELETE FROM auth_attempts WHERE ts < (now() - INTERVAL '1 day');`;
+  } catch {
+    // If tables are not provisioned in older branch schemas
+  }
+
+  // 3. Archive rollup snapshot to Neon Object Storage if configured
+  let archivedToStorage = false;
+  if (process.env.AWS_ENDPOINT_URL_S3 && process.env.AWS_ACCESS_KEY_ID) {
+    try {
+      const { uploadObject } = await import("@/lib/storage");
+      await uploadObject(
+        `rollups/${date}.json`,
+        JSON.stringify(
+          {
+            date,
+            upsertedRows,
+            deletedOldEvents,
+            archivedAt: new Date().toISOString(),
+          },
+          null,
+          2
+        )
+      );
+      archivedToStorage = true;
+    } catch (storageErr) {
+      console.warn("Neon Object Storage archival skipped:", storageErr);
+    }
+  }
 
   return {
     date,
-    upsertedRows: Array.isArray(upsertRes) ? upsertRes.length : 0,
-    deletedOldEvents: Array.isArray(deleteRes) ? deleteRes.length : 0,
+    upsertedRows,
+    deletedOldEvents,
+    archivedToStorage,
   };
 }

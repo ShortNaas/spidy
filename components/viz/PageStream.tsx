@@ -53,7 +53,13 @@ export function PageStream({
     const uniqueDates = Array.from(dateSet).sort();
 
     if (uniqueDates.length < 2 || uniquePaths.length === 0) {
-      return { paths: uniquePaths, dates: uniqueDates, series: [], xScale: null, areaGenerator: null };
+      return {
+        paths: uniquePaths,
+        dates: uniqueDates,
+        series: [],
+        xScale: null,
+        areaGenerator: null,
+      };
     }
 
     // Transform to tabular rows for d3.stack: Array<{ date, [path]: views }>
@@ -114,7 +120,9 @@ export function PageStream({
         aria-busy="true"
       >
         <div className="w-full h-40 bg-zinc-900 rounded" />
-        <span className="text-xs text-zinc-500 font-mono mt-4">Generating page traffic streamgraph...</span>
+        <span className="text-xs text-zinc-500 font-mono mt-4">
+          Generating page traffic streamgraph...
+        </span>
       </div>
     );
   }
@@ -178,7 +186,9 @@ export function PageStream({
             const isHighlighted = hoveredPath === null || hoveredPath === pathName;
             const pathD =
               areaGenerator(
-                layer as unknown as Array<[number, number] & { data: Record<string, number | string> }>
+                layer as unknown as Array<
+                  [number, number] & { data: Record<string, number | string> }
+                >
               ) || "";
 
             return (
@@ -203,7 +213,9 @@ export function PageStream({
           {xScale && dates.length > 0 && (
             <g transform={`translate(0, ${height - 10})`}>
               {dates
-                .filter((_, i) => i === 0 || i === Math.floor(dates.length / 2) || i === dates.length - 1)
+                .filter(
+                  (_, i) => i === 0 || i === Math.floor(dates.length / 2) || i === dates.length - 1
+                )
                 .map((date) => (
                   <text
                     key={date}

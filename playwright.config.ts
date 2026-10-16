@@ -24,8 +24,9 @@ export default defineConfig({
     reuseExistingServer: false,
     timeout: 30000,
     env: {
-      DASHBOARD_PASSWORD: process.env.DASHBOARD_PASSWORD || "spidy",
+      NODE_ENV: "production",
       SALT: process.env.SALT || "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      NODE_OPTIONS: "--no-network-family-autoselection",
     },
   },
 });

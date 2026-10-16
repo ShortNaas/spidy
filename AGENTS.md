@@ -1,9 +1,11 @@
 # AGENTS.md: Privacy-First Web Analytics (Vercel)
 
 ## Objective
+
 Build a self-hosted, cookieless, privacy-respecting web analytics tool with a visually striking dashboard. Deploy on Vercel. Keep the codebase small and simple.
 
 ## Hard constraints (never violate)
+
 1. No cookies, no localStorage, no fingerprinting.
 2. Raw IP is never stored or logged. Only a salted daily hash is stored.
 3. Query strings and URL fragments are stripped. Referrer is stored as hostname only.
@@ -14,24 +16,26 @@ Build a self-hosted, cookieless, privacy-respecting web analytics tool with a vi
 8. Secrets live in env vars only. Never commit them.
 
 ## Stack
-| Layer | Choice |
-|---|---|
-| Framework | Next.js (latest stable), App Router, TypeScript strict |
-| Hosting | Vercel (Fluid/Serverless functions, Vercel Cron) |
-| Database | Neon Postgres via `@neondatabase/serverless` |
-| Styling | Tailwind CSS, dark-first theme |
-| Charts (2D) | Observable Plot, D3 (`d3-geo`, `d3-scale`, `d3-sankey`, `d3-shape`) |
-| Globe | `cobe` |
-| Animation | Framer Motion |
-| Validation | Zod |
-| Testing | Vitest (unit), Playwright (e2e) |
-| Lint/format | ESLint, Prettier |
-| Package manager | pnpm |
-| Geo | Vercel headers: `x-vercel-ip-country`, `x-vercel-ip-city`, `x-vercel-ip-latitude`, `x-vercel-ip-longitude` |
+
+| Layer           | Choice                                                                                                     |
+| --------------- | ---------------------------------------------------------------------------------------------------------- |
+| Framework       | Next.js (latest stable), App Router, TypeScript strict                                                     |
+| Hosting         | Vercel (Fluid/Serverless functions, Vercel Cron)                                                           |
+| Database        | Neon Postgres via `@neondatabase/serverless`                                                               |
+| Styling         | Tailwind CSS, dark-first theme                                                                             |
+| Charts (2D)     | Observable Plot, D3 (`d3-geo`, `d3-scale`, `d3-sankey`, `d3-shape`)                                        |
+| Globe           | `cobe`                                                                                                     |
+| Animation       | Framer Motion                                                                                              |
+| Validation      | Zod                                                                                                        |
+| Testing         | Vitest (unit), Playwright (e2e)                                                                            |
+| Lint/format     | ESLint, Prettier                                                                                           |
+| Package manager | pnpm                                                                                                       |
+| Geo             | Vercel headers: `x-vercel-ip-country`, `x-vercel-ip-city`, `x-vercel-ip-latitude`, `x-vercel-ip-longitude` |
 
 Verify current versions with `pnpm view <pkg> version` before installing. Pin exact versions in `package.json`.
 
 ## Environment variables
+
 ```
 DATABASE_URL=        # Neon connection string
 SALT=                # random 32+ byte hex
@@ -41,6 +45,7 @@ ALLOWED_ORIGINS=     # comma-separated origins allowed to send events
 ```
 
 ## Repo structure
+
 ```
 /app
   /api/collect/route.ts        # POST collector
@@ -62,6 +67,7 @@ vercel.json                    # cron schedule
 ```
 
 ## Data model
+
 ```sql
 CREATE TABLE sites (
   id text PRIMARY KEY, domain text UNIQUE NOT NULL, created_at timestamptz DEFAULT now()
@@ -91,15 +97,18 @@ CREATE TABLE daily_stats (
 Run roles in order. Each role has inputs, outputs, and an exit check. Do not start the next role until the exit check passes.
 
 ### Agent 1: Scaffold
+
 - Inputs: this file.
 - Tasks: `pnpm create next-app` (TypeScript, Tailwind, App Router, ESLint), install deps, set up Prettier, Vitest, Playwright, folder structure, `.env.example`, `.gitignore`.
 - Exit check: `pnpm build` and `pnpm lint` pass.
 
 ### Agent 2: Database
+
 - Tasks: write `db/schema.sql`, a migration runner script (`pnpm db:migrate`), `lib/db.ts` exporting a Neon client, seed script (`pnpm db:seed`) that generates 30 days of realistic fake events across 10+ countries, 20+ paths, 8+ referrers, with weekday/hour seasonality.
 - Exit check: migrate and seed run against a Neon branch; row counts verified.
 
 ### Agent 3: Tracker and collector
+
 - Tasks:
   - Write `public/a.js` (pageview on load, on `history.pushState`, on `popstate`; use `navigator.sendBeacon`; skip on DNT).
   - Write `/api/collect`: Zod-validate body, reject bots (`lib/bots.ts`), check origin against `ALLOWED_ORIGINS`, add CORS headers, compute `visitor = sha256(SALT + utcDate + ip + ua).slice(0,16)`, parse UA to browser/OS/device, read geo headers, insert row, return 204.
@@ -108,6 +117,7 @@ Run roles in order. Each role has inputs, outputs, and an exit check. Do not sta
 - Exit check: curl and Playwright test post an event, the row appears, and no raw IP exists anywhere in the DB.
 
 ### Agent 4: Query layer
+
 - Tasks: in `lib/queries.ts`, write typed SQL functions using `date_trunc`, `GROUP BY`, `COUNT(DISTINCT visitor)`:
   - timeseries(views, visitors) by hour/day
   - top pages, top referrers, top countries, devices, browsers
@@ -120,7 +130,9 @@ Run roles in order. Each role has inputs, outputs, and an exit check. Do not sta
 - Exit check: unit tests against seeded data return expected shapes and counts.
 
 ### Agent 5: Visualization
+
 One component per file in `/components/viz`. Each takes plain props (no fetching inside), has loading and empty states, is responsive, and animates on mount.
+
 1. `GlobeLive`: cobe globe, rotating, markers from lat/lon of recent events, pulse on new events.
 2. `FlowSankey`: d3-sankey, referrer -> landing page -> next page, hover highlights a full path.
 3. `CalendarHeatmap`: GitHub-style, daily views, 12 months.
@@ -131,18 +143,22 @@ One component per file in `/components/viz`. Each takes plain props (no fetching
 8. `KpiStrip`: views, visitors, bounce proxy, top country, with delta vs previous period.
 
 Design rules: dark background, one accent hue plus a perceptually uniform sequential scale (viridis/inferno), tabular numerals, generous spacing, 60fps animation, `prefers-reduced-motion` respected, accessible labels and color-blind-safe palettes.
+
 - Exit check: each component renders in a Storybook-less preview page `/viz-gallery` using seeded data; Playwright screenshot per component.
 
 ### Agent 6: Dashboard
+
 - Tasks: compose overview page grid, date range picker (24h, 7d, 30d, 12mo, custom), site switcher, filters (country, path, referrer) that update URL search params, server components fetch aggregates, client components render viz.
 - Auth: `middleware.ts` checks signed httpOnly session cookie set by `/login` against `DASHBOARD_PASSWORD` (constant-time compare). Dashboard cookie only; the tracked sites never receive cookies.
 - Exit check: unauthenticated request to dashboard redirects to `/login`; authenticated flow shows all 8 viz with seeded data.
 
 ### Agent 7: Rollup and retention
+
 - Tasks: `/api/cron/rollup` (authorized via `Authorization: Bearer CRON_SECRET`) aggregates yesterday's events into `daily_stats` (idempotent upsert), deletes raw events older than 90 days. Schedule in `vercel.json` (daily, 03:00 UTC).
 - Exit check: running twice yields identical `daily_stats`; old rows deleted.
 
 ### Agent 8: Hardening and deploy
+
 - Tasks:
   - Serve tracker and endpoint with neutral names for adblock resilience (e.g. `/s.js`, `/api/e`). Make paths configurable through env.
   - Security headers, CSP for dashboard, input size limits on collector.
@@ -151,6 +167,7 @@ Design rules: dark background, one accent hue plus a perceptually uniform sequen
 - Exit check: production pageview from a real browser appears on the dashboard within 5 seconds.
 
 ## Working method for every agent
+
 1. Read this file and the current repo state before editing.
 2. Make small, reviewable commits, one logical change each, conventional commit messages.
 3. Write tests alongside code. Run `pnpm lint && pnpm test && pnpm build` before every commit.
@@ -161,6 +178,7 @@ Design rules: dark background, one accent hue plus a perceptually uniform sequen
 8. On finishing a role, append a short entry to `PROGRESS.md`: what was built, how verified, what's next.
 
 ## Definition of done
+
 - Tracker under 1 KB, no cookies or storage.
 - Database contains no raw IPs.
 - All 8 visualizations render on live data.

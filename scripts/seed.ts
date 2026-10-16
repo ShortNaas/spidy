@@ -102,12 +102,51 @@ export async function seedDatabase(targetSiteId = "spidy-demo"): Promise<void> {
 
   console.log(`Seeding database for site '${targetSiteId}'...`);
 
+  // Handle admin user migration if ADMIN_EMAIL and ADMIN_PASSWORD are set
+  let adminUserId: string | null = null;
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (adminEmail && adminPassword) {
+    console.log(`Provisioning admin user '${adminEmail}'...`);
+    const argon2 = await import("@node-rs/argon2");
+    const passwordHash = await argon2.hash(adminPassword, {
+      algorithm: 2, // Argon2id
+    });
+
+    const userRows = (await sql`
+      INSERT INTO users (email, password_hash)
+      VALUES (${adminEmail}, ${passwordHash})
+      ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash
+      RETURNING id;
+    `) as Array<{ id: string }>;
+
+    adminUserId = userRows[0]?.id || null;
+
+    if (adminUserId) {
+      await sql`
+        UPDATE sites
+        SET user_id = ${adminUserId}::uuid
+        WHERE user_id IS NULL;
+      `;
+      console.log(`✓ Assigned existing unassigned sites to admin user '${adminEmail}'`);
+    }
+  }
+
   // Ensure site exists
-  await sql`
-    INSERT INTO sites (id, domain, created_at)
-    VALUES (${targetSiteId}, 'spidy.dev', now() - interval '60 days')
-    ON CONFLICT (id) DO UPDATE SET domain = EXCLUDED.domain;
-  `;
+  if (adminUserId) {
+    await sql`
+      INSERT INTO sites (id, domain, user_id, created_at)
+      VALUES (${targetSiteId}, 'spidy.dev', ${adminUserId}::uuid, now() - interval '60 days')
+      ON CONFLICT (id) DO UPDATE SET domain = EXCLUDED.domain, user_id = EXCLUDED.user_id;
+    `;
+  } else {
+    await sql`
+      INSERT INTO sites (id, domain, created_at)
+      VALUES (${targetSiteId}, 'spidy.dev', now() - interval '60 days')
+      ON CONFLICT (id) DO UPDATE SET domain = EXCLUDED.domain;
+    `;
+  }
 
   // Clear existing events and daily_stats for a clean idempotent seed
   console.log("Cleaning old seed data for site...");
@@ -115,7 +154,8 @@ export async function seedDatabase(targetSiteId = "spidy-demo"): Promise<void> {
   await sql`DELETE FROM daily_stats WHERE site_id = ${targetSiteId};`;
 
   const now = new Date();
-  const DAYS = 30;
+  const HISTORICAL_DAYS = 365;
+  const RAW_EVENT_DAYS = 60;
   const eventsToInsert: Array<{
     ts: string;
     site_id: string;
@@ -146,30 +186,78 @@ export async function seedDatabase(targetSiteId = "spidy-demo"): Promise<void> {
     }
   >();
 
-  console.log("Generating 30 days of synthetic event data with seasonality...");
+  console.log(
+    "Generating 365 days of realistic data (60 days granular events + 365 days daily aggregates)..."
+  );
 
-  for (let dayOffset = DAYS - 1; dayOffset >= 0; dayOffset--) {
+  // 1. Generate full year of daily_stats for older history (days 364 down to RAW_EVENT_DAYS)
+  for (let dayOffset = HISTORICAL_DAYS - 1; dayOffset >= RAW_EVENT_DAYS; dayOffset--) {
     const currentDate = new Date(now.getTime() - dayOffset * 86400000);
     const dayStr = currentDate.toISOString().slice(0, 10);
-    const dayOfWeek = currentDate.getUTCDay(); // 0 = Sun, 6 = Sat
+    const dayOfWeek = currentDate.getUTCDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const weekdayMultiplier = isWeekend ? 0.65 : 1.2;
+
+    // Organic yearly growth factor: 0.5 (1 year ago) -> 1.0 (now)
+    const growthFactor = 0.5 + 0.5 * (1 - dayOffset / HISTORICAL_DAYS);
+    const baseDailyViews = Math.floor(
+      (100 + Math.random() * 60) * weekdayMultiplier * growthFactor
+    );
+
+    // Distribute daily views across top paths, countries, devices, referrers
+    const selectedPaths = PATHS.slice(0, 12);
+    for (const p of selectedPaths) {
+      const pathShare = p === "/" ? 0.35 : 0.65 / (selectedPaths.length - 1);
+      const pathViews = Math.max(
+        1,
+        Math.floor(baseDailyViews * pathShare * (0.8 + Math.random() * 0.4))
+      );
+      const pathVisitors = Math.max(1, Math.floor(pathViews * 0.85));
+
+      const loc = pickWeighted(LOCATIONS);
+      const dev = pickWeighted(DEVICES);
+      const ref = Math.random() < 0.7 ? pickRandom(REFERRERS) : "";
+
+      const aggKey = `${dayStr}|${targetSiteId}|${p}|${ref}|${loc.country}|${dev.device}`;
+      let agg = dailyAggs.get(aggKey);
+      if (!agg) {
+        agg = {
+          day: dayStr,
+          site_id: targetSiteId,
+          path: p,
+          referrer: ref,
+          country: loc.country,
+          device: dev.device,
+          views: 0,
+          visitorsSet: new Set<string>(),
+        };
+        dailyAggs.set(aggKey, agg);
+      }
+      agg.views += pathViews;
+      for (let v = 0; v < pathVisitors; v++) {
+        agg.visitorsSet.add(`hist-vis-${v}-${dayStr}`);
+      }
+    }
+  }
+
+  // 2. Generate granular multi-step events for recent active retention window (days RAW_EVENT_DAYS - 1 down to 0)
+  for (let dayOffset = RAW_EVENT_DAYS - 1; dayOffset >= 0; dayOffset--) {
+    const currentDate = new Date(now.getTime() - dayOffset * 86400000);
+    const dayStr = currentDate.toISOString().slice(0, 10);
+    const dayOfWeek = currentDate.getUTCDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     const weekdayMultiplier = isWeekend ? 0.6 : 1.25;
 
-    // Number of sessions for this day
     const baseSessions = 70 + Math.floor(Math.random() * 40);
     const totalDailySessions = Math.floor(baseSessions * weekdayMultiplier);
 
     for (let s = 0; s < totalDailySessions; s++) {
-      // Diurnal hour distribution: peak at 14-18 UTC, low at 02-06 UTC
       let hour: number;
       if (Math.random() < 0.65) {
-        // Peak hours (12:00 - 21:00)
         hour = 12 + Math.floor(Math.random() * 10);
       } else if (Math.random() < 0.85) {
-        // Morning hours (07:00 - 11:00)
         hour = 7 + Math.floor(Math.random() * 5);
       } else {
-        // Night hours (22:00 - 06:00)
         hour = Math.floor(Math.random() * 7);
       }
 
@@ -178,6 +266,9 @@ export async function seedDatabase(targetSiteId = "spidy-demo"): Promise<void> {
 
       const sessionDate = new Date(currentDate);
       sessionDate.setUTCHours(hour, minute, second, 0);
+
+      // Skip future timestamps for today
+      if (sessionDate.getTime() > now.getTime()) continue;
 
       const loc = pickWeighted(LOCATIONS);
       const dev = pickWeighted(DEVICES);
@@ -190,13 +281,15 @@ export async function seedDatabase(targetSiteId = "spidy-demo"): Promise<void> {
         .slice(0, 16);
 
       // Multi-step journey for this session (1 to 4 pages)
-      const pageCount = Math.random() < 0.45 ? 1 : Math.random() < 0.8 ? 2 : 4;
-      const landingPath = Math.random() < 0.6 ? "/" : pickRandom(PATHS);
+      const pageCount = Math.random() < 0.4 ? 1 : Math.random() < 0.75 ? 2 : 4;
+      const landingPath = Math.random() < 0.5 ? "/" : pickRandom(PATHS);
 
       for (let p = 0; p < pageCount; p++) {
         const pageTs = new Date(sessionDate.getTime() + p * (15000 + Math.random() * 45000));
+        if (pageTs.getTime() > now.getTime()) continue;
+
         const currentPath = p === 0 ? landingPath : pickRandom(PATHS);
-        const eventReferrer = p === 0 ? (referrer || null) : "";
+        const eventReferrer = p === 0 ? referrer || null : "";
 
         eventsToInsert.push({
           ts: pageTs.toISOString(),
@@ -234,6 +327,38 @@ export async function seedDatabase(targetSiteId = "spidy-demo"): Promise<void> {
         agg.visitorsSet.add(visitor);
       }
     }
+  }
+
+  // 3. Inject active realtime beacons in the last 30 minutes for Globe & Pulse
+  console.log("Injecting active realtime beacons for last 30 minutes...");
+  for (let m = 0; m < 40; m++) {
+    const minutesAgo = Math.floor(Math.random() * 29);
+    const secondsAgo = Math.floor(Math.random() * 60);
+    const beaconTs = new Date(now.getTime() - (minutesAgo * 60 + secondsAgo) * 1000);
+    const loc = LOCATIONS[m % LOCATIONS.length];
+    const dev = pickWeighted(DEVICES);
+    const ref = Math.random() < 0.8 ? pickRandom(REFERRERS) : "";
+    const visitor = crypto
+      .createHash("sha256")
+      .update(`live-visitor-${loc.country}-${m}`)
+      .digest("hex")
+      .slice(0, 16);
+
+    eventsToInsert.push({
+      ts: beaconTs.toISOString(),
+      site_id: targetSiteId,
+      path: pickRandom(PATHS),
+      referrer: ref || null,
+      country: loc.country,
+      city: loc.city,
+      lat: loc.lat,
+      lon: loc.lon,
+      device: dev.device,
+      browser: dev.browser,
+      os: dev.os,
+      visitor,
+      session: `live-${m}`,
+    });
   }
 
   console.log(`Generated ${eventsToInsert.length} events across 30 days.`);
@@ -274,7 +399,14 @@ export async function seedDatabase(targetSiteId = "spidy-demo"): Promise<void> {
       ) VALUES ${valuePlaceholders.join(", ")}
     `;
 
-    await (sql as unknown as (q: string, p: unknown[]) => Promise<unknown>)(insertQuery, params);
+    if ("query" in sql && typeof (sql as { query?: unknown }).query === "function") {
+      await (sql as { query: (q: string, p?: unknown[]) => Promise<unknown> }).query(
+        insertQuery,
+        params
+      );
+    } else {
+      await (sql as unknown as (q: string, p: unknown[]) => Promise<unknown>)(insertQuery, params);
+    }
   }
 
   console.log("Inserted events. Now populating daily_stats for historical aggregation...");
@@ -313,15 +445,37 @@ export async function seedDatabase(targetSiteId = "spidy-demo"): Promise<void> {
         visitors = EXCLUDED.visitors;
     `;
 
-    await (sql as unknown as (q: string, p: unknown[]) => Promise<unknown>)(insertQuery, params);
+    if ("query" in sql && typeof (sql as { query?: unknown }).query === "function") {
+      await (sql as { query: (q: string, p?: unknown[]) => Promise<unknown> }).query(
+        insertQuery,
+        params
+      );
+    } else {
+      await (sql as unknown as (q: string, p: unknown[]) => Promise<unknown>)(insertQuery, params);
+    }
   }
 
   // Verification checks
-  const eventCountRes = (await sql`SELECT count(*)::int as count FROM events WHERE site_id = ${targetSiteId};`) as Array<{ count: number }>;
-  const dailyCountRes = (await sql`SELECT count(*)::int as count FROM daily_stats WHERE site_id = ${targetSiteId};`) as Array<{ count: number }>;
-  const countryCountRes = (await sql`SELECT count(DISTINCT country)::int as count FROM events WHERE site_id = ${targetSiteId};`) as Array<{ count: number }>;
-  const pathCountRes = (await sql`SELECT count(DISTINCT path)::int as count FROM events WHERE site_id = ${targetSiteId};`) as Array<{ count: number }>;
-  const referrerCountRes = (await sql`SELECT count(DISTINCT referrer)::int as count FROM events WHERE site_id = ${targetSiteId} AND referrer != '';`) as Array<{ count: number }>;
+  const eventCountRes =
+    (await sql`SELECT count(*)::int as count FROM events WHERE site_id = ${targetSiteId};`) as Array<{
+      count: number;
+    }>;
+  const dailyCountRes =
+    (await sql`SELECT count(*)::int as count FROM daily_stats WHERE site_id = ${targetSiteId};`) as Array<{
+      count: number;
+    }>;
+  const countryCountRes =
+    (await sql`SELECT count(DISTINCT country)::int as count FROM events WHERE site_id = ${targetSiteId};`) as Array<{
+      count: number;
+    }>;
+  const pathCountRes =
+    (await sql`SELECT count(DISTINCT path)::int as count FROM events WHERE site_id = ${targetSiteId};`) as Array<{
+      count: number;
+    }>;
+  const referrerCountRes =
+    (await sql`SELECT count(DISTINCT referrer)::int as count FROM events WHERE site_id = ${targetSiteId} AND referrer != '';`) as Array<{
+      count: number;
+    }>;
 
   console.log("\n=== Seed Verification Summary ===");
   console.log(`Total Events: ${eventCountRes[0].count}`);

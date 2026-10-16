@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import path from "node:path";
 import fs from "node:fs";
 
-test.describe("Visualization Gallery (/viz-gallery)", () => {
+test.describe("Full-Scale Visualizations on /demo & Dev Gallery", () => {
   const screenshotsDir = path.resolve(process.cwd(), "test-results/screenshots");
 
   test.beforeAll(() => {
@@ -11,13 +11,17 @@ test.describe("Visualization Gallery (/viz-gallery)", () => {
     }
   });
 
-  test("renders all 8 visual components and captures screenshots", async ({ page }) => {
+  test("renders all 8 visual components at full scale on /demo and captures screenshots", async ({
+    page,
+  }) => {
     test.setTimeout(240000);
-    // Navigate to gallery
-    await page.goto("/viz-gallery");
+    // Navigate to public /demo dashboard
+    await page.goto("/demo");
     await page.waitForLoadState("load");
     await page.waitForSelector("#viz-kpi-strip");
     await page.waitForTimeout(1000);
+
+    // 1. KPI Strip
     const kpiStrip = page.locator("#viz-kpi-strip");
     await expect(kpiStrip).toBeVisible();
     await kpiStrip.screenshot({ path: path.join(screenshotsDir, "01-kpi-strip.png") });
@@ -25,7 +29,6 @@ test.describe("Visualization Gallery (/viz-gallery)", () => {
     // 2. Globe Live
     const globeLive = page.locator("#viz-globe-live");
     await expect(globeLive).toBeVisible();
-    // Allow canvas WebGL frame render
     await page.waitForTimeout(500);
     await globeLive.screenshot({ path: path.join(screenshotsDir, "02-globe-live.png") });
 
@@ -38,7 +41,9 @@ test.describe("Visualization Gallery (/viz-gallery)", () => {
     const worldChoropleth = page.locator("#viz-world-choropleth");
     await expect(worldChoropleth).toBeVisible();
     await page.waitForTimeout(300);
-    await worldChoropleth.screenshot({ path: path.join(screenshotsDir, "04-world-choropleth.png") });
+    await worldChoropleth.screenshot({
+      path: path.join(screenshotsDir, "04-world-choropleth.png"),
+    });
 
     // 5. Flow Sankey
     const flowSankey = page.locator("#viz-flow-sankey");
@@ -53,7 +58,9 @@ test.describe("Visualization Gallery (/viz-gallery)", () => {
     // 7. Calendar Heatmap
     const calendarHeatmap = page.locator("#viz-calendar-heatmap");
     await expect(calendarHeatmap).toBeVisible();
-    await calendarHeatmap.screenshot({ path: path.join(screenshotsDir, "07-calendar-heatmap.png") });
+    await calendarHeatmap.screenshot({
+      path: path.join(screenshotsDir, "07-calendar-heatmap.png"),
+    });
 
     // 8. Hour-Weekday Heatmap
     const hourWeekday = page.locator("#viz-hour-weekday");
@@ -63,6 +70,11 @@ test.describe("Visualization Gallery (/viz-gallery)", () => {
     // Verify all 8 screenshot files exist
     const files = fs.readdirSync(screenshotsDir);
     expect(files.filter((f) => f.endsWith(".png")).length).toBe(8);
-    await page.close();
+  });
+
+  test("dev gallery /viz-gallery returns 404 in production", async ({ page }) => {
+    const res = await page.goto("/viz-gallery");
+    expect(res).toBeTruthy();
+    expect(res!.status()).toBe(404);
   });
 });

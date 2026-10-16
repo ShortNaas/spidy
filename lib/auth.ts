@@ -1,5 +1,16 @@
+import { sql } from "@/lib/db";
+
 export const SESSION_COOKIE_NAME = "spidy_session";
-export const SESSION_MAX_AGE_SECONDS = 7 * 86400; // 7 days
+export const SESSION_MAX_AGE_SECONDS = 30 * 86400; // 30 days
+
+export const SESSION_COOKIE_OPTIONS = {
+  name: SESSION_COOKIE_NAME,
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: SESSION_MAX_AGE_SECONDS,
+};
 
 const enc = new TextEncoder();
 
@@ -9,90 +20,131 @@ function bufferToHex(buffer: ArrayBuffer): string {
     .join("");
 }
 
-function hexToBuffer(hex: string): Uint8Array {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < bytes.length; i++) {
-    bytes[i] = parseInt(hex.substring(i * 2, i * 2 + 2), 16);
-  }
-  return bytes;
-}
-
 /**
- * Constant-time comparison of two byte arrays to prevent timing attacks.
+ * Computes SHA-256 hash of a string (used for session tokens and attempt tracking).
  */
-function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) {
-    diff |= a[i] ^ b[i];
-  }
-  return diff === 0;
-}
-
-async function getHmacKey(): Promise<CryptoKey> {
-  const password = process.env.DASHBOARD_PASSWORD || "spidy";
-  const salt = process.env.SALT || "default-dev-salt";
-  const secretBytes = enc.encode(`${password}:${salt}`);
-  return crypto.subtle.importKey(
-    "raw",
-    secretBytes,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign", "verify"]
-  );
+export async function hashToken(token: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", enc.encode(token));
+  return bufferToHex(digest);
 }
 
 /**
- * Constant-time comparison of entered password against DASHBOARD_PASSWORD.
+ * Generates a cryptographically secure random 32-byte hex token.
  */
-export async function verifyPassword(inputPassword: string): Promise<boolean> {
-  const expectedPassword = process.env.DASHBOARD_PASSWORD || "";
-  if (!expectedPassword) {
-    if (process.env.NODE_ENV === "production") return false;
-    return inputPassword === "spidy";
+export function generateRawToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return bufferToHex(bytes.buffer as ArrayBuffer);
+}
+
+/**
+ * Hashes a password with argon2id.
+ * Dynamically imports @node-rs/argon2 so it never bundles into Edge Runtime.
+ */
+export async function hashPassword(password: string): Promise<string> {
+  const argon2 = await import("@node-rs/argon2");
+  return argon2.hash(password, {
+    algorithm: 2, // Argon2id
+  });
+}
+
+/**
+ * Verifies a password against an argon2id hash.
+ */
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  try {
+    const argon2 = await import("@node-rs/argon2");
+    return await argon2.verify(hash, password);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Dummy password verification for constant-time mitigation of timing attacks on nonexistent users.
+ */
+const DUMMY_HASH =
+  "$argon2id$v=19$m=19456,t=2,p=1$ZHVtbXlzYWx0MTIzNDU2$K8d2Zz5h4b7L1m8x0V3q9A";
+
+export async function dummyPasswordVerify(): Promise<void> {
+  try {
+    const argon2 = await import("@node-rs/argon2");
+    await argon2.verify(DUMMY_HASH, "wrong-password-for-dummy-timing");
+  } catch {}
+}
+
+/**
+ * Creates a new session in the database for the given user ID.
+ * Returns the raw token to set in the user's cookie.
+ */
+export async function createSession(userId: string): Promise<string> {
+  const rawToken = generateRawToken();
+  const tokenHash = await hashToken(rawToken);
+  const expiresAt = new Date(Date.now() + SESSION_MAX_AGE_SECONDS * 1000).toISOString();
+
+  await sql`
+    INSERT INTO sessions (token_hash, user_id, expires_at)
+    VALUES (${tokenHash}, ${userId}::uuid, ${expiresAt}::timestamptz);
+  `;
+
+  return rawToken;
+}
+
+export interface SessionUser {
+  id: string;
+  email: string;
+}
+
+/**
+ * Retrieves the authenticated user from a raw session token.
+ * Returns null if token is missing, invalid, or expired.
+ */
+export async function getSessionUser(
+  token: string | null | undefined
+): Promise<SessionUser | null> {
+  if (!token || typeof token !== "string" || token.trim().length === 0) {
+    return null;
   }
 
-  const inputHash = await crypto.subtle.digest("SHA-256", enc.encode(inputPassword));
-  const expectedHash = await crypto.subtle.digest("SHA-256", enc.encode(expectedPassword));
+  const tokenHash = await hashToken(token.trim());
 
-  return constantTimeEqual(new Uint8Array(inputHash), new Uint8Array(expectedHash));
+  const rows = (await sql`
+    SELECT users.id, users.email
+    FROM sessions
+    JOIN users ON sessions.user_id = users.id
+    WHERE sessions.token_hash = ${tokenHash}
+      AND sessions.expires_at > now();
+  `) as Array<{ id: string; email: string }>;
+
+  if (!rows || rows.length === 0) {
+    return null;
+  }
+
+  return {
+    id: rows[0].id,
+    email: rows[0].email,
+  };
 }
 
 /**
- * Creates signed session token: timestamp.signature using Web Crypto API.
+ * Invalidates and deletes a session by raw token.
  */
-export async function createSessionToken(): Promise<string> {
-  const key = await getHmacKey();
-  const timestamp = Date.now().toString();
-  const signatureBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(timestamp));
-  return `${timestamp}.${bufferToHex(signatureBuffer)}`;
+export async function destroySession(token: string | null | undefined): Promise<void> {
+  if (!token || typeof token !== "string" || token.trim().length === 0) {
+    return;
+  }
+
+  const tokenHash = await hashToken(token.trim());
+  await sql`
+    DELETE FROM sessions
+    WHERE token_hash = ${tokenHash};
+  `;
 }
 
 /**
- * Verifies signed session token in constant time. Compatible with Edge Runtime.
+ * Backward compatibility helper for legacy middleware/routes checking validity.
  */
 export async function verifySessionToken(token: string | null | undefined): Promise<boolean> {
-  if (!token || typeof token !== "string" || !token.includes(".")) {
-    return false;
-  }
-
-  const [timestampStr, providedSigHex] = token.split(".");
-  const timestamp = parseInt(timestampStr, 10);
-
-  if (isNaN(timestamp)) return false;
-
-  // Verify expiration (7 days)
-  if (Date.now() - timestamp > SESSION_MAX_AGE_SECONDS * 1000) {
-    return false;
-  }
-
-  if (providedSigHex.length !== 64) {
-    return false;
-  }
-
-  const key = await getHmacKey();
-  const expectedSigBuffer = await crypto.subtle.sign("HMAC", key, enc.encode(timestampStr));
-  const expectedSigHex = bufferToHex(expectedSigBuffer);
-
-  return constantTimeEqual(hexToBuffer(providedSigHex), hexToBuffer(expectedSigHex));
+  const user = await getSessionUser(token);
+  return user !== null;
 }

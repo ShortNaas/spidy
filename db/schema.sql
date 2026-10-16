@@ -1,11 +1,34 @@
 -- Spidy Database Schema
 -- Cookieless, privacy-first web analytics
 
+CREATE TABLE IF NOT EXISTS users (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text UNIQUE NOT NULL,
+  password_hash text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash text PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expires_at timestamptz NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS sessions_user ON sessions (user_id);
+
+CREATE TABLE IF NOT EXISTS auth_attempts (
+  key text NOT NULL,
+  ts timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS auth_attempts_key_ts ON auth_attempts (key, ts DESC);
+
 CREATE TABLE IF NOT EXISTS sites (
   id text PRIMARY KEY,
   domain text UNIQUE NOT NULL,
+  user_id uuid REFERENCES users(id) ON DELETE CASCADE,
   created_at timestamptz DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS sites_user ON sites (user_id);
 
 CREATE TABLE IF NOT EXISTS events (
   ts timestamptz NOT NULL DEFAULT now(),

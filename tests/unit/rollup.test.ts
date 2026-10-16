@@ -14,9 +14,7 @@ describe("Cron Rollup and Retention Unit Tests", () => {
 
     const mockDb = ((stringsOrQuery: TemplateStringsArray | string) => {
       const sqlText =
-        typeof stringsOrQuery === "string"
-          ? stringsOrQuery
-          : stringsOrQuery.join("?");
+        typeof stringsOrQuery === "string" ? stringsOrQuery : stringsOrQuery.join("?");
       executedQueries.push(sqlText);
 
       if (sqlText.includes("INSERT INTO daily_stats")) {
@@ -49,9 +47,7 @@ describe("Cron Rollup and Retention Unit Tests", () => {
       expect(result.upsertedRows).toBe(5);
       expect(result.deletedOldEvents).toBe(12);
 
-      const upsertQuery = executedQueries.find((q) =>
-        q.includes("INSERT INTO daily_stats")
-      );
+      const upsertQuery = executedQueries.find((q) => q.includes("INSERT INTO daily_stats"));
       expect(upsertQuery).toBeDefined();
       expect(upsertQuery).toContain("ON CONFLICT (day, site_id, path, referrer, country, device)");
       expect(upsertQuery).toContain("DO UPDATE SET");
@@ -62,9 +58,7 @@ describe("Cron Rollup and Retention Unit Tests", () => {
     it("executes 90-day retention cleanup on raw events table", async () => {
       await performRollup("2026-10-15");
 
-      const deleteQuery = executedQueries.find((q) =>
-        q.includes("DELETE FROM events")
-      );
+      const deleteQuery = executedQueries.find((q) => q.includes("DELETE FROM events"));
       expect(deleteQuery).toBeDefined();
       expect(deleteQuery).toContain("ts < (CURRENT_DATE - INTERVAL '90 days')");
     });
@@ -116,12 +110,9 @@ describe("Cron Rollup and Retention Unit Tests", () => {
     });
 
     it("accepts requests with valid Bearer CRON_SECRET", async () => {
-      const req = new NextRequest(
-        `http://localhost:3000/api/cron/rollup?date=2026-10-14`,
-        {
-          headers: { Authorization: `Bearer ${CRON_SECRET}` },
-        }
-      );
+      const req = new NextRequest(`http://localhost:3000/api/cron/rollup?date=2026-10-14`, {
+        headers: { Authorization: `Bearer ${CRON_SECRET}` },
+      });
       const res = await GET(req);
 
       expect(res.status).toBe(200);
@@ -133,13 +124,10 @@ describe("Cron Rollup and Retention Unit Tests", () => {
     });
 
     it("supports POST method with valid Bearer token", async () => {
-      const req = new NextRequest(
-        `http://localhost:3000/api/cron/rollup?date=2026-10-14`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${CRON_SECRET}` },
-        }
-      );
+      const req = new NextRequest(`http://localhost:3000/api/cron/rollup?date=2026-10-14`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${CRON_SECRET}` },
+      });
       const res = await POST(req);
 
       expect(res.status).toBe(200);
