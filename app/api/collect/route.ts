@@ -81,10 +81,25 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return new NextResponse(null, { status: 204, headers: corsHeaders });
   }
 
-  // 4. Validate payload
+  // 4. Validate payload with strict input size limit (max 16 KB)
+  const contentLength = request.headers.get("content-length");
+  if (contentLength && parseInt(contentLength, 10) > 16384) {
+    return new NextResponse("Payload Too Large", {
+      status: 413,
+      headers: corsHeaders,
+    });
+  }
+
   let jsonBody: unknown;
   try {
-    jsonBody = await request.json();
+    const rawText = await request.text();
+    if (rawText.length > 16384) {
+      return new NextResponse("Payload Too Large", {
+        status: 413,
+        headers: corsHeaders,
+      });
+    }
+    jsonBody = JSON.parse(rawText);
   } catch {
     return new NextResponse("Bad Request: Invalid JSON body", {
       status: 400,

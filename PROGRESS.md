@@ -99,3 +99,18 @@
   - `pnpm lint` and `pnpm build` passed with zero errors or warnings.
 - **What's next**:
   - Agent 8: Hardening and Deploy (`next.config.ts` security headers & neutral script rewrites, `README.md`).
+
+## Agent 8: Hardening and Deploy
+- **What was built**:
+  - Configured neutral path rewrites in `next.config.ts` (`/s.js` -> `/a.js`, `/api/e` -> `/api/collect`) with configurable `TRACKER_PATH` and `COLLECTOR_PATH` environment variables for adblock resilience.
+  - Implemented strict input payload size limits (16 KB max) on `/api/collect` returning HTTP 413 Payload Too Large.
+  - Added enterprise-grade security headers in `next.config.ts`: Content-Security-Policy (CSP), X-Frame-Options (DENY), X-Content-Type-Options (nosniff), Referrer-Policy (strict-origin-when-cross-origin), and Permissions-Policy.
+  - Configured public CORS and caching headers for tracker scripts (`public, max-age=86400, stale-while-revalidate=604800`).
+  - Authored comprehensive `README.md` documenting architecture, privacy guarantees, setup guide, embed snippets, environment variables, and cron schedule.
+  - Updated `DECISIONS.md` documenting Web Crypto usage, idempotent upserts, and neutral path rewrites.
+- **How verified**:
+  - All 46 Vitest unit tests passed (`pnpm test`).
+  - Playwright E2E tests for authentication and visual gallery passed (`pnpm test:e2e`).
+  - ESLint passed with 0 errors or warnings (`pnpm lint`).
+  - Next.js production build succeeded with Turbopack and dynamic route rendering (`pnpm build`).
+- **Status**: ALL 8 AGENT ROLES COMPLETE.

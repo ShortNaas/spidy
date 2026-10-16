@@ -247,5 +247,37 @@ describe("Tracker & Collector Unit Tests", () => {
       // Verify Hard Constraint 2: Raw IP is NEVER in the inserted values
       expect(values).not.toContain("198.51.100.42");
     });
+
+    it("rejects payloads exceeding the 16 KB size limit with 413 Payload Too Large", async () => {
+      const { POST } = await import("@/app/api/collect/route");
+
+      const oversizedBody = JSON.stringify({
+        site_id: "spidy-test",
+        path: "/oversized",
+        extra_garbage: "x".repeat(20000),
+      });
+
+      const req = new NextRequest("http://localhost:3000/api/collect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "content-length": String(oversizedBody.length),
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0",
+        },
+        body: oversizedBody,
+      });
+
+      const response = await POST(req);
+      expect(response.status).toBe(413);
+      expect(await response.text()).toBe("Payload Too Large");
+    });
+
+    it("handles tracker neutral script name /s.js mapping to /api/e", async () => {
+      const trackerPath = path.resolve(process.cwd(), "public/a.js");
+      const scriptCode = await readFile(trackerPath, "utf-8");
+
+      expect(scriptCode).toMatch(/\/s\\\.js/);
+      expect(scriptCode).toContain("/api/e");
+    });
   });
 });

@@ -7,9 +7,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // 1. Unprotected public routes and static assets
   if (
     pathname.startsWith("/api/collect") ||
+    pathname.startsWith("/api/e") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/cron") ||
     pathname === "/a.js" ||
+    pathname === "/s.js" ||
     pathname === "/world.geojson" ||
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico" ||

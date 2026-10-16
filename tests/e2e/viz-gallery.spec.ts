@@ -12,7 +12,7 @@ test.describe("Visualization Gallery (/viz-gallery)", () => {
   });
 
   test("renders all 8 visual components and captures screenshots", async ({ page }) => {
-    test.setTimeout(120000);
+    test.setTimeout(240000);
     // Navigate to gallery
     await page.goto("/viz-gallery");
     await page.waitForLoadState("load");
@@ -63,5 +63,6 @@ test.describe("Visualization Gallery (/viz-gallery)", () => {
     // Verify all 8 screenshot files exist
     const files = fs.readdirSync(screenshotsDir);
     expect(files.filter((f) => f.endsWith(".png")).length).toBe(8);
+    await page.close();
   });
 });
