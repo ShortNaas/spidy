@@ -19,9 +19,13 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm start",
+    command: "./node_modules/.bin/next start",
     url: "http://localhost:3000",
-    reuseExistingServer: true,
+    reuseExistingServer: false,
     timeout: 30000,
+    env: {
+      DASHBOARD_PASSWORD: process.env.DASHBOARD_PASSWORD || "spidy",
+      SALT: process.env.SALT || "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    },
   },
 });

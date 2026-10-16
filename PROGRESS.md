@@ -68,6 +68,19 @@
 - **What's next**:
   - Agent 6: Dashboard & Authentication (`middleware.ts`, `app/login/page.tsx`, `app/(dashboard)/page.tsx`, `app/(dashboard)/sites/[id]/page.tsx`).
 
-
-
-
+## Agent 6: Dashboard & Authentication
+- **What was built**:
+  - Implemented `lib/auth.ts` with constant-time password verification using Web Crypto API (`crypto.subtle`) and signed HMAC-SHA256 session tokens compatible with Edge Runtime.
+  - Implemented `middleware.ts` protecting dashboard routes and API endpoints, redirecting unauthenticated visitors to `/login?next=...` while allowing public access to `/api/collect`, `/api/auth`, `/a.js`, `/world.geojson`, and `/viz-gallery`.
+  - Implemented `/login/page.tsx` with high-contrast dark aesthetic, accessible form inputs, and testable error displays.
+  - Implemented authentication route `/api/auth/route.ts` setting signed httpOnly, Secure, SameSite=Lax session cookies.
+  - Composed responsive overview and site-specific dashboard layouts in `app/(dashboard)/layout.tsx`, `app/(dashboard)/page.tsx`, and `app/(dashboard)/sites/[id]/page.tsx`.
+  - Built `components/dashboard/Header.tsx` with interactive site switcher dropdown, date range presets (24h, 7d, 30d, 12mo), and logout button.
+  - Built `components/dashboard/DashboardClient.tsx` bringing all 8 visual components together alongside summary breakdown tables and 5-second live polling.
+  - Added unit test suite `tests/unit/auth.test.ts` (6 tests) and Playwright E2E test suite `tests/e2e/auth-dashboard.spec.ts` (3 tests).
+- **How verified**:
+  - Unit tests in `tests/unit/auth.test.ts` passed (6/6).
+  - Playwright E2E tests in `tests/e2e/auth-dashboard.spec.ts` passed (3/3), verifying unauthenticated redirect, bad password alert, and successful dashboard unlock.
+  - `pnpm lint`, `pnpm test`, and `pnpm build` passed with zero errors or warnings.
+- **What's next**:
+  - Agent 7: Rollup and Retention (`/api/cron/rollup/route.ts`, `vercel.json`).
