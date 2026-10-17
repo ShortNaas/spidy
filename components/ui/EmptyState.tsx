@@ -6,6 +6,8 @@ export interface EmptyStateProps {
   message?: string;
   actionLabel?: string;
   onAction?: () => void;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
   className?: string;
 }
 
@@ -17,6 +19,8 @@ export function EmptyState({
   message = "No visitor traffic matches the selected filters for this time window.",
   actionLabel = "Change range",
   onAction,
+  secondaryActionLabel,
+  onSecondaryAction,
   className = "",
 }: EmptyStateProps) {
   return (
@@ -28,11 +32,18 @@ export function EmptyState({
       <div className="relative z-10 max-w-sm space-y-2">
         <h4 className="font-sans font-medium text-[16px] text-white">{title}</h4>
         <p className="font-sans text-[13px] text-muted leading-relaxed">{message}</p>
-        {onAction && (
-          <div className="pt-3">
-            <Button variant="ghost" size="sm" onClick={onAction}>
-              {actionLabel}
-            </Button>
+        {(onAction || onSecondaryAction) && (
+          <div className="pt-3 flex flex-wrap items-center justify-center gap-2">
+            {onAction && (
+              <Button variant="ghost" size="sm" onClick={onAction}>
+                {actionLabel}
+              </Button>
+            )}
+            {onSecondaryAction && secondaryActionLabel && (
+              <Button variant="ghost" size="sm" onClick={onSecondaryAction}>
+                {secondaryActionLabel}
+              </Button>
+            )}
           </div>
         )}
       </div>

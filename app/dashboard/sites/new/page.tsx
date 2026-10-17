@@ -3,10 +3,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Copy, Check, Globe } from "lucide-react";
+import { ArrowLeft, Globe } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { EmbedSnippetModal } from "@/components/dashboard/EmbedSnippetModal";
 
 export default function NewSitePage() {
   const router = useRouter();
@@ -17,7 +18,8 @@ export default function NewSitePage() {
   // Once site is created
   const [createdSite, setCreatedSite] = useState<{ id: string; domain: string } | null>(null);
   const [hasReceivedEvent, setHasReceivedEvent] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [showSnippetModal, setShowSnippetModal] = useState(false);
+  const showSnippetBtnRef = useRef<HTMLButtonElement>(null);
   const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   async function handleCreateSite(e: React.FormEvent) {
@@ -41,6 +43,7 @@ export default function NewSitePage() {
       }
 
       setCreatedSite({ id: data.site.id, domain: data.site.domain });
+      setShowSnippetModal(true);
       setLoading(false);
     } catch {
       setError("Network error. Please try again.");
@@ -85,18 +88,6 @@ export default function NewSitePage() {
       clearInterval(interval);
     };
   }, [createdSite, hasReceivedEvent]);
-
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const embedSnippet = createdSite
-    ? `<script defer src="${origin}/a.js" data-site="${createdSite.id}"></script>`
-    : "";
-
-  function copySnippet() {
-    if (!embedSnippet) return;
-    navigator.clipboard.writeText(embedSnippet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
 
   return (
     <div className="max-w-2xl mx-auto py-10 px-4 sm:px-6 font-sans">
@@ -160,54 +151,17 @@ export default function NewSitePage() {
           subtitle={`ID: ${createdSite.id}`}
         >
           <div className="space-y-6 mt-2">
-            {/* Step 1: Tracking script in Raised block */}
+            {/* Live Verification Indicator */}
             <div className="space-y-2.5">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-mono uppercase tracking-wider text-muted font-semibold">
-                  01. Add Tracking Script
-                </span>
-              </div>
-              <p className="text-[13px] text-muted">
-                Paste this lightweight (&lt;1 KB), cookieless snippet into your HTML header or before &lt;/body&gt;:
-              </p>
-              <div className="bg-raised border border-border rounded-xl p-3.5 font-mono text-xs text-white break-all select-all flex items-center justify-between gap-4">
-                <code data-testid="embed-snippet" className="text-text font-mono text-[12px]">
-                  {embedSnippet}
-                </code>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={copySnippet}
-                  className="shrink-0 flex items-center gap-1.5"
-                  aria-label="Copy embed script"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-positive" />
-                      <span>Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5 text-muted" />
-                      <span>Copy</span>
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            {/* Step 2: Verification */}
-            <div className="space-y-2.5 pt-2 border-t border-border">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-muted font-semibold">
-                  02. Verify Connection
+                  Connection Status
                 </span>
               </div>
 
               <div
                 data-testid="live-status-indicator"
-                className={`p-4 rounded-2xl border transition-colors duration-150 flex items-center justify-between gap-4 ${
+                className={`p-4 rounded-2xl border transition-colors duration-150 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
                   hasReceivedEvent
                     ? "bg-positive/10 border-positive/30 text-white"
                     : "bg-raised border-border text-text"
@@ -236,17 +190,28 @@ export default function NewSitePage() {
                   </div>
                 </div>
 
-                {hasReceivedEvent && (
+                <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
                   <Button
+                    ref={showSnippetBtnRef}
                     type="button"
-                    variant="primary"
+                    variant="ghost"
                     size="sm"
-                    onClick={() => router.push(`/dashboard/sites/${createdSite.id}`)}
-                    className="shrink-0"
+                    onClick={() => setShowSnippetModal(true)}
                   >
-                    View dashboard →
+                    Show snippet
                   </Button>
-                )}
+
+                  {hasReceivedEvent && (
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={() => router.push(`/dashboard/sites/${createdSite.id}`)}
+                    >
+                      View dashboard →
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -261,6 +226,16 @@ export default function NewSitePage() {
             </div>
           </div>
         </Card>
+      )}
+
+      {/* Embed script modal */}
+      {createdSite && (
+        <EmbedSnippetModal
+          isOpen={showSnippetModal}
+          onClose={() => setShowSnippetModal(false)}
+          siteId={createdSite.id}
+          triggerRef={showSnippetBtnRef}
+        />
       )}
     </div>
   );

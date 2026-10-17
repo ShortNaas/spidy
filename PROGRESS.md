@@ -407,4 +407,26 @@
   - `pnpm test:e2e`: 11/11 Playwright E2E tests passed.
   - `pnpm build`: Next.js Turbopack production build succeeded.
 
+## Impeccable Polish: Embed Snippet Modal & Toast
+
+- **What was built**:
+  - Re-architected embed snippet box as a reusable, viewport-centered modal overlay (`components/dashboard/EmbedSnippetModal.tsx`) rendered into `document.body` via `createPortal`.
+  - Container overlay uses `fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/70 backdrop-blur-sm`.
+  - Modal box styled per DESIGN.md: `w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-4xl bg-surface border border-border p-6 sm:p-7 sheen shadow-2xl`, with tracking snippet rendered in a Raised block (`bg-raised border border-border rounded-xl p-3.5 font-mono text-[12px] text-white break-all select-all`) and Wordmark-free header with title in Poppins 500 (`font-sans font-medium text-[16px] text-white`).
+  - Eliminated legacy "Done" button entirely across the codebase.
+  - Implemented multi-step "Copy snippet" action: writes snippet to clipboard (`navigator.clipboard.writeText` with `document.execCommand('copy')` fallback), shows Toast "Snippet copied", and closes the modal. If both clipboard mechanisms fail, keeps dialog open, highlights snippet text, and renders an inline alert "Press Ctrl/Cmd+C to copy".
+  - Created standalone `Toast` component (`components/ui/Toast.tsx`) adhering to DESIGN.md: pill at bottom center, `bg-raised border border-border`, white text, 13px font-sans, 8px hollow ring-dot on left, 2s auto-dismiss, with `role="status"` and `aria-live="polite"`.
+  - Configured accessibility: `role="dialog"`, `aria-modal="true"`, `aria-labelledby="embed-snippet-title"`, focus automatically shifts to "Copy snippet" button on open, Tab and Shift+Tab focus trap inside modal, and returns focus to the trigger element on close.
+  - Click outside (backdrop click) and Escape key close the box without triggering copy.
+  - Integrated into `app/dashboard/sites/new/page.tsx`: on site registration, automatically opens the modal; closing the box does NOT mark site as set up and does NOT interrupt polling for the first pageview. Page persistently shows the live connection indicator plus a ghost pill "Show snippet" to reopen the dialog anytime.
+  - Integrated into `components/dashboard/Header.tsx` (header code button) and `components/dashboard/DashboardClient.tsx` via `EmptyState` secondary action.
+  - Added full end-to-end Playwright test suite in `tests/e2e/embed-modal.spec.ts` asserting all centering, modal, accessibility, clipboard, and toast behaviors.
+- **How verified**:
+  - `pnpm lint`: 0 errors, 0 warnings.
+  - `pnpm test`: 5/5 unit tests passed.
+  - `pnpm test:e2e`: 12/12 Playwright E2E tests passed (including `tests/e2e/embed-modal.spec.ts`).
+  - `python3 scripts/verify-pixels.py`: 0 violating pixels across all 10 viewport screenshots (100% PASSED).
+  - `pnpm build`: Next.js Turbopack production build compiled successfully.
+
+
 

@@ -6,7 +6,8 @@ import { Wordmark } from "@/components/ui/Wordmark";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
-import { Search, Settings, LogOut, Code, Plus, ChevronDown, X } from "lucide-react";
+import { Search, Settings, LogOut, Code, Plus, ChevronDown } from "lucide-react";
+import { EmbedSnippetModal } from "@/components/dashboard/EmbedSnippetModal";
 
 export interface HeaderProps {
   currentSiteId?: string;
@@ -25,7 +26,7 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showEmbedModal, setShowEmbedModal] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const codeBtnRef = React.useRef<HTMLButtonElement>(null);
 
   const currentRange = searchParams.get("range") || "7d";
   const currentCountry = searchParams.get("country");
@@ -60,29 +61,6 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
     router.push("/login");
     router.refresh();
   }
-
-  const embedSnippet = `<script defer src="${
-    typeof window !== "undefined" ? window.location.origin : ""
-  }/a.js" data-site="${currentSiteId}"></script>`;
-
-  function copySnippet() {
-    navigator.clipboard.writeText(embedSnippet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  // Dismiss embed modal with Escape key
-  React.useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && showEmbedModal) {
-        setShowEmbedModal(false);
-      }
-    }
-    if (showEmbedModal) {
-      window.addEventListener("keydown", onKeyDown);
-      return () => window.removeEventListener("keydown", onKeyDown);
-    }
-  }, [showEmbedModal]);
 
   return (
     <header className="border-b border-border bg-surface/80 backdrop-blur-md sticky top-0 z-40 transition-colors duration-150">
@@ -138,6 +116,7 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
 
           {!isDemo && currentSiteId && (
             <Button
+              ref={codeBtnRef}
               variant="icon"
               onClick={() => setShowEmbedModal(true)}
               title="Embed Tracker"
@@ -211,46 +190,13 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
       )}
 
       {/* Embed script modal */}
-      {showEmbedModal && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowEmbedModal(false);
-          }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/80 backdrop-blur-sm"
-        >
-          <div className="bg-surface border border-border rounded-3xl p-6 max-w-lg w-full space-y-4 sheen relative z-10 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[16px] font-medium text-white">Embed Analytics Tracker</h3>
-              <button
-                type="button"
-                onClick={() => setShowEmbedModal(false)}
-                className="w-8 h-8 rounded-full bg-raised border border-border text-muted hover:text-white flex items-center justify-center cursor-pointer transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
-                aria-label="Close modal"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-[13px] text-muted leading-relaxed font-sans">
-              Add this lightweight script tag (&lt;1 KB) to your website&apos;s &lt;head&gt; or &lt;body&gt;. Zero cookies, no device fingerprints, raw IPs never logged.
-            </p>
-
-            <div className="bg-subtle border border-border rounded-xl p-3 font-mono text-[12px] text-white break-all select-all">
-              {embedSnippet}
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <Button variant="secondary" onClick={() => setShowEmbedModal(false)}>
-                Done
-              </Button>
-              <Button variant="primary" onClick={copySnippet}>
-                {copied ? "Copied to Clipboard!" : "Copy Snippet"}
-              </Button>
-            </div>
-          </div>
-        </div>
+      {!isDemo && currentSiteId && (
+        <EmbedSnippetModal
+          isOpen={showEmbedModal}
+          onClose={() => setShowEmbedModal(false)}
+          siteId={currentSiteId}
+          triggerRef={codeBtnRef}
+        />
       )}
     </header>
   );

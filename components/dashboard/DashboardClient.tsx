@@ -6,6 +6,7 @@ import { DashboardGrid } from "./DashboardGrid";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { AlertCircle, RefreshCw } from "lucide-react";
+import { EmbedSnippetModal } from "@/components/dashboard/EmbedSnippetModal";
 import type { GlobeMarker } from "@/components/viz/GlobeLive";
 import type {
   ItemCount,
@@ -44,6 +45,7 @@ export function DashboardClient({ siteId }: DashboardClientProps) {
   const [live, setLive] = useState<LiveStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showSnippetModal, setShowSnippetModal] = useState(false);
 
   // Compute date range from preset
   const { fromDate, toDate, interval } = useMemo(() => {
@@ -184,6 +186,8 @@ export function DashboardClient({ siteId }: DashboardClientProps) {
           message="No visitor events have been collected for this site in the selected time window."
           actionLabel="View 30-day window"
           onAction={() => router.push("?range=30d")}
+          secondaryActionLabel="Show snippet"
+          onSecondaryAction={() => setShowSnippetModal(true)}
         />
       ) : (
         <DashboardGrid
@@ -201,6 +205,13 @@ export function DashboardClient({ siteId }: DashboardClientProps) {
           loading={loading}
         />
       )}
+
+      {/* Embed snippet modal */}
+      <EmbedSnippetModal
+        isOpen={showSnippetModal}
+        onClose={() => setShowSnippetModal(false)}
+        siteId={siteId}
+      />
     </div>
   );
 }
