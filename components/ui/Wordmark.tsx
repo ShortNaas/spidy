@@ -20,7 +20,7 @@ export function Wordmark({ href = "/", className = "" }: WordmarkProps) {
 
   if (href) {
     return (
-      <Link href={href} className="inline-flex items-center outline-none focus-visible:ring-2 focus-visible:ring-live focus-visible:ring-offset-2 focus-visible:ring-offset-canvas rounded-sm">
+      <Link href={href} className="inline-flex items-center outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-canvas rounded-sm">
         {content}
       </Link>
     );

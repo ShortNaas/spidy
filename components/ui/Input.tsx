@@ -36,7 +36,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             } ${
               error
                 ? "border-danger/50 bg-danger/10 focus:border-danger focus:ring-1 focus:ring-danger"
-                : "border-border hover:border-border-hover focus:border-live focus:ring-1 focus:ring-live"
+                : "border-border hover:border-border-hover focus:border-white focus:ring-1 focus:ring-white/60"
             } disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
             {...props}
           />

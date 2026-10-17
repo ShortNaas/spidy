@@ -2,7 +2,7 @@ import React from "react";
 
 export interface ChipProps {
   children: React.ReactNode;
-  variant?: "neutral" | "live" | "accent" | "positive" | "danger";
+  variant?: "neutral" | "active" | "accent" | "positive" | "danger";
   size?: "sm" | "md";
   dot?: boolean;
   onRemove?: () => void;
@@ -20,9 +20,9 @@ export function Chip({
   let styleClasses = "bg-raised border border-border text-white";
   let dotColor = "bg-muted";
 
-  if (variant === "live") {
-    styleClasses = "bg-live-deep/60 border-live/40 text-live";
-    dotColor = "bg-live shadow-[0_0_8px_var(--color-live)]";
+  if (variant === "active") {
+    styleClasses = "bg-raised border border-border-hover text-white";
+    dotColor = "bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]";
   } else if (variant === "accent") {
     styleClasses = "bg-accent-deep/50 border-accent/40 text-accent-bright";
     dotColor = "bg-accent";

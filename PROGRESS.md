@@ -371,4 +371,5 @@
 
 - **Step 1: Audit**: Audited repository for all occurrences of cyan, teal, sky, legacy live tokens (`--color-live`, `live-deep`, `ring-live`, `border-live`, `bg-live`, `text-live`, `hatch-live`, `lineColors.live`, and hex/rgb cyan codes); compiled and saved comprehensive inventory in `CYAN-AUDIT.md` (90 hits across 22 files).
 - **Step 2: Tokens**: Removed `live` and `live-deep` from `app/globals.css` and `lib/theme.ts`; set `lineColors` to `{ live: "#ffffff", static: "#ffffff" }`, updated 8-step `CATEGORICAL_PALETTE` to ember, white, mint, blue, then 4 hatched grays, and updated `liveHalo` shadow token to `0 0 24px rgba(255, 255, 255, 0.25)`.
+- **Step 3: Components**: Replaced cyan focus rings with white focus rings (`focus-visible:ring-2 ring-white ring-offset-2 ring-offset-canvas`) across `Button`, `Tabs`, `Wordmark`, and `Header`; updated `Input` focus state to `border-white ring-1 ring-white/60`; updated active filter chips in `Chip` and `Header` to white-on-raised (`bg-raised text-white border-border-hover`) with white dots; deleted dead live variant.
 

@@ -38,7 +38,7 @@ export function Tabs({
             aria-selected={isActive}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`rounded-full font-sans font-medium transition-all duration-150 outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-live focus-visible:ring-offset-2 focus-visible:ring-offset-canvas ${padClass} ${
+            className={`rounded-full font-sans font-medium transition-all duration-150 outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-canvas ${padClass} ${
               isActive
                 ? "bg-white text-canvas font-semibold shadow-xs"
                 : "text-muted hover:text-white hover:bg-white/5"

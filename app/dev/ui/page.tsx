@@ -71,7 +71,7 @@ export default function DevUiGalleryPage() {
         <div className="flex flex-wrap gap-4 items-center p-6 bg-surface border border-border rounded-3xl">
           <Tag>Section Label</Tag>
           <Chip variant="neutral">Default Chip</Chip>
-          <Chip variant="live" dot>
+          <Chip variant="active" dot>
             LIVE · 34
           </Chip>
           <Chip variant="accent" dot>

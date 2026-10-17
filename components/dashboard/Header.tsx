@@ -188,7 +188,7 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
         <div className="bg-raised/40 border-t border-border px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-2 text-[12px] font-sans">
           <span className="text-muted">Active Filters:</span>
           {currentCountry && (
-            <Chip variant="live" onRemove={() => updateQuery("country", null)}>
+            <Chip variant="active" onRemove={() => updateQuery("country", null)}>
               Country: {currentCountry}
             </Chip>
           )}
@@ -221,7 +221,7 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
               <button
                 type="button"
                 onClick={() => setShowEmbedModal(false)}
-                className="w-8 h-8 rounded-full bg-raised border border-border text-muted hover:text-white flex items-center justify-center cursor-pointer transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-live"
+                className="w-8 h-8 rounded-full bg-raised border border-border text-muted hover:text-white flex items-center justify-center cursor-pointer transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
                 aria-label="Close modal"
               >
                 <X className="w-4 h-4" />

@@ -38,7 +38,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }, [variant]);
 
     const baseClasses =
-      "inline-flex items-center justify-center font-sans font-medium text-[13px] rounded-full transition-all duration-150 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-live focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none";
+      "inline-flex items-center justify-center font-sans font-medium text-[13px] rounded-full transition-all duration-150 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none";
 
     let variantClasses = "";
     if (variant === "primary") {
