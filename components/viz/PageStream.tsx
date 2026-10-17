@@ -115,7 +115,9 @@ export function PageStream({
   if (loading) {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 min-h-[280px] sheen ${className}`}
+        className={`flex flex-col items-center justify-center min-h-[280px] ${
+          embedded ? "w-full" : "bg-surface border border-border rounded-3xl p-6 sheen"
+        } ${className}`}
         aria-busy="true"
         aria-label="Loading page trajectory streamgraph"
       >

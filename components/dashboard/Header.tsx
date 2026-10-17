@@ -7,7 +7,7 @@ import { Wordmark } from "@/components/ui/Wordmark";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
-import { Search, Settings, LogOut, Code, Plus } from "lucide-react";
+import { Search, Settings, LogOut, Code, Plus, ChevronDown, X } from "lucide-react";
 
 export interface HeaderProps {
   currentSiteId?: string;
@@ -101,8 +101,8 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
                     + Add site...
                   </option>
                 </select>
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted text-[10px]">
-                  ▼
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted">
+                  <ChevronDown className="w-3.5 h-3.5" />
                 </span>
               </div>
             )
@@ -197,7 +197,7 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/80 backdrop-blur-sm"
         >
           <div className="bg-surface border border-border rounded-3xl p-6 max-w-lg w-full space-y-4 sheen relative z-10 shadow-2xl">
             <div className="flex items-center justify-between">
@@ -205,10 +205,10 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
               <button
                 type="button"
                 onClick={() => setShowEmbedModal(false)}
-                className="w-8 h-8 rounded-full bg-raised border border-border text-muted hover:text-white flex items-center justify-center cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-full bg-raised border border-border text-muted hover:text-white flex items-center justify-center cursor-pointer transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-live"
                 aria-label="Close modal"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 

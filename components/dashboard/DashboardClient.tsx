@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardGrid } from "./DashboardGrid";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Button } from "@/components/ui/Button";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import type { GlobeMarker } from "@/components/viz/GlobeLive";
 import type {
   ItemCount,
@@ -33,12 +36,14 @@ interface AllStatsResponse {
 }
 
 export function DashboardClient({ siteId }: DashboardClientProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const range = searchParams.get("range") || "7d";
 
   const [stats, setStats] = useState<AllStatsResponse | null>(null);
   const [live, setLive] = useState<LiveStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Compute date range from preset
   const { fromDate, toDate, interval } = useMemo(() => {
@@ -61,31 +66,38 @@ export function DashboardClient({ siteId }: DashboardClientProps) {
     return { fromDate: from, toDate: now, interval: intv };
   }, [range]);
 
-  // Fetch all stats when siteId or range changes
+  const [retryCount, setRetryCount] = useState(0);
+
+  // Fetch all stats when siteId, range, or retryCount changes
   useEffect(() => {
     let isMounted = true;
-
     const url = `/api/stats/all?siteId=${encodeURIComponent(siteId)}&from=${fromDate.toISOString()}&to=${toDate.toISOString()}&interval=${interval}`;
 
     fetch(url)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: AllStatsResponse | null) => {
-        if (!isMounted) return;
-        if (data) {
-          setStats(data);
-          if (data.live) setLive(data.live);
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Telemetry service returned status ${res.status}`);
         }
+        return res.json();
+      })
+      .then((data: AllStatsResponse) => {
+        if (!isMounted) return;
+        setStats(data);
+        if (data.live) setLive(data.live);
+        setError(null);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
+        if (!isMounted) return;
         console.error("Dashboard stats fetch error:", err);
-        if (isMounted) setLoading(false);
+        setError(err instanceof Error ? err.message : "Failed to load telemetry stats");
+        setLoading(false);
       });
 
     return () => {
       isMounted = false;
     };
-  }, [siteId, fromDate, toDate, interval]);
+  }, [siteId, fromDate, toDate, interval, retryCount]);
 
   // Realtime live stats polling (every 5 seconds)
   useEffect(() => {
@@ -131,20 +143,64 @@ export function DashboardClient({ siteId }: DashboardClientProps) {
     }));
   }, [stats]);
 
+  const isEmpty =
+    !loading &&
+    !error &&
+    stats &&
+    stats.kpis?.current?.views === 0 &&
+    stats.kpis?.current?.visitors === 0 &&
+    (!stats.pages || stats.pages.length === 0);
+
   return (
-    <DashboardGrid
-      kpis={stats?.kpis}
-      globeMarkers={globeMarkers}
-      live={live || undefined}
-      devices={stats?.devices}
-      countries={stats?.countries}
-      pages={stats?.pages}
-      referrers={stats?.referrers}
-      stream={stats?.stream}
-      flows={stats?.flows}
-      calendarData={calendarData}
-      hourWeekdayData={stats?.hourWeekday}
-      loading={loading}
-    />
+    <div className="space-y-6">
+      {error && (
+        <div
+          role="alert"
+          className="bg-danger/10 border border-danger/30 text-danger rounded-2xl p-4 flex items-center justify-between gap-4 font-sans text-[13px]"
+        >
+          <div className="flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setLoading(true);
+              setError(null);
+              setRetryCount((c) => c + 1);
+            }}
+            className="text-danger hover:text-white hover:bg-danger/20 shrink-0 flex items-center gap-1.5"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Retry</span>
+          </Button>
+        </div>
+      )}
+
+      {isEmpty ? (
+        <EmptyState
+          title="No Telemetry Detected"
+          message="No visitor events have been collected for this site in the selected time window."
+          actionLabel="View 30-day window"
+          onAction={() => router.push("?range=30d")}
+        />
+      ) : (
+        <DashboardGrid
+          kpis={stats?.kpis}
+          globeMarkers={globeMarkers}
+          live={live || undefined}
+          devices={stats?.devices}
+          countries={stats?.countries}
+          pages={stats?.pages}
+          referrers={stats?.referrers}
+          stream={stats?.stream}
+          flows={stats?.flows}
+          calendarData={calendarData}
+          hourWeekdayData={stats?.hourWeekday}
+          loading={loading}
+        />
+      )}
+    </div>
   );
 }

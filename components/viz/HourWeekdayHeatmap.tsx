@@ -84,7 +84,9 @@ export function HourWeekdayHeatmap({
   if (loading) {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 min-h-[240px] sheen ${className}`}
+        className={`flex flex-col items-center justify-center min-h-[240px] ${
+          embedded ? "w-full" : "bg-surface border border-border rounded-3xl p-6 sheen"
+        } ${className}`}
         aria-busy="true"
         aria-label="Loading hour weekday heatmap"
       >

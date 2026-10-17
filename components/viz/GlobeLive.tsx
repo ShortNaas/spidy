@@ -96,7 +96,9 @@ export function GlobeLive({
   if (loading) {
     return (
       <div
-        className={`relative flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 aspect-square sheen ${className}`}
+        className={`relative flex flex-col items-center justify-center aspect-square ${
+          embedded ? "w-full" : "bg-surface border border-border rounded-3xl p-6 sheen"
+        } ${className}`}
         aria-busy="true"
         aria-label="Loading realtime globe"
       >

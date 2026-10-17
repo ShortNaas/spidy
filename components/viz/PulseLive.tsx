@@ -59,7 +59,9 @@ export function PulseLive({
   if (loading) {
     return (
       <div
-        className={`flex flex-col justify-between bg-surface border border-border rounded-3xl p-6 min-h-[160px] sheen ${className}`}
+        className={`flex flex-col justify-between min-h-[160px] ${
+          embedded ? "w-full" : "bg-surface border border-border rounded-3xl p-6 sheen"
+        } ${className}`}
         aria-busy="true"
         aria-label="Loading live pulse"
       >

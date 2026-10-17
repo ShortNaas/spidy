@@ -290,6 +290,15 @@
   - Restyled `app/dashboard/settings/page.tsx` strictly using shared primitives (`Card`, `Input`, `Button`) for both password updates and danger zone account deletion.
   - Restyled `app/privacy/page.tsx` using `Wordmark`, `Tag`, tokenized colors, and clean minimal layout.
   - Verification: `pnpm lint`, `pnpm test`, and `pnpm build` passed with 0 errors across 26 routes.
+- **Step 8: States and Polish**:
+  - Implemented seamless `Skeleton` loading state across all 8 visualization components (`embedded` mode without double borders).
+  - Added `motion-safe:before:animate-[shimmer_1.6s_infinite]` to `Skeleton` component ensuring adherence to `prefers-reduced-motion`.
+  - Added inline rose error banner with `Retry` button to `DashboardClient.tsx`, and `EmptyState` when 0 telemetry is recorded for the selected window.
+  - Replaced legacy unicode arrows and close markers with Lucide `ChevronDown` and `X` icons in `Header.tsx`.
+  - Removed dead code `DemoTeaserSection.tsx`.
+  - Verified `transition-colors duration-150` on all interactive buttons, links, inputs, and modal controls.
+  - Verification: `pnpm lint`, `pnpm test`, and `pnpm build` passed with 0 errors across 26 routes.
+
 
 
 

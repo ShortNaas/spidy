@@ -160,7 +160,9 @@ export function WorldChoropleth({
   if (loading || geoLoading) {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 min-h-[360px] sheen ${className}`}
+        className={`flex flex-col items-center justify-center min-h-[360px] ${
+          embedded ? "w-full" : "bg-surface border border-border rounded-3xl p-6 sheen"
+        } ${className}`}
         aria-busy="true"
         aria-label="Loading world choropleth"
       >
