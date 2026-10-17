@@ -247,5 +247,6 @@
 
 - **Step 1: Audit**: Completed comprehensive styling audit of all pages, shared components, viz components, and config files; saved inventory checklist to `REDESIGN-AUDIT.md`.
 - **Step 2: Tokens and textures**: Defined CSS variables for all DESIGN.md colors, radii, and fonts in `app/globals.css`, mapped to Tailwind `@theme inline`. Created `.sheen`, `.hatch-accent`, `.hatch-live`, `.hatch-white`, `.dotgrid`, `.beam`, and `.mono-num` utilities. Configured self-hosted Poppins (300-600) and Geist Mono in `app/layout.tsx`. Implemented `lib/theme.ts` exporting `emberRamp`, `categorical(n)`, `lineColors`, and `sankeyColors`.
+- **Step 3: Primitives (`/components/ui`)**: Implemented all required design system primitives (`Button`, `Tag`, `Tabs`, `Card`, `KpiCard`, `Input`, `Chip`, `DeltaBadge`, `Table`, `Tooltip`, `Skeleton`, `EmptyState`, `Banner`, `Wordmark`) strictly conforming to DESIGN.md. Built `/dev/ui` component gallery demonstrating all states.
 
 
