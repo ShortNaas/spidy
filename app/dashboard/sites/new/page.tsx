@@ -155,7 +155,7 @@ export default function NewSitePage() {
         </Card>
       ) : (
         <Card
-          icon={<Globe className="w-5 h-5 text-live" />}
+          icon={<Globe className="w-5 h-5 text-white" />}
           title={createdSite.domain}
           subtitle={`ID: ${createdSite.id}`}
         >
@@ -170,7 +170,7 @@ export default function NewSitePage() {
               <p className="text-[13px] text-muted">
                 Paste this lightweight (&lt;1 KB), cookieless snippet into your HTML header or before &lt;/body&gt;:
               </p>
-              <div className="bg-raised border border-border rounded-xl p-3.5 font-mono text-xs text-live break-all select-all flex items-center justify-between gap-4">
+              <div className="bg-raised border border-border rounded-xl p-3.5 font-mono text-xs text-white break-all select-all flex items-center justify-between gap-4">
                 <code data-testid="embed-snippet" className="text-text font-mono text-[12px]">
                   {embedSnippet}
                 </code>
@@ -218,8 +218,8 @@ export default function NewSitePage() {
                     <span className="w-3 h-3 rounded-full bg-positive shrink-0" />
                   ) : (
                     <span className="relative flex h-3 w-3 shrink-0">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-live opacity-75" />
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-live shadow-[0_0_12px_rgba(34,211,238,0.6)]" />
+                      <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-white shadow-[0_0_12px_rgba(255,255,255,0.6)]" />
                     </span>
                   )}
                   <div>
