@@ -1,20 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poppins, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const poppins = Poppins({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Spidy - Privacy-First Web Analytics",
-  description: "Cookieless, privacy-first web analytics with visually striking visualizations.",
+  title: "Spidy · Privacy-First Web Analytics",
+  description: "Self-hosted, cookieless, privacy-first web analytics with visually striking interactive telemetry.",
 };
 
 export default function RootLayout({
@@ -25,9 +26,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      className={`${poppins.variable} ${geistMono.variable} dark h-full antialiased`}
     >
-      <body className="min-h-full bg-black text-zinc-100 flex flex-col">{children}</body>
+      <body className="min-h-full bg-canvas text-text font-sans antialiased flex flex-col">{children}</body>
     </html>
   );
 }
