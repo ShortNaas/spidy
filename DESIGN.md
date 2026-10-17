@@ -15,8 +15,6 @@ colors:
   accent: "#fb5c34"           # NEXORA / Dribbble orange
   accent-bright: "#ff7a57"
   accent-deep: "#7a2a16"
-  live: "#22d3ee"             # live telemetry only
-  live-deep: "#083344"
   positive: "#86d4b2"         # NEXORA mint swatch [ASSUMED: label in the image reads #66FE4C but the swatch renders softer]
   info: "#2861eb"             # NEXORA blue
   danger: "#f43f5e"
@@ -111,7 +109,7 @@ components:
 
 **Creative North Star: "The Orbital Observatory", now in monochrome**
 
-Spidy is a quiet, black instrument. The v3 look takes the NEXORA material (neutral black, soft-sheen cards, thin white lines, grayscale light beams, dot-grid texture, Poppins) and the Dribbble Sales dashboard's data language (one hot orange, hatched fills, pill-shaped bars, big rounded cards). Everything is near-monochrome so that the one orange accent and the cyan live signal carry meaning.
+Spidy is a quiet, black instrument. The v3 look takes the NEXORA material (neutral black, soft-sheen cards, thin white lines, grayscale light beams, dot-grid texture, Poppins) and the Dribbble Sales dashboard's data language (one hot orange, hatched fills, pill-shaped bars, big rounded cards). Everything is near-monochrome so that the single orange accent carries meaning.
 
 The interface should feel minimal and aesthetic: generous radii, soft surfaces, thin white strokes, two-tone headlines (white then gray), and texture used as information (hatching means "less", solid means "more").
 
@@ -121,7 +119,7 @@ Anti-references: no light mode, no pastel gradients, no colored gradients of any
 - **Neutral Black:** `#050505` canvas, `#0f0f0f` cards. No blue tint.
 - **Soft-Sheen Cards:** 24px radius, hairline border, a faint white sheen toward the bottom-right corner.
 - **One Hot Accent:** Orange `#fb5c34`, used for volume data, the hero CTA, and emphasis.
-- **Live Cyan:** `#22d3ee`, reserved for real-time elements.
+- **Live = White:** Real-time elements are white with a soft white halo and motion. There is no cyan anywhere.
 - **Hatch as Data:** Diagonal hatching fills low and mid values; solid fills mark peaks.
 - **Pills Everywhere:** Buttons, tabs, tags, and delta badges are fully rounded.
 - **Poppins + Geist Mono:** Poppins for structure and static KPIs, Geist Mono for anything that updates or sits in a column.
@@ -140,21 +138,20 @@ Anti-references: no light mode, no pastel gradients, no colored gradients of any
 - **Accent, Ember (`#fb5c34`):** volume and density data, the hero CTA, selected series, key deltas, hatch fills.
   - *Bright (`#ff7a57`):* hover and peak values.
   - *Deep (`#7a2a16`):* subdued badges and the low end of the ramp.
-- **Live, Orbital Cyan (`#22d3ee`):** real-time only: the globe blips, the live counter dot, the 30-minute pulse line, the "waiting for first pageview" indicator, focus rings.
-  - *Deep (`#083344`):* live badge backgrounds.
+- **Live signal (white):** real-time elements (globe blips, live counter dot, 30-minute pulse line, the "waiting for first pageview" indicator) use `text` white with a pulsing ring and the white live halo. Focus rings are white.
 - **Positive, Mint (`#86d4b2`) [ASSUMED swatch]:** positive deltas, healthy states, "next page" flows.
 - **Info, Blue (`#2861eb`):** extra categorical series and links on marketing pages. Never a status color.
 - **Danger, Rose (`#f43f5e`):** negative deltas, errors, destructive actions only.
 
 ### Data ramps
 - **Ember volume ramp (heatmaps, choropleth, bars):** step 0 empty (`#161616` with hairline), step 1 hatched ember at 35%, step 2 hatched ember at 75%, step 3 solid `#c4472a`, step 4 solid `#fb5c34`, peak `#ff7a57`.
-- **Live line:** cyan 1.5px stroke with ring-dot markers.
+- **Live line:** white 1.5px stroke with ring-dot markers and a pulsing end dot.
 - **Static trend lines and sparklines:** white 1.5px with ring-dot markers (NEXORA style).
 - **Sankey:** referrers white-gray, landing pages ember, next pages mint.
-- **Categorical (streamgraph, max 8):** ember, white, cyan, mint, blue, then gray steps `#bdbdbd`, `#8d8d8d`, `#5f5f5f`. Series beyond the fourth also use hatch to stay distinguishable.
+- **Categorical (streamgraph, max 8):** ember, white, mint, blue, then gray steps `#bdbdbd`, `#8d8d8d`, `#5f5f5f`. Series beyond the fourth also use hatch to stay distinguishable.
 
 ### Named Rules
-**The Status Rule.** Cyan means live. Mint means positive. Rose means harm. Orange is emphasis and volume, never an error. Blue is never a status.
+**The Status Rule.** White with motion means live. Mint means positive. Rose means harm. Orange is emphasis and volume, never an error. Blue is never a status.
 
 **The One Hot Thing Rule.** At most one solid-orange filled UI element (button or highlighted series) competes per viewport. Hatched orange data does not count.
 
@@ -198,10 +195,10 @@ Flat at rest. Depth comes from tone, hairlines, and texture.
 
 - **Panels:** `bg-surface border border-border rounded-3xl`, hover `border-border-hover`.
 - **Card sheen:** an overlay inside each card: `radial-gradient(120% 120% at 100% 100%, rgba(255,255,255,0.06), transparent 55%)` plus a 1px inner top highlight `rgba(255,255,255,0.04)`. Utility: `.sheen`.
-- **Hatch fill:** `repeating-linear-gradient(-45deg, var(--color-accent) 0 1.5px, transparent 1.5px 4.5px)`. Utilities: `.hatch-accent`, `.hatch-live`, `.hatch-white`. Opacity is set per ramp step.
+- **Hatch fill:** `repeating-linear-gradient(-45deg, var(--color-accent) 0 1.5px, transparent 1.5px 4.5px)`. Utilities: `.hatch-accent`, `.hatch-white`. Opacity is set per ramp step.
 - **Dot grid:** `radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px)` at 12px spacing, masked with a radial fade so it vanishes toward the edges. Utility: `.dotgrid`. Used on the landing hero, the auth backdrop, and empty states.
 - **Light beam:** one blurred, rotated grayscale streak (`rotate(-28deg)`, `blur(40px)`, white at 15 to 45% opacity along its length), `pointer-events-none`, `aria-hidden`. Maximum one per page, on the landing hero and at most one on the auth page. Utility: `.beam`.
-- **Live halo:** `shadow-[0_0_24px_rgba(34,211,238,0.3)]` on live beacons only.
+- **Live halo:** `shadow-[0_0_24px_rgba(255,255,255,0.25)]` on live beacons and the globe container only.
 - **Accent halo:** `shadow-[0_0_28px_rgba(251,92,52,0.28)]` on the single hero CTA only.
 
 ### Named Rules
@@ -231,7 +228,7 @@ Flat at rest. Depth comes from tone, hairlines, and texture.
 - **Icon button:** 40px circle on Raised with a hairline, 16px Lucide icon.
 - **Danger:** ghost that turns `hover:text-rose-400`.
 - **Disabled:** 40% opacity, `cursor-not-allowed`.
-- **Focus (all):** `focus-visible:ring-2 ring-live ring-offset-2 ring-offset-canvas`.
+- **Focus (all):** `focus-visible:ring-2 ring-white ring-offset-2 ring-offset-canvas`.
 
 ### Tag (section label)
 Full pill, Raised background, hairline border, a 8px ring-dot (hollow circle) on the left, text 13px white. Used as the section label on the landing page (for example "Privacy", "How it works").
@@ -252,11 +249,11 @@ Label (muted 13px), value (Poppins 300, 40px; live values in mono), delta pill (
 - **Donut:** gray track `#1c1c1c`, white or ember arc with rounded caps.
 - **Line charts:** 1.5px strokes, ring-dot markers at the hovered point and the last point, soft vertical highlight band on hover.
 - **Sankey:** thin nodes with a 3px colored left edge (NEXORA flow style), rounded 12px node cards, links in 30% opacity.
-- **Globe:** dotted gray landmass, cyan live blips, container with live halo.
+- **Globe:** dotted gray landmass, white live blips with a pulsing ring, container with live halo.
 - **Tooltip:** `bg-raised border border-border-hover rounded-xl px-3 py-2`, mono 12px values.
 
 ### Inputs
-`bg-subtle border border-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-faint`. Focus: `border-live ring-1 ring-live`. Error: `border-rose-500/50 bg-rose-950/30`, message in 12px rose below.
+`bg-subtle border border-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-faint`. Focus: `border-white ring-1 ring-white/60`. Error: `border-rose-500/50 bg-rose-950/30`, message in 12px rose below.
 
 ### Tables
 Header row on Raised with muted 12px text, rows divided by hairlines, hover Raised, numeric columns right-aligned in mono, optional inline hatched-ember bar behind the value for share of total.
@@ -291,7 +288,7 @@ Lucide, 16px in controls and 20px in headers, 1.5px stroke, inherits color. No f
 ## Do's and Don'ts
 
 ### Do
-- Keep surfaces neutral and let orange and cyan carry meaning.
+- Keep surfaces neutral and let orange carry meaning.
 - Use hatch for lower values and solid for peaks.
 - Use pills for controls and 24px or larger radii for containers.
 - Use white for primary actions and headings.
@@ -300,6 +297,7 @@ Lucide, 16px in controls and 20px in headers, 1.5px stroke, inherits color. No f
 
 ### Don't
 - Don't add a light mode.
+- Don't use cyan, teal, or any blue-green anywhere (UI, charts, focus rings, glows, favicons, OG image).
 - Don't tint the black blue; the neutrals stay pure gray.
 - Don't use colored gradients; only grayscale sheen, beam, and dot-grid.
 - Don't use orange for errors or warnings.

@@ -367,10 +367,7 @@
     4. *Multiple orange accent CTA buttons*: Impeccable suggests accent buttons in both the header and footer. Skipped because DESIGN.md strictly enforces "The One Hot Thing Rule" (`Open live demo` is the single accent element).
     5. *Smaller container border radii (6-8px)*: Impeccable suggests sharper, more compact radii. Skipped because DESIGN.md explicitly mandates 24px (`rounded-3xl`) for cards/panels, 32px (`rounded-4xl`) for frames, and pill (`rounded-full`) for all buttons, tags, chips, and tabs.
 
+## Remove Cyan: Complete Transition to Monochrome Live Signals
 
-
-
-
-
-
+- **Step 1: Audit**: Audited repository for all occurrences of cyan, teal, sky, legacy live tokens (`--color-live`, `live-deep`, `ring-live`, `border-live`, `bg-live`, `text-live`, `hatch-live`, `lineColors.live`, and hex/rgb cyan codes); compiled and saved comprehensive inventory in `CYAN-AUDIT.md` (90 hits across 22 files).
 
