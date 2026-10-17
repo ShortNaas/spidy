@@ -248,5 +248,6 @@
 - **Step 1: Audit**: Completed comprehensive styling audit of all pages, shared components, viz components, and config files; saved inventory checklist to `REDESIGN-AUDIT.md`.
 - **Step 2: Tokens and textures**: Defined CSS variables for all DESIGN.md colors, radii, and fonts in `app/globals.css`, mapped to Tailwind `@theme inline`. Created `.sheen`, `.hatch-accent`, `.hatch-live`, `.hatch-white`, `.dotgrid`, `.beam`, and `.mono-num` utilities. Configured self-hosted Poppins (300-600) and Geist Mono in `app/layout.tsx`. Implemented `lib/theme.ts` exporting `emberRamp`, `categorical(n)`, `lineColors`, and `sankeyColors`.
 - **Step 3: Primitives (`/components/ui`)**: Implemented all required design system primitives (`Button`, `Tag`, `Tabs`, `Card`, `KpiCard`, `Input`, `Chip`, `DeltaBadge`, `Table`, `Tooltip`, `Skeleton`, `EmptyState`, `Banner`, `Wordmark`) strictly conforming to DESIGN.md. Built `/dev/ui` component gallery demonstrating all states.
+- **Step 4: Shell**: Rebuilt the top bar into a 72px floating pill bar (`Header.tsx`) with wordmark left, centered range preset tabs, and 40px circular control buttons right. Extracted shared 3-column cockpit grid (`DashboardGrid.tsx`) with 24px `Card` panels, unifying `/dashboard` and `/demo` with zero duplicated layout code.
 
 

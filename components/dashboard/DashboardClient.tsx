@@ -2,14 +2,8 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { GlobeLive, type GlobeMarker } from "@/components/viz/GlobeLive";
-import { FlowSankey } from "@/components/viz/FlowSankey";
-import { CalendarHeatmap } from "@/components/viz/CalendarHeatmap";
-import { HourWeekdayHeatmap } from "@/components/viz/HourWeekdayHeatmap";
-import { PageStream } from "@/components/viz/PageStream";
-import { PulseLive } from "@/components/viz/PulseLive";
-import { WorldChoropleth } from "@/components/viz/WorldChoropleth";
-import { KpiStrip } from "@/components/viz/KpiStrip";
+import { DashboardGrid } from "./DashboardGrid";
+import type { GlobeMarker } from "@/components/viz/GlobeLive";
 import type {
   ItemCount,
   KpiResult,
@@ -138,137 +132,19 @@ export function DashboardClient({ siteId }: DashboardClientProps) {
   }, [stats]);
 
   return (
-    <div className="space-y-6">
-      {/* 1. KPI Strip */}
-      <section>
-        <KpiStrip data={stats?.kpis} loading={loading} />
-      </section>
-
-      {/* 2 & 3. 3D Globe + Live Pulse sparkline */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <GlobeLive markers={globeMarkers} loading={loading && !live} />
-        </div>
-
-        <div>
-          <PulseLive
-            activeVisitors={live?.activeVisitors5Min || 0}
-            totalViews={live?.totalViews30Min || 0}
-            perMinute={live?.perMinute || []}
-            loading={loading && !live}
-          />
-
-          {/* Quick Device Breakdown summary below pulse */}
-          <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4 mt-4">
-            <div className="text-xs font-semibold text-zinc-300 mb-2">Device & Platform</div>
-            <div className="space-y-2">
-              {stats?.devices.slice(0, 3).map((d) => (
-                <div key={d.name} className="flex justify-between items-center text-xs font-mono">
-                  <span className="text-zinc-400 capitalize">{d.name}</span>
-                  <span className="text-zinc-200 tabular-nums">{d.views.toLocaleString()}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4 & 5. World Choropleth + Top Countries Table */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <WorldChoropleth data={stats?.countries || []} loading={loading} />
-        </div>
-
-        <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4 flex flex-col justify-between">
-          <div>
-            <div className="text-xs font-semibold text-zinc-200 mb-3">Top Countries</div>
-            <div className="space-y-2.5">
-              {stats?.countries.slice(0, 6).map((c, i) => (
-                <div key={c.name} className="flex items-center justify-between text-xs font-mono">
-                  <div className="flex items-center gap-2">
-                    <span className="text-zinc-600 text-[10px] w-3">{i + 1}</span>
-                    <span className="text-zinc-300">{c.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-zinc-400 tabular-nums">
-                      {c.visitors.toLocaleString()} <span className="text-zinc-600">vis</span>
-                    </span>
-                    <span className="text-cyan-400 tabular-nums w-12 text-right">
-                      {c.views.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Page Streamgraph & Top Pages Table */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <PageStream data={stats?.stream || []} loading={loading} />
-        </div>
-
-        <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4 flex flex-col justify-between">
-          <div>
-            <div className="text-xs font-semibold text-zinc-200 mb-3">Top Pages</div>
-            <div className="space-y-2.5">
-              {stats?.pages.slice(0, 6).map((p, i) => (
-                <div key={p.name} className="flex items-center justify-between text-xs font-mono">
-                  <div className="flex items-center gap-2 truncate max-w-[170px]">
-                    <span className="text-zinc-600 text-[10px] w-3">{i + 1}</span>
-                    <span className="text-zinc-300 truncate" title={p.name}>
-                      {p.name}
-                    </span>
-                  </div>
-                  <div className="text-cyan-400 tabular-nums text-right">
-                    {p.views.toLocaleString()}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. Flow Sankey & Top Referrers */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <FlowSankey data={stats?.flows} loading={loading} />
-        </div>
-
-        <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4 flex flex-col justify-between">
-          <div>
-            <div className="text-xs font-semibold text-zinc-200 mb-3">Top Referrers</div>
-            <div className="space-y-2.5">
-              {stats?.referrers.slice(0, 6).map((r, i) => (
-                <div key={r.name} className="flex items-center justify-between text-xs font-mono">
-                  <div className="flex items-center gap-2 truncate max-w-[170px]">
-                    <span className="text-zinc-600 text-[10px] w-3">{i + 1}</span>
-                    <span className="text-zinc-300 truncate" title={r.name}>
-                      {r.name}
-                    </span>
-                  </div>
-                  <div className="text-emerald-400 tabular-nums text-right">
-                    {r.views.toLocaleString()}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. Heatmaps: 12-Month Calendar & 7x24 Hour Weekday Grid */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
-          <CalendarHeatmap data={calendarData} loading={loading} />
-        </div>
-        <div>
-          <HourWeekdayHeatmap data={stats?.hourWeekday || []} loading={loading} />
-        </div>
-      </section>
-    </div>
+    <DashboardGrid
+      kpis={stats?.kpis}
+      globeMarkers={globeMarkers}
+      live={live || undefined}
+      devices={stats?.devices}
+      countries={stats?.countries}
+      pages={stats?.pages}
+      referrers={stats?.referrers}
+      stream={stats?.stream}
+      flows={stats?.flows}
+      calendarData={calendarData}
+      hourWeekdayData={stats?.hourWeekday}
+      loading={loading}
+    />
   );
 }

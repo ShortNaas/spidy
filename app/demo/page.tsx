@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { DemoDashboardClient } from "@/components/demo/DemoDashboardClient";
 
@@ -9,5 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function DemoPage() {
-  return <DemoDashboardClient />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-canvas" />}>
+      <DemoDashboardClient />
+    </Suspense>
+  );
 }

@@ -1,17 +1,14 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import Link from "next/link";
-import { GlobeLive } from "@/components/viz/GlobeLive";
-import { FlowSankey } from "@/components/viz/FlowSankey";
-import { CalendarHeatmap } from "@/components/viz/CalendarHeatmap";
-import { HourWeekdayHeatmap } from "@/components/viz/HourWeekdayHeatmap";
-import { PageStream } from "@/components/viz/PageStream";
-import { PulseLive } from "@/components/viz/PulseLive";
-import { WorldChoropleth } from "@/components/viz/WorldChoropleth";
-import { KpiStrip } from "@/components/viz/KpiStrip";
+import React, { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { Header } from "@/components/dashboard/Header";
+import { Banner } from "@/components/ui/Banner";
+import { DashboardGrid } from "@/components/dashboard/DashboardGrid";
 import demoData from "@/lib/demo-data.json";
-import type { SankeyData, ItemCount } from "@/lib/queries";
+import type { SankeyData, ItemCount, StreamDataPoint, HourWeekdayCell } from "@/lib/queries";
+import type { GlobeMarker } from "@/components/viz/GlobeLive";
+import type { CalendarDayData } from "@/components/viz/CalendarHeatmap";
 
 const DATE_PRESETS = [
   { label: "24h", value: "24h", multiplier: 0.15 },
@@ -85,7 +82,8 @@ const DEMO_PULSE_MINUTES = [
 ];
 
 export function DemoDashboardClient() {
-  const [range, setRange] = useState("7d");
+  const searchParams = useSearchParams();
+  const range = searchParams.get("range") || "7d";
 
   const currentPreset = useMemo(
     () => DATE_PRESETS.find((p) => p.value === range) || DATE_PRESETS[1],
@@ -142,247 +140,78 @@ export function DemoDashboardClient() {
     [m]
   );
 
+  const devices = useMemo<ItemCount[]>(
+    () =>
+      DEMO_DEVICES.map((d) => ({
+        name: d.name,
+        views: Math.round(d.views * m),
+        visitors: Math.round(d.views * m * 0.65),
+      })),
+    [m]
+  );
+
+  const globeMarkers = useMemo<GlobeMarker[]>(
+    () => (demoData.markers as unknown as GlobeMarker[]) || [],
+    []
+  );
+
+  const liveStats = useMemo(
+    () => ({
+      activeVisitors5Min: 34,
+      totalViews30Min: Math.round(580 * Math.min(m, 1)),
+      perMinute: DEMO_PULSE_MINUTES,
+      recentMarkers: demoData.markers,
+    }),
+    [m]
+  );
+
+  const streamData = useMemo<StreamDataPoint[]>(
+    () => (demoData.pageStream as unknown as StreamDataPoint[]) || [],
+    []
+  );
+
+  const calendarData = useMemo<CalendarDayData[]>(
+    () => (demoData.calendar as unknown as CalendarDayData[]) || [],
+    []
+  );
+
+  const hourWeekdayData = useMemo<HourWeekdayCell[]>(
+    () => (demoData.hourWeekday as unknown as HourWeekdayCell[]) || [],
+    []
+  );
+
   return (
-    <div className="min-h-screen bg-black text-zinc-100 flex flex-col font-sans selection:bg-cyan-500/20 selection:text-cyan-300">
-      {/* Demo Banner */}
-      <div className="bg-gradient-to-r from-cyan-950/80 via-zinc-900 to-indigo-950/80 border-b border-cyan-800/40 px-4 py-2 text-center text-xs font-mono text-zinc-300 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 mx-auto sm:mx-0">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          <span>
-            <strong>Interactive Live Demo:</strong> Viewing sample analytics for{" "}
-            <span className="text-cyan-400 font-semibold">spidy.dev</span> (zero cookies, zero IP tracking).
-          </span>
-        </div>
-        <div className="hidden sm:flex items-center gap-3">
-          <Link
-            href="/register"
-            className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs px-3 py-1 rounded-md transition-colors"
-          >
-            Track your own site →
-          </Link>
-        </div>
-      </div>
+    <div className="min-h-screen bg-canvas text-text flex flex-col font-sans">
+      {/* Shared Header Shell */}
+      <Header isDemo={true} />
 
-      {/* Header */}
-      <header className="border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          {/* Brand & Demo site badge */}
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 text-white font-bold tracking-tight">
-              <span className="w-7 h-7 rounded-lg bg-cyan-950 border border-cyan-800/80 flex items-center justify-center text-cyan-400">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </span>
-              <span className="text-base tracking-tight hidden sm:inline">Spidy</span>
-            </Link>
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Step 4 Demo Banner: The single solid accent element on /demo */}
+        <Banner
+          text="You are viewing demo data"
+          actionText="Create your own"
+          actionHref="/register"
+        />
 
-            <span className="bg-zinc-900 border border-zinc-700/80 text-zinc-200 text-xs font-mono px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-              <span className="text-zinc-500">Site:</span>
-              <span className="text-white font-semibold">spidy.dev</span>
-              <span className="text-[10px] bg-cyan-950 text-cyan-400 border border-cyan-800/60 px-1 rounded uppercase">
-                demo
-              </span>
-            </span>
-          </div>
-
-          {/* Range presets */}
-          <div className="flex items-center bg-zinc-900/90 border border-zinc-800 rounded-lg p-0.5">
-            {DATE_PRESETS.map((p) => {
-              const isActive = range === p.value;
-              return (
-                <button
-                  key={p.value}
-                  type="button"
-                  onClick={() => setRange(p.value)}
-                  className={`text-xs font-mono px-3 py-1 rounded-md transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-zinc-800 text-cyan-400 font-semibold shadow-xs"
-                      : "text-zinc-400 hover:text-zinc-200"
-                  }`}
-                >
-                  {p.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Auth Actions */}
-          <div className="flex items-center gap-2">
-            <Link
-              href="/login"
-              className="text-xs font-mono text-zinc-300 hover:text-white px-3 py-1.5 transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/register"
-              className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs font-mono px-4 py-1.5 rounded-lg transition-colors cursor-pointer"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Dashboard Layout */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {/* 1. KPI Strip */}
-        <section id="viz-kpi-strip">
-          <KpiStrip data={kpis} />
-        </section>
-
-        {/* 2 & 3. 3D Globe + Pulse Live */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div id="viz-globe-live" className="lg:col-span-2">
-            <GlobeLive markers={demoData.markers} />
-          </div>
-
-          <div id="viz-pulse-live" className="space-y-4">
-            <PulseLive
-              activeVisitors={38}
-              totalViews={492}
-              perMinute={DEMO_PULSE_MINUTES}
-            />
-
-            {/* Device breakdown */}
-            <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4">
-              <div className="text-xs font-semibold text-zinc-300 mb-2">Device & Platform</div>
-              <div className="space-y-2">
-                {DEMO_DEVICES.map((d) => (
-                  <div key={d.name} className="flex justify-between items-center text-xs font-mono">
-                    <span className="text-zinc-400 capitalize">{d.name}</span>
-                    <span className="text-zinc-200 tabular-nums">
-                      {Math.round(d.views * m).toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 4. World Choropleth + Top Countries */}
-        <section id="viz-world-choropleth" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <WorldChoropleth data={countries} />
-          </div>
-
-          <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4 flex flex-col justify-between">
-            <div>
-              <div className="text-xs font-semibold text-zinc-200 mb-3">Top Countries</div>
-              <div className="space-y-2.5">
-                {countries.slice(0, 6).map((c, i) => (
-                  <div key={c.name} className="flex items-center justify-between text-xs font-mono">
-                    <div className="flex items-center gap-2">
-                      <span className="text-zinc-600 text-[10px] w-3">{i + 1}</span>
-                      <span className="text-zinc-300">{c.name}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-zinc-400 tabular-nums">
-                        {c.visitors.toLocaleString()} <span className="text-zinc-600">vis</span>
-                      </span>
-                      <span className="text-cyan-400 tabular-nums w-12 text-right">
-                        {c.views.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 5. Page Stream + Top Pages */}
-        <section id="viz-page-stream" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <PageStream data={demoData.pageStream} />
-          </div>
-
-          <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4 flex flex-col justify-between">
-            <div>
-              <div className="text-xs font-semibold text-zinc-200 mb-3">Top Pages</div>
-              <div className="space-y-2.5">
-                {pages.map((p, i) => (
-                  <div key={p.name} className="flex items-center justify-between text-xs font-mono">
-                    <div className="flex items-center gap-2 truncate max-w-[170px]">
-                      <span className="text-zinc-600 text-[10px] w-3">{i + 1}</span>
-                      <span className="text-zinc-300 truncate" title={p.name}>
-                        {p.name}
-                      </span>
-                    </div>
-                    <div className="text-cyan-400 tabular-nums text-right">
-                      {p.views.toLocaleString()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 6. Flow Sankey + Top Referrers */}
-        <section id="viz-flow-sankey" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <FlowSankey data={sankeyData} />
-          </div>
-
-          <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4 flex flex-col justify-between">
-            <div>
-              <div className="text-xs font-semibold text-zinc-200 mb-3">Top Referrers</div>
-              <div className="space-y-2.5">
-                {referrers.map((r, i) => (
-                  <div key={r.name} className="flex items-center justify-between text-xs font-mono">
-                    <div className="flex items-center gap-2 truncate max-w-[170px]">
-                      <span className="text-zinc-600 text-[10px] w-3">{i + 1}</span>
-                      <span className="text-zinc-300 truncate" title={r.name}>
-                        {r.name}
-                      </span>
-                    </div>
-                    <div className="text-cyan-400 tabular-nums text-right">
-                      {r.views.toLocaleString()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 7 & 8. Heatmaps (Calendar + Hour Weekday) */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div id="viz-calendar-heatmap" className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4">
-            <div className="text-xs font-semibold text-zinc-200 mb-3">Annual Activity (365 Days)</div>
-            <CalendarHeatmap data={demoData.calendar} />
-          </div>
-
-          <div id="viz-hour-weekday" className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4">
-            <div className="text-xs font-semibold text-zinc-200 mb-3">Hourly Traffic Rhythm (7 × 24 UTC)</div>
-            <HourWeekdayHeatmap data={demoData.hourWeekday} />
-          </div>
-        </section>
+        {/* Shared Cockpit Grid */}
+        <DashboardGrid
+          kpis={kpis}
+          globeMarkers={globeMarkers}
+          live={liveStats}
+          devices={devices}
+          countries={countries}
+          pages={pages}
+          referrers={referrers}
+          stream={streamData}
+          flows={sankeyData}
+          calendarData={calendarData}
+          hourWeekdayData={hourWeekdayData}
+          loading={false}
+        />
       </main>
 
-      <footer className="border-t border-zinc-900 py-8 text-center text-xs text-zinc-600 font-mono">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span>Spidy Analytics · Cookieless · Zero Fingerprinting</span>
-          <div className="flex items-center gap-4">
-            <Link href="/" className="hover:text-zinc-400 transition-colors">
-              Home
-            </Link>
-            <Link href="/privacy" className="hover:text-zinc-400 transition-colors">
-              Privacy
-            </Link>
-            <Link href="/register" className="text-cyan-400 hover:text-cyan-300 transition-colors">
-              Create Free Account →
-            </Link>
-          </div>
-        </div>
+      <footer className="border-t border-border py-6 text-center text-[12px] text-muted font-sans">
+        Spidy · Self-Hosted Privacy Analytics · Cookieless & No IP Storage
       </footer>
     </div>
   );

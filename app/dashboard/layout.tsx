@@ -32,13 +32,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const defaultSiteId = sites[0]?.id || "";
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 flex flex-col font-sans selection:bg-cyan-500/20 selection:text-cyan-300">
-      <Suspense fallback={<div className="h-16 border-b border-zinc-800 bg-zinc-950" />}>
+    <div className="min-h-screen bg-canvas text-text flex flex-col font-sans">
+      <Suspense fallback={<div className="h-[72px] border-b border-border bg-surface/80" />}>
         <Header currentSiteId={defaultSiteId} sites={sites} />
       </Suspense>
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
-      <footer className="border-t border-zinc-900 py-6 text-center text-xs text-zinc-600 font-mono">
-        Spidy · Cookieless Web Analytics · Zero Fingerprinting
+      <footer className="border-t border-border py-6 text-center text-[12px] text-muted font-sans">
+        Spidy · Self-Hosted Privacy Analytics · Cookieless & No IP Storage
       </footer>
     </div>
   );

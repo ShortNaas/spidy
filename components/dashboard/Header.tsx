@@ -3,20 +3,26 @@
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Wordmark } from "@/components/ui/Wordmark";
+import { Tabs } from "@/components/ui/Tabs";
+import { Button } from "@/components/ui/Button";
+import { Chip } from "@/components/ui/Chip";
+import { Search, Settings, LogOut, Code, Plus } from "lucide-react";
 
 export interface HeaderProps {
-  currentSiteId: string;
-  sites: Array<{ id: string; domain: string }>;
+  currentSiteId?: string;
+  sites?: Array<{ id: string; domain: string }>;
+  isDemo?: boolean;
 }
 
 const DATE_PRESETS = [
-  { label: "24h", value: "24h" },
-  { label: "7d", value: "7d" },
-  { label: "30d", value: "30d" },
-  { label: "12mo", value: "12mo" },
+  { id: "24h", label: "24h" },
+  { id: "7d", label: "7d" },
+  { id: "30d", label: "30d" },
+  { id: "12mo", label: "12mo" },
 ];
 
-export function Header({ currentSiteId, sites }: HeaderProps) {
+export function Header({ currentSiteId = "", sites = [], isDemo = false }: HeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showEmbedModal, setShowEmbedModal] = useState(false);
@@ -67,172 +73,160 @@ export function Header({ currentSiteId, sites }: HeaderProps) {
   }
 
   return (
-    <header className="border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Left: Brand and Site switcher */}
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="flex items-center gap-2 text-white font-bold tracking-tight">
-            <span className="w-7 h-7 rounded-lg bg-cyan-950 border border-cyan-800/80 flex items-center justify-center text-cyan-400">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
+    <header className="border-b border-border bg-surface/80 backdrop-blur-md sticky top-0 z-40 transition-colors duration-150">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between gap-4">
+        {/* Left: Wordmark & Site Switcher */}
+        <div className="flex items-center gap-4 min-w-0">
+          <Wordmark href={isDemo ? "/demo" : "/dashboard"} />
+
+          {isDemo ? (
+            <span className="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-raised border border-border text-[12px] font-mono text-muted">
+              demo.spidy.dev
             </span>
-            <span className="text-base tracking-tight hidden sm:inline">Spidy</span>
-          </Link>
-
-          {/* Site switcher */}
-          <div className="relative">
-            <select
-              value={currentSiteId}
-              onChange={(e) => handleSiteChange(e.target.value)}
-              className="bg-zinc-900 border border-zinc-700/80 hover:border-zinc-600 rounded-lg px-2.5 py-1.5 text-xs font-mono text-zinc-200 outline-none cursor-pointer"
-            >
-              {sites.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.domain} ({s.id})
-                </option>
-              ))}
-              <option value="new">+ Add site...</option>
-            </select>
-          </div>
+          ) : (
+            sites.length > 0 && (
+              <div className="relative hidden sm:block">
+                <select
+                  value={currentSiteId}
+                  onChange={(e) => handleSiteChange(e.target.value)}
+                  className="bg-raised border border-border hover:border-border-hover rounded-full px-3.5 py-1.5 text-[12px] font-mono text-white outline-none cursor-pointer appearance-none pr-8 transition-colors duration-150"
+                  aria-label="Select active site"
+                >
+                  {sites.map((s) => (
+                    <option key={s.id} value={s.id} className="bg-surface text-white">
+                      {s.domain}
+                    </option>
+                  ))}
+                  <option value="new" className="bg-surface text-accent">
+                    + Add site...
+                  </option>
+                </select>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted text-[10px]">
+                  ▼
+                </span>
+              </div>
+            )
+          )}
         </div>
 
-        {/* Center: Date Range Presets */}
-        <div className="flex items-center bg-zinc-900/90 border border-zinc-800 rounded-lg p-0.5">
-          {DATE_PRESETS.map((p) => {
-            const isActive = currentRange === p.value;
-            return (
-              <button
-                key={p.value}
-                type="button"
-                onClick={() => updateQuery("range", p.value)}
-                className={`text-xs font-mono px-3 py-1 rounded-md transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-zinc-800 text-cyan-400 font-semibold shadow-xs"
-                    : "text-zinc-400 hover:text-zinc-200"
-                }`}
-              >
-                {p.label}
-              </button>
-            );
-          })}
+        {/* Center: Range Presets Tabs (Floating Pill Group) */}
+        <div className="flex justify-center">
+          <Tabs
+            tabs={DATE_PRESETS}
+            activeTab={currentRange}
+            onChange={(val) => updateQuery("range", val)}
+          />
         </div>
 
-        {/* Right: Embed snippet, gallery, settings, logout */}
+        {/* Right: 40px Circle Buttons (Search, Embed, Settings, Avatar/Logout) */}
         <div className="flex items-center gap-2">
-          {currentSiteId && (
-            <button
-              type="button"
+          <Button variant="icon" title="Search telemetry" aria-label="Search telemetry">
+            <Search size={16} />
+          </Button>
+
+          {!isDemo && currentSiteId && (
+            <Button
+              variant="icon"
               onClick={() => setShowEmbedModal(true)}
-              className="text-xs font-mono px-2.5 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors hidden md:inline-flex items-center gap-1.5 cursor-pointer"
+              title="Embed Tracker"
+              aria-label="Embed tracker script"
             >
-              <span>&lt;/&gt;</span>
-              <span>Embed</span>
-            </button>
+              <Code size={16} />
+            </Button>
           )}
 
-          <Link
-            href="/dashboard/sites/new"
-            className="text-xs font-mono px-2.5 py-1.5 rounded-lg border border-cyan-800/60 bg-cyan-950/40 text-cyan-300 hover:bg-cyan-900/40 transition-colors hidden sm:inline-flex items-center gap-1"
-          >
-            + Site
-          </Link>
+          {!isDemo && (
+            <>
+              <Link href="/dashboard/sites/new" title="Add New Site" className="hidden md:inline-flex">
+                <Button variant="icon" aria-label="Add new site">
+                  <Plus size={16} />
+                </Button>
+              </Link>
 
-          <Link
-            href="/dashboard/settings"
-            className="text-xs font-mono px-2.5 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 bg-zinc-900 text-zinc-300 transition-colors"
-          >
-            Settings
-          </Link>
+              <Link href="/dashboard/settings" title="Account Settings" className="hidden md:inline-flex">
+                <Button variant="icon" aria-label="Settings">
+                  <Settings size={16} />
+                </Button>
+              </Link>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            title="Log out"
-            className="text-xs font-mono px-2.5 py-1.5 rounded-lg text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
-          >
-            Logout
-          </button>
+              <Button
+                variant="icon"
+                onClick={handleLogout}
+                title="Log out"
+                aria-label="Log out"
+              >
+                <LogOut size={16} />
+              </Button>
+            </>
+          )}
+
+          {isDemo && (
+            <Link href="/register">
+              <Button variant="primary" size="sm">
+                Get started
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
       {/* Active filters pill bar */}
       {(currentCountry || currentPath || currentReferrer) && (
-        <div className="bg-zinc-900/60 border-t border-zinc-800/50 px-4 sm:px-6 lg:px-8 py-1.5 flex items-center gap-2 text-xs font-mono">
-          <span className="text-zinc-500">Filters:</span>
+        <div className="bg-raised/40 border-t border-border px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-2 text-[12px] font-sans">
+          <span className="text-muted">Active Filters:</span>
           {currentCountry && (
-            <span className="inline-flex items-center gap-1 bg-cyan-950/60 text-cyan-400 border border-cyan-800/50 px-2 py-0.5 rounded-md">
+            <Chip variant="live" onRemove={() => updateQuery("country", null)}>
               Country: {currentCountry}
-              <button
-                type="button"
-                onClick={() => updateQuery("country", null)}
-                className="hover:text-white cursor-pointer"
-              >
-                ×
-              </button>
-            </span>
+            </Chip>
           )}
           {currentPath && (
-            <span className="inline-flex items-center gap-1 bg-indigo-950/60 text-indigo-400 border border-indigo-800/50 px-2 py-0.5 rounded-md">
+            <Chip variant="accent" onRemove={() => updateQuery("path", null)}>
               Path: {currentPath}
-              <button
-                type="button"
-                onClick={() => updateQuery("path", null)}
-                className="hover:text-white cursor-pointer"
-              >
-                ×
-              </button>
-            </span>
+            </Chip>
           )}
           {currentReferrer && (
-            <span className="inline-flex items-center gap-1 bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 px-2 py-0.5 rounded-md">
+            <Chip variant="positive" onRemove={() => updateQuery("referrer", null)}>
               Referrer: {currentReferrer}
-              <button
-                type="button"
-                onClick={() => updateQuery("referrer", null)}
-                className="hover:text-white cursor-pointer"
-              >
-                ×
-              </button>
-            </span>
+            </Chip>
           )}
         </div>
       )}
 
-      {/* Embed snippet modal */}
+      {/* Embed script modal */}
       {showEmbedModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        >
+          <div className="bg-surface border border-border rounded-3xl p-6 max-w-lg w-full space-y-4 sheen relative z-10 shadow-2xl">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Embed Tracker Snippet</h3>
+              <h3 className="text-[16px] font-medium text-white">Embed Analytics Tracker</h3>
               <button
                 type="button"
                 onClick={() => setShowEmbedModal(false)}
-                className="text-zinc-400 hover:text-white text-lg font-mono cursor-pointer"
+                className="w-8 h-8 rounded-full bg-raised border border-border text-muted hover:text-white flex items-center justify-center cursor-pointer transition-colors"
+                aria-label="Close modal"
               >
-                ×
+                ✕
               </button>
             </div>
-            <p className="text-xs text-zinc-400">
-              Add this lightweight (&lt;1 KB), cookieless tag to your website header or before
-              &lt;/body&gt;:
+
+            <p className="text-[13px] text-muted leading-relaxed font-sans">
+              Add this lightweight script tag (&lt;1 KB) to your website&apos;s &lt;head&gt; or &lt;body&gt;. Zero cookies, no device fingerprints, raw IPs never logged.
             </p>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 font-mono text-xs text-cyan-300 break-all select-all">
+
+            <div className="bg-subtle border border-border rounded-xl p-3 font-mono text-[12px] text-white break-all select-all">
               {embedSnippet}
             </div>
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={copySnippet}
-                className="bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-semibold px-4 py-2 rounded-lg font-mono transition-colors cursor-pointer"
-              >
-                {copied ? "Copied!" : "Copy Snippet"}
-              </button>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="secondary" onClick={() => setShowEmbedModal(false)}>
+                Done
+              </Button>
+              <Button variant="primary" onClick={copySnippet}>
+                {copied ? "Copied to Clipboard!" : "Copy Snippet"}
+              </Button>
             </div>
           </div>
         </div>

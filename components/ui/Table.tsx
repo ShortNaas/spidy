@@ -18,7 +18,7 @@ export interface TableProps<T> {
   getShareValue?: (row: T) => number; // 0 to 1
 }
 
-export function Table<T extends Record<string, unknown>>({
+export function Table<T>({
   columns,
   data,
   keyExtractor,
@@ -64,7 +64,7 @@ export function Table<T extends Record<string, unknown>>({
                 className="group relative hover:bg-raised/80 transition-colors duration-150"
               >
                 {columns.map((col) => {
-                  const content = col.render ? col.render(row, rowIdx) : String(row[col.key] ?? "");
+                  const content = col.render ? col.render(row, rowIdx) : String((row as Record<string, unknown>)[col.key] ?? "");
                   return (
                     <td
                       key={col.key}
