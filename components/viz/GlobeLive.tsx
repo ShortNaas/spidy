@@ -114,14 +114,14 @@ export function GlobeLive({
     <div
       className={
         embedded
-          ? `relative flex flex-col items-center justify-center w-full ${className}`
-          : `relative flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 sheen overflow-hidden shadow-[0_0_24px_rgba(255,255,255,0.25)] ${className}`
+          ? `relative flex flex-col items-center justify-between w-full h-full ${className}`
+          : `relative flex flex-col items-center justify-between bg-surface border border-border rounded-3xl p-6 sm:p-7 sheen overflow-hidden shadow-[0_0_24px_rgba(255,255,255,0.25)] ${className}`
       }
       role="region"
       aria-label="Real-time planetary globe telemetry"
     >
       {/* Live Badge and Beacon count */}
-      <div className={embedded ? "w-full flex items-center justify-between mb-2" : "absolute top-5 left-5 z-10 flex items-center gap-2.5"}>
+      <div className="w-full flex items-center justify-between mb-3 px-1 z-10 shrink-0">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
@@ -129,7 +129,7 @@ export function GlobeLive({
           </span>
           <span className="font-sans text-[13px] font-medium text-white">Live Global Traffic</span>
         </div>
-        <span className="font-mono text-[11px] tabular-nums text-muted bg-raised px-2 py-0.5 rounded-full border border-border">
+        <span className="font-mono text-[11px] tabular-nums text-muted bg-raised px-2.5 py-0.5 rounded-full border border-border">
           {markers.length} {markers.length === 1 ? "beacon" : "beacons"}
         </span>
       </div>
@@ -139,7 +139,7 @@ export function GlobeLive({
         Interactive 3D globe displaying {markers.length} real-time active visitor locations.
       </div>
 
-      <div className="w-full max-w-[420px] aspect-square flex items-center justify-center mt-2">
+      <div className="relative w-full flex-1 max-w-[360px] aspect-square flex items-center justify-center">
         <canvas
           ref={canvasRef}
           style={{ width: "100%", height: "100%", contain: "layout paint size" }}

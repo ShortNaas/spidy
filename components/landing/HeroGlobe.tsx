@@ -20,7 +20,7 @@ const GlobeLive = dynamic(
  */
 export function HeroGlobe() {
   return (
-    <div className="relative w-full max-w-[440px] aspect-square mx-auto flex items-center justify-center rounded-4xl bg-surface border border-border p-4 sheen overflow-hidden shadow-[0_0_24px_rgba(255,255,255,0.25)]">
+    <div className="relative w-full max-w-[440px] aspect-square mx-auto flex flex-col justify-between rounded-4xl bg-surface border border-border p-6 sm:p-7 sheen overflow-hidden shadow-[0_0_24px_rgba(255,255,255,0.25)]">
       <GlobeLive markers={demoData.markers} embedded />
     </div>
   );

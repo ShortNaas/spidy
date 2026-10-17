@@ -392,3 +392,19 @@
   - `pnpm test:e2e`: 11/11 Playwright E2E tests passed.
   - `python3 scripts/verify-pixels.py`: 0 violating pixels across all 10 viewport screenshots.
 
+## Impeccable Polish: Hero Globe Layout & Header Clearance
+
+- **What was built**:
+  - Resolved border collision and cramped layout on the 3D globe card (`components/landing/HeroGlobe.tsx` and `components/viz/GlobeLive.tsx`).
+  - Increased hero globe container padding from `p-4` (16px) to `p-6 sm:p-7` (24px mobile, 28px desktop) and switched layout to `flex flex-col justify-between`.
+  - Relocated and standardized the "Live Global Traffic" and beacon counter header to `w-full flex items-center justify-between mb-3 px-1 z-10 shrink-0`, moving it safely away from the 32px rounded-4xl corner curvature.
+  - Resized the globe canvas wrapper to `relative w-full flex-1 max-w-[360px] aspect-square flex items-center justify-center` preventing vertical overflow displacement.
+- **How verified**:
+  - Visual verification via Playwright screenshot crops (`screenshots/landing-1440.png`, `screenshots/dashboard-1440.png`): confirmed generous ~28px breathing room from card borders, 0 collision with rounded corner curves.
+  - `python3 scripts/verify-pixels.py`: 0 violating pixels across all 10 viewport screenshots (100% PASSED).
+  - `pnpm lint`: 0 errors, 0 warnings.
+  - `pnpm test`: 5/5 unit tests passed.
+  - `pnpm test:e2e`: 11/11 Playwright E2E tests passed.
+  - `pnpm build`: Next.js Turbopack production build succeeded.
+
+
