@@ -105,7 +105,7 @@ export function DemoDashboardClient() {
         bounceRate: 40,
         topCountry: "United States",
       },
-      deltas: { viewsPct: 18, visitorsPct: 16, bounceRatePct: -4 },
+      deltas: { viewsPct: 18, visitorsPct: -8.4, bounceRatePct: -4 },
     }),
     [m]
   );

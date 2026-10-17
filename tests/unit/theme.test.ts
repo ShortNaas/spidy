@@ -9,6 +9,7 @@ describe("Theme Tokens & Data Ramps", () => {
     expect(tokens.colors.subtle).toBe("#1c1c1c");
     expect(tokens.colors.accent).toBe("#fb5c34");
     expect(tokens.colors.positive).toBe("#86d4b2");
+    expect(tokens.colors.negative).toBe("#f27d93");
     expect(tokens.colors.danger).toBe("#f43f5e");
     expect(tokens.shadows.liveHalo).toBe("0 0 24px rgba(255, 255, 255, 0.25)");
   });

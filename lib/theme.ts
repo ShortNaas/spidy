@@ -103,6 +103,7 @@ export const tokens = {
     accentMid: "#c4472a",
     accentDeep: "#7a2a16",
     positive: "#86d4b2",
+    negative: "#f27d93",
     info: "#2861eb",
     danger: "#f43f5e",
   },

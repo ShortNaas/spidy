@@ -86,9 +86,12 @@ export default function DevUiGalleryPage() {
           <Chip variant="neutral" onRemove={() => {}}>
             Dismissible
           </Chip>
-          <DeltaBadge value={18.4} isPositiveGood={true} />
-          <DeltaBadge value={-6.2} isPositiveGood={true} />
+          <DeltaBadge value={18.4} />
+          <DeltaBadge value={-6.2} />
           <DeltaBadge value={0} />
+          <DeltaBadge value={null} isPreviousZero />
+          <DeltaBadge value={null} />
+          <DeltaBadge value={-4} invert />
         </div>
       </section>
 

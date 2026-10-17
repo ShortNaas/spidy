@@ -1,10 +1,12 @@
 import React from "react";
+import { DeltaBadge } from "./DeltaBadge";
 
 export interface KpiCardProps {
   label: string;
   value: string | number;
   deltaPct?: number | null;
-  isPositiveGood?: boolean;
+  invertDelta?: boolean;
+  isPositiveGood?: boolean; // legacy prop compatibility: if false, invert is true
   isLiveValue?: boolean;
   subtext?: string;
   sparklineData?: number[];
@@ -14,43 +16,22 @@ export interface KpiCardProps {
 /**
  * Spidy v3 KPI Card:
  * Label (muted 13px), value (Poppins 300, 40px; live values in mono),
- * delta pill (mint or rose tinted background at 15%, text in same hue),
+ * delta pill via shared DeltaBadge,
  * optional 28px white sparkline with ring-dot end marker.
  */
 export function KpiCard({
   label,
   value,
   deltaPct,
+  invertDelta,
   isPositiveGood = true,
   isLiveValue = false,
   subtext,
   sparklineData,
   className = "",
 }: KpiCardProps) {
-  // Delta pill calculation
-  let deltaNode: React.ReactNode = null;
-  if (deltaPct !== undefined && deltaPct !== null) {
-    const isGood = isPositiveGood ? deltaPct >= 0 : deltaPct <= 0;
-    const sign = deltaPct > 0 ? "+" : "";
-    const isZero = deltaPct === 0;
-
-    let deltaBg = "bg-white/5 border-border text-muted";
-    if (!isZero) {
-      if (isGood) {
-        deltaBg = "bg-positive/15 border-positive/30 text-positive";
-      } else {
-        deltaBg = "bg-danger/15 border-danger/30 text-danger";
-      }
-    }
-
-    deltaNode = (
-      <span
-        className={`inline-flex items-center gap-0.5 px-2.5 py-0.5 rounded-full border text-[11px] font-mono tabular-nums font-medium ${deltaBg}`}
-      >
-        <span>{sign}{deltaPct}%</span>
-      </span>
-    );
-  }
+  // Determine if delta should be inverted (lower is better, e.g. bounce rate)
+  const invert = invertDelta ?? !isPositiveGood;
 
   // Mini sparkline (28px high) with ring-dot end marker
   let sparklineSvg: React.ReactNode = null;
@@ -95,25 +76,29 @@ export function KpiCard({
     >
       <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
         <span className="font-sans text-[13px] text-muted font-normal leading-none">{label}</span>
-        {deltaNode}
+        {deltaPct !== undefined && <DeltaBadge value={deltaPct} invert={invert} />}
       </div>
 
-      <div className="relative z-10 flex items-baseline justify-between gap-3 mt-1">
-        <div
-          className={`text-[40px] leading-none text-white tracking-tight ${
-            isLiveValue ? "font-mono font-medium tabular-nums" : "font-sans font-light"
+      <div className="relative z-10 flex items-baseline justify-between gap-4">
+        <span
+          className={`text-white tracking-tight ${
+            isLiveValue
+              ? "font-mono font-medium text-[28px] tabular-nums"
+              : "font-sans font-light text-[40px] leading-none"
           }`}
         >
           {value}
-        </div>
+        </span>
         {sparklineSvg}
       </div>
 
       {subtext && (
-        <div className="relative z-10 mt-3 pt-2 font-mono text-[11px] text-faint">
+        <span className="relative z-10 font-mono text-[11px] text-faint mt-3 block leading-tight">
           {subtext}
-        </div>
+        </span>
       )}
     </div>
   );
 }
+
+export default KpiCard;

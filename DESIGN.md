@@ -16,6 +16,7 @@ colors:
   accent-bright: "#ff7a57"
   accent-deep: "#7a2a16"
   positive: "#86d4b2"         # NEXORA mint swatch [ASSUMED: label in the image reads #66FE4C but the swatch renders softer]
+  negative: "#f27d93"
   info: "#2861eb"             # NEXORA blue
   danger: "#f43f5e"
 typography:
@@ -140,8 +141,9 @@ Anti-references: no light mode, no pastel gradients, no colored gradients of any
   - *Deep (`#7a2a16`):* subdued badges and the low end of the ramp.
 - **Live signal (white):** real-time elements (globe blips, live counter dot, 30-minute pulse line, the "waiting for first pageview" indicator) use `text` white with a pulsing ring and the white live halo. Focus rings are white.
 - **Positive, Mint (`#86d4b2`) [ASSUMED swatch]:** positive deltas, healthy states, "next page" flows.
+- **Negative, Soft Rose (`#f27d93`):** negative deltas only; same lightness as Mint.
 - **Info, Blue (`#2861eb`):** extra categorical series and links on marketing pages. Never a status color.
-- **Danger, Rose (`#f43f5e`):** negative deltas, errors, destructive actions only.
+- **Danger, Rose (`#f43f5e`):** errors and destructive actions only.
 
 ### Data ramps
 - **Ember volume ramp (heatmaps, choropleth, bars):** step 0 empty (`#161616` with hairline), step 1 hatched ember at 35%, step 2 hatched ember at 75%, step 3 solid `#c4472a`, step 4 solid `#fb5c34`, peak `#ff7a57`.
@@ -151,7 +153,7 @@ Anti-references: no light mode, no pastel gradients, no colored gradients of any
 - **Categorical (streamgraph, max 8):** ember, white, mint, blue, then gray steps `#bdbdbd`, `#8d8d8d`, `#5f5f5f`. Series beyond the fourth also use hatch to stay distinguishable.
 
 ### Named Rules
-**The Status Rule.** White with motion means live. Mint means positive. Rose means harm. Orange is emphasis and volume, never an error. Blue is never a status.
+**The Status Rule.** White with motion means live. Mint means positive deltas. Soft rose means negative deltas. Rose/danger is errors and destructive actions only. Orange is emphasis and volume, never an error. Blue is never a status.
 
 **The One Hot Thing Rule.** At most one solid-orange filled UI element (button or highlighted series) competes per viewport. Hatched orange data does not count.
 

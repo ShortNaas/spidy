@@ -19,7 +19,7 @@ import { Tag } from "@/components/ui/Tag";
 const MOCK_KPIS = {
   current: { views: 48520, visitors: 19430, bounceRate: 38, topCountry: "United States" },
   previous: { views: 41200, visitors: 16800, bounceRate: 42, topCountry: "United States" },
-  deltas: { viewsPct: 18, visitorsPct: 16, bounceRatePct: -4 },
+  deltas: { viewsPct: 18, visitorsPct: -8.4, bounceRatePct: -4 },
 };
 
 const MOCK_PULSE = {

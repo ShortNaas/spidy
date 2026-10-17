@@ -428,5 +428,30 @@
   - `python3 scripts/verify-pixels.py`: 0 violating pixels across all 10 viewport screenshots (100% PASSED).
   - `pnpm build`: Next.js Turbopack production build compiled successfully.
 
+## Impeccable Polish: Delta Badges (Percentage Change Indicators)
 
+- **What was built**:
+  - Re-architected and standardized all percentage change indicators through a single shared primitive: `components/ui/DeltaBadge.tsx`.
+  - Added new soft rose color token `--color-negative: #f27d93;` in `app/globals.css`, `@theme inline`, and `lib/theme.ts` (`tokens.colors.negative`) with identical lightness and softness as Mint (`#86d4b2`). Updated `DESIGN.md` (frontmatter colors, Colors list, and Status Rule: Mint for positive deltas, Soft Rose for negative deltas, Danger `#f43f5e` for errors and destructive actions only).
+  - Enforced real mathematical minus sign U+2212 (`\u2212` / `−`) instead of ASCII hyphen-minus across all negative values.
+  - Formatted deltas with `Intl.NumberFormat`: 1 decimal place below 100%, 0 decimal places at 100% and above.
+  - Handled neutral states: `value === 0` renders neutral pill with flat dash icon and `0%`; `value === null` / non-finite renders neutral pill with `–` (`\u2013`); previous period 0 renders `New` pill. Safe against `NaN`, `Infinity`, or `+∞%`.
+  - Implemented `invert?: boolean` for bounce-rate and other "lower is better" metrics: a decrease renders positive styling (Mint) and an increase renders negative styling (Soft Rose), while maintaining true directional arrows (`↓` for decrease, `↑` for increase).
+  - Built full accessibility support: dynamic `aria-label` describing the change direction and magnitude (e.g. `"Up 18 percent versus previous period"`, `"Down 8.4 percent versus previous period"`, `"0 percent change versus previous period"`).
+  - Replaced inline custom badge rendering in `components/ui/KpiCard.tsx` with `<DeltaBadge value={deltaPct} invert={invert} />`.
+  - Configured seeded demo telemetry in `components/demo/DemoDashboardClient.tsx` to `{ viewsPct: 18, visitorsPct: -8.4, bounceRatePct: -4 }` so positive, negative, and neutral states render side by side on `/demo`.
+  - Updated showcase pages `app/dev/ui/page.tsx` and `components/viz/VizGalleryClient.tsx` to exhibit all delta states.
 
+- **How verified**:
+  - **Unit Tests (`tests/unit/delta-badge.test.tsx` & `tests/unit/theme.test.ts`)**: 14/14 tests passing. Validates positive (+), negative (U+2212), zero, null, previous-zero ("New"), non-finite numbers, invert flag in both directions, rounding rules at 0.04, 12.46, 100, and 1234.5, and theme token existence.
+  - **WCAG 2.1 Contrast Ratios**:
+    - Mint (`#86d4b2`) on 15% Mint over Surface (`#0f0f0f`): **8.22:1** (over Raised `#161616`: **7.56:1**) -> Pass AAA.
+    - Soft Rose (`#f27d93`) on 15% Rose over Surface (`#0f0f0f`): **5.97:1** (over Raised `#161616`: **5.57:1**) -> Pass AA.
+    - Neutral (`#8d8d8d`) on Raised (`#161616`): **5.45:1** -> Pass AA.
+  - **Playwright E2E Tests (`tests/e2e/delta-badges.spec.ts`)**:
+    - Verified on `/demo` at 390px and 1440px viewports.
+    - Computed CSS color assertions: positive matches mint `rgb(134, 212, 178)`, negative matches soft rose `rgb(242, 125, 147)`, neutral matches muted `rgb(141, 141, 141)`.
+    - Captured side-by-side screenshots: `screenshots/delta-badges-390.png` and `screenshots/delta-badges-1440.png`.
+  - **Pixel & Hue Verification (`scripts/verify-pixels.py`)**: 0 violating pixels in hue 160°–210° across all viewport screenshots (100% PASSED).
+  - **Grep Audit**: 0 hardcoded delta styles outside `DeltaBadge.tsx`, 0 instances of `green`, `red`, `emerald`, or raw hex in delta code.
+  - **CI & Build**: `pnpm lint`, `pnpm test`, and `pnpm build` passed with 0 errors across all 26 routes.
