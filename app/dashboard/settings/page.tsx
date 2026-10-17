@@ -3,6 +3,10 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft, KeyRound, AlertTriangle } from "lucide-react";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -99,150 +103,133 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4 space-y-8">
+    <div className="max-w-2xl mx-auto py-10 px-4 sm:px-6 space-y-8 font-sans">
       <div>
         <Link
           href="/dashboard"
-          className="text-xs font-mono text-zinc-400 hover:text-zinc-200 transition-colors inline-flex items-center gap-1 mb-4"
+          className="text-[13px] font-sans text-muted hover:text-white transition-colors duration-150 inline-flex items-center gap-1.5 mb-4 group"
         >
-          ← Back to Dashboard
+          <ArrowLeft className="w-4 h-4 transition-transform duration-150 group-hover:-translate-x-0.5" />
+          <span>Back to dashboard</span>
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight text-white">Account Settings</h1>
-        <p className="text-xs text-zinc-400 font-mono mt-1">
+        <h1 className="text-2xl font-semibold tracking-tight text-white">Account Settings</h1>
+        <p className="text-[13px] text-muted mt-1">
           Manage your account credentials and security preferences.
         </p>
       </div>
 
       {/* Change Password Card */}
-      <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-xl space-y-4">
-        <h2 className="text-sm font-semibold text-white font-mono uppercase tracking-wider">
-          Change Password
-        </h2>
-        <p className="text-xs text-zinc-400">
-          Updating your password will automatically sign out all other active sessions across your devices.
-        </p>
+      <Card
+        icon={<KeyRound className="w-5 h-5 text-muted" />}
+        title="Change password"
+        subtitle="Updating your password will sign out other active sessions"
+      >
+        <form onSubmit={handlePasswordChange} className="space-y-4 mt-2">
+          {pwError && (
+            <div
+              className="bg-danger/10 border border-danger/30 text-danger text-[12px] px-3.5 py-2.5 rounded-xl font-mono leading-relaxed"
+              role="alert"
+            >
+              {pwError}
+            </div>
+          )}
 
-        {pwError && (
-          <div
-            className="bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs px-3 py-2 rounded-lg font-mono"
-            role="alert"
-          >
-            {pwError}
-          </div>
-        )}
+          {pwSuccess && (
+            <div
+              className="bg-positive/10 border border-positive/30 text-positive text-[12px] px-3.5 py-2.5 rounded-xl font-mono leading-relaxed"
+              role="status"
+            >
+              {pwSuccess}
+            </div>
+          )}
 
-        {pwSuccess && (
-          <div
-            className="bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 text-xs px-3 py-2 rounded-lg font-mono"
-            role="status"
-          >
-            {pwSuccess}
-          </div>
-        )}
-
-        <form onSubmit={handlePasswordChange} className="space-y-4">
-          <div className="space-y-1.5">
-            <label htmlFor="current-pw" className="block text-xs font-mono text-zinc-300">
-              Current Password
-            </label>
-            <input
-              id="current-pw"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-700/80 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none transition-all font-mono"
-            />
-          </div>
+          <Input
+            id="current-pw"
+            label="Current password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label htmlFor="new-pw" className="block text-xs font-mono text-zinc-300">
-                New Password <span className="text-[10px] text-zinc-500">(min 10)</span>
-              </label>
-              <input
-                id="new-pw"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={10}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-700/80 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none transition-all font-mono"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="confirm-pw" className="block text-xs font-mono text-zinc-300">
-                Confirm New Password
-              </label>
-              <input
-                id="confirm-pw"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={10}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-700/80 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none transition-all font-mono"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={pwLoading}
-            className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs tracking-wide uppercase px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 font-mono cursor-pointer"
-          >
-            {pwLoading ? "Updating..." : "Update Password"}
-          </button>
-        </form>
-      </div>
-
-      {/* Danger Zone: Delete Account */}
-      <div className="bg-rose-950/10 border border-rose-900/40 rounded-2xl p-6 shadow-xl space-y-4">
-        <h2 className="text-sm font-semibold text-rose-400 font-mono uppercase tracking-wider">
-          Danger Zone: Delete Account
-        </h2>
-        <p className="text-xs text-zinc-400 leading-relaxed">
-          Permanently delete your account, your registered sites, all tracking sessions, and all collected analytics events. This action cannot be undone.
-        </p>
-
-        {delError && (
-          <div
-            className="bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs px-3 py-2 rounded-lg font-mono"
-            role="alert"
-          >
-            {delError}
-          </div>
-        )}
-
-        <form onSubmit={handleDeleteAccount} className="space-y-4">
-          <div className="space-y-1.5">
-            <label htmlFor="confirm-email" className="block text-xs font-mono text-zinc-300">
-              Type your email address to confirm deletion
-            </label>
-            <input
-              id="confirm-email"
-              type="email"
+            <Input
+              id="new-pw"
+              label="New password"
+              type="password"
+              autoComplete="new-password"
               required
-              value={confirmEmail}
-              onChange={(e) => setConfirmEmail(e.target.value)}
-              placeholder="user@example.com"
-              className="w-full bg-zinc-900 border border-rose-900/50 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none transition-all font-mono"
+              minLength={10}
+              hint="Minimum 10 characters"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+
+            <Input
+              id="confirm-pw"
+              label="Confirm new password"
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={10}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
 
-          <button
+          <Button
             type="submit"
-            disabled={delLoading}
-            className="bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs tracking-wide uppercase px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 font-mono cursor-pointer"
+            variant="primary"
+            disabled={pwLoading}
+            className="cursor-pointer"
           >
-            {delLoading ? "Deleting Account..." : "Permanently Delete Account"}
-          </button>
+            {pwLoading ? "Updating..." : "Update password"}
+          </Button>
         </form>
-      </div>
+      </Card>
+
+      {/* Danger Zone: Delete Account */}
+      <Card
+        className="border-danger/30"
+        icon={<AlertTriangle className="w-5 h-5 text-danger" />}
+        title="Delete account"
+        subtitle="Permanently remove your account, sites, and analytics events"
+      >
+        <form onSubmit={handleDeleteAccount} className="space-y-4 mt-2">
+          <p className="text-[13px] text-muted leading-relaxed">
+            Permanently delete your account, your registered sites, all tracking sessions, and all collected analytics events. This action cannot be undone.
+          </p>
+
+          {delError && (
+            <div
+              className="bg-danger/10 border border-danger/30 text-danger text-[12px] px-3.5 py-2.5 rounded-xl font-mono leading-relaxed"
+              role="alert"
+            >
+              {delError}
+            </div>
+          )}
+
+          <Input
+            id="confirm-email"
+            label="Type your email address to confirm deletion"
+            type="email"
+            required
+            value={confirmEmail}
+            onChange={(e) => setConfirmEmail(e.target.value)}
+            placeholder="user@example.com"
+          />
+
+          <Button
+            type="submit"
+            variant="danger"
+            disabled={delLoading}
+            className="cursor-pointer"
+          >
+            {delLoading ? "Deleting account..." : "Permanently delete account"}
+          </Button>
+        </form>
+      </Card>
     </div>
   );
 }

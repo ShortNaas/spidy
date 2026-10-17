@@ -284,6 +284,13 @@
     - *Adding illustrative graphics/icons to each privacy card*: Skipped because DESIGN.md explicitly mandates: "four small cards with one plain sentence each (true statements only). Nothing else visual."
     - *Adding background colored gradient or mesh*: Skipped because DESIGN.md strictly enforces "The No Colored Gradient Rule" (only grayscale sheen, beam, and dot-grid).
     - *Adding multiple orange accent buttons*: Skipped because DESIGN.md strictly enforces "The One Hot Thing Rule" (`Open live demo` is the single accent element).
+- **Step 7: Auth, Settings, Add-Site**:
+  - Restyled `app/login/page.tsx` and `components/auth/RegisterForm.tsx` as centered 420px cards on Canvas (`bg-canvas text-text`) with 32px radius (`rounded-4xl`), hairline borders, `.sheen`, `.dotgrid` backdrop, single `.beam`, `Wordmark` on top, full-width primary pill buttons (`Button` variant `primary`), and inline rose error blocks (`bg-danger/10 border-danger/30 text-danger`).
+  - Restyled `app/dashboard/sites/new/page.tsx` using `Card`, `Input`, and `Button` primitives; tracking snippet displayed in Raised block (`bg-raised border border-border text-live`) with mono text and Copy button with Lucide icons; connection verification displays live-cyan pulsing indicator (`bg-live animate-ping`).
+  - Restyled `app/dashboard/settings/page.tsx` strictly using shared primitives (`Card`, `Input`, `Button`) for both password updates and danger zone account deletion.
+  - Restyled `app/privacy/page.tsx` using `Wordmark`, `Tag`, tokenized colors, and clean minimal layout.
+  - Verification: `pnpm lint`, `pnpm test`, and `pnpm build` passed with 0 errors across 26 routes.
+
 
 
 
