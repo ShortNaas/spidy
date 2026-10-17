@@ -8,7 +8,7 @@ export interface DonutChartProps {
   subtext?: string;
   size?: number;
   strokeWidth?: number;
-  color?: "ember" | "white" | "live" | "mint";
+  color?: "ember" | "white" | "mint";
   className?: string;
 }
 
@@ -33,7 +33,6 @@ export function DonutChart({
 
   let strokeColor: string = tokens.colors.accent;
   if (color === "white") strokeColor = tokens.colors.text;
-  if (color === "live") strokeColor = tokens.colors.live;
   if (color === "mint") strokeColor = tokens.colors.positive;
 
   return (

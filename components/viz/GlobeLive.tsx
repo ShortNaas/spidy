@@ -53,7 +53,7 @@ export function GlobeLive({
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Cobe WebGL globe configuration per DESIGN.md:
-    // Pure neutral gray landmass [0.15, 0.15, 0.15], cyan live blips [0.133, 0.827, 0.933]
+    // Pure neutral gray landmass [0.15, 0.15, 0.15], white live blips [1, 1, 1]
     const globe = createGlobe(canvasRef.current, {
       devicePixelRatio: 2,
       width: width * 2,
@@ -65,7 +65,7 @@ export function GlobeLive({
       mapSamples: 16000,
       mapBrightness: 6,
       baseColor: [0.15, 0.15, 0.15],
-      markerColor: [0.133, 0.827, 0.933], // Live Orbital Cyan
+      markerColor: [1, 1, 1], // Live White
       glowColor: [0.08, 0.08, 0.08],
       markers: cobeMarkers,
     });
@@ -102,7 +102,7 @@ export function GlobeLive({
         aria-busy="true"
         aria-label="Loading realtime globe"
       >
-        <div className="w-48 h-48 rounded-full border border-live/20 border-t-live animate-spin" />
+        <div className="w-48 h-48 rounded-full border border-white/20 border-t-white animate-spin" />
         <span className="absolute bottom-6 text-xs text-muted font-mono tabular-nums">
           Initializing 3D coordinates...
         </span>
@@ -115,7 +115,7 @@ export function GlobeLive({
       className={
         embedded
           ? `relative flex flex-col items-center justify-center w-full ${className}`
-          : `relative flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 sheen overflow-hidden shadow-[0_0_24px_rgba(34,211,238,0.15)] ${className}`
+          : `relative flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 sheen overflow-hidden shadow-[0_0_24px_rgba(255,255,255,0.25)] ${className}`
       }
       role="region"
       aria-label="Real-time planetary globe telemetry"
@@ -124,8 +124,8 @@ export function GlobeLive({
       <div className={embedded ? "w-full flex items-center justify-between mb-2" : "absolute top-5 left-5 z-10 flex items-center gap-2.5"}>
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-live opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-live" />
+            <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
           </span>
           <span className="font-sans text-[13px] font-medium text-white">Live Global Traffic</span>
         </div>

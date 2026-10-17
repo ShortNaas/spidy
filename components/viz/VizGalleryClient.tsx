@@ -205,14 +205,14 @@ export function VizGalleryClient() {
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div id="viz-globe-live" className="lg:col-span-2 space-y-3">
             <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
-              2. Globe Live (Pure Gray Landmass &amp; Live Cyan Blips)
+              2. Globe Live (Pure Gray Landmass &amp; Live White Blips)
             </h2>
             <GlobeLive markers={MOCK_MARKERS} loading={loadingToggle} />
           </div>
 
           <div id="viz-pulse-live" className="space-y-3">
             <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
-              3. Pulse Live (1.5px Cyan Stroke &amp; Ring-Dot End Marker)
+              3. Pulse Live (1.5px White Stroke &amp; Ring-Dot End Marker)
             </h2>
             <PulseLive
               activeVisitors={MOCK_PULSE.activeVisitors}

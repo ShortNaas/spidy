@@ -92,8 +92,8 @@ export function PulseLive({
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-live opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-live" />
+              <span className="animate-live-pulse absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
             </span>
             <span className="font-sans text-[13px] font-medium text-white">Active Now</span>
           </div>
@@ -105,7 +105,7 @@ export function PulseLive({
 
         <div className="text-right">
           <div className="font-sans text-[12px] text-muted">Past 30 min</div>
-          <div className="text-xl font-mono font-semibold tabular-nums text-live mt-0.5">
+          <div className="text-xl font-mono font-semibold tabular-nums text-white mt-0.5">
             {totalViews.toLocaleString()}
           </div>
           <div className="text-[11px] font-mono text-faint mt-1">total views</div>
@@ -117,7 +117,7 @@ export function PulseLive({
         Active visitors now: {activeVisitors}. Total views in past 30 minutes: {totalViews}.
       </div>
 
-      {/* Per-minute 1.5px live cyan sparkline */}
+      {/* Per-minute 1.5px live white sparkline */}
       <div className="relative mt-4 w-full">
         <svg
           viewBox={`0 0 ${width} ${height}`}
@@ -136,12 +136,12 @@ export function PulseLive({
             strokeWidth="1"
           />
 
-          {/* Stroke path: 1.5px live cyan */}
+          {/* Stroke path: 1.5px live white */}
           {points.pathD && (
             <path
               d={points.pathD}
               fill="none"
-              stroke={tokens.colors.live}
+              stroke={tokens.colors.text}
               strokeWidth={1.5}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -161,7 +161,7 @@ export function PulseLive({
             />
           ))}
 
-          {/* End marker: ring-dot (hollow circle with live cyan border) */}
+          {/* End marker: ring-dot with pulsing white end dot */}
           {lastPoint && hoveredIndex === null && (
             <g>
               <circle
@@ -169,10 +169,19 @@ export function PulseLive({
                 cy={lastPoint.y}
                 r={4}
                 fill={tokens.colors.surface}
-                stroke={tokens.colors.live}
+                stroke={tokens.colors.text}
                 strokeWidth={1.5}
               />
-              <circle cx={lastPoint.x} cy={lastPoint.y} r={1.5} fill={tokens.colors.live} />
+              <circle cx={lastPoint.x} cy={lastPoint.y} r={1.5} fill={tokens.colors.text} />
+              <circle
+                cx={lastPoint.x}
+                cy={lastPoint.y}
+                r={4}
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.75)"
+                strokeWidth={1}
+                className="animate-live-pulse"
+              />
             </g>
           )}
 
@@ -193,7 +202,7 @@ export function PulseLive({
                 cy={activePoint.y}
                 r={4.5}
                 fill={tokens.colors.surface}
-                stroke={tokens.colors.live}
+                stroke={tokens.colors.text}
                 strokeWidth={2}
               />
               <circle cx={activePoint.x} cy={activePoint.y} r={2} fill={tokens.colors.text} />
