@@ -36,7 +36,10 @@ export function Card({
           <div className="flex items-center justify-between mb-5 gap-3">
             <div className="flex items-center gap-3 min-w-0">
               {icon && (
-                <div className="w-10 h-10 rounded-full bg-raised border border-border text-white flex items-center justify-center shrink-0">
+                <div
+                  className="w-10 h-10 rounded-full bg-raised border border-border text-white flex items-center justify-center shrink-0"
+                  aria-hidden="true"
+                >
                   {icon}
                 </div>
               )}

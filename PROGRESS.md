@@ -264,6 +264,14 @@
     - Added `embedded?: boolean` mode across all charts for seamless integration in `DashboardGrid`.
     - Added unit test suite `tests/unit/theme.test.ts` (4 tests) verifying color tokens, ramp ratios, and categorical hatching.
   - Verification: `pnpm lint`, `pnpm test`, and `pnpm build` all passed with 0 errors across 26 routes.
+- **Review Checkpoint 1: `/impeccable critique` (Dashboard)**:
+  - **Verdict**: Bespoke / Grounded. Strong Nielsen heuristic ratings (avg 3.7/4).
+  - **Accepted Improvements**: Added `aria-hidden="true"` to decorative header icon containers in `Card.tsx` to streamline screen reader linear navigation (Sam persona); confirmed keyboard dismissibility and `aria-label` tags across all controls in `Header.tsx`.
+  - **Skipped Impeccable Suggestions (DESIGN.md wins)**:
+    - *Multi-color / rainbow chart ramps*: Impeccable typically suggests distinctive saturated hues per metric. Skipped because DESIGN.md explicitly enforces "The Status Rule" (Orange is volume, Cyan is live, Mint is positive, Rose is harm) and "The No Colored Gradient Rule".
+    - *Smaller container border radius (e.g., 6-8px)*: Skipped because DESIGN.md explicitly mandates 24px (`rounded-3xl`) for cards/panels and 32px (`rounded-4xl`) for frames, keeping pills for compact clickables.
+    - *Secondary accent color*: Skipped because DESIGN.md strictly enforces "The One Hot Thing Rule" (at most one solid orange filled element competing per viewport).
+
 
 
 
