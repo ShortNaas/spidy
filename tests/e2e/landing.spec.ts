@@ -38,6 +38,7 @@ test.describe("Landing Page", () => {
   test("navigates from Open live demo button to /demo", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/");
+    await page.waitForLoadState("networkidle");
     await page.getByRole("link", { name: "Open live demo" }).first().click();
     await expect(page).toHaveURL(/\/demo/);
   });
@@ -45,6 +46,7 @@ test.describe("Landing Page", () => {
   test("navigates from Get started button to /register", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/");
+    await page.waitForLoadState("networkidle");
     await page.getByRole("link", { name: "Get started" }).first().click();
     await expect(page).toHaveURL(/\/register/);
   });

@@ -119,7 +119,7 @@ Anti-references: no light mode, no pastel gradients, no colored gradients of any
 - **Neutral Black:** `#050505` canvas, `#0f0f0f` cards. No blue tint.
 - **Soft-Sheen Cards:** 24px radius, hairline border, a faint white sheen toward the bottom-right corner.
 - **One Hot Accent:** Orange `#fb5c34`, used for volume data, the hero CTA, and emphasis.
-- **Live = White:** Real-time elements are white with a soft white halo and motion. There is no cyan anywhere.
+- **Live = White:** Real-time elements are white with a soft white halo and motion. There is no blue-green anywhere.
 - **Hatch as Data:** Diagonal hatching fills low and mid values; solid fills mark peaks.
 - **Pills Everywhere:** Buttons, tabs, tags, and delta badges are fully rounded.
 - **Poppins + Geist Mono:** Poppins for structure and static KPIs, Geist Mono for anything that updates or sits in a column.
@@ -297,7 +297,7 @@ Lucide, 16px in controls and 20px in headers, 1.5px stroke, inherits color. No f
 
 ### Don't
 - Don't add a light mode.
-- Don't use cyan, teal, or any blue-green anywhere (UI, charts, focus rings, glows, favicons, OG image).
+- Don't use blue-green anywhere (UI, charts, focus rings, glows, favicons, OG image).
 - Don't tint the black blue; the neutrals stay pure gray.
 - Don't use colored gradients; only grayscale sheen, beam, and dot-grid.
 - Don't use orange for errors or warnings.

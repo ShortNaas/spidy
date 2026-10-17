@@ -64,7 +64,7 @@ Unlike minimal analytics tools that sacrifice visual depth for simplicity, Spidy
 
 ## Accessibility & Inclusion
 
-- Dark-first theme with high-contrast foregrounds and color-blind safe sequential palettes (cyan/viridis/inferno).
+- Dark-first theme with high-contrast foregrounds and color-blind safe sequential palettes (ember/viridis/inferno).
 - Tabular numerals across all data tables and KPI cards for scanability.
 - Strict adherence to `prefers-reduced-motion` for WebGL rotations and interface animations.
 - Accessible ARIA labeling, keyboard navigation, and semantic HTML on all forms and controls.

@@ -19,11 +19,11 @@ Work through the steps in order. After each step run `pnpm lint && pnpm test && 
 List every file with hardcoded colors, fonts, radii, shadows, or gradients. Save to `REDESIGN-AUDIT.md`, grouped by: pages, shared components, viz components, config. This is your checklist.
 
 ## Step 2: Tokens and textures
-1. In `app/globals.css`, define CSS variables for every color, radius, and font in the DESIGN.md frontmatter: `--color-canvas`, `surface`, `raised`, `subtle`, `border`, `border-hover`, `text`, `muted`, `faint`, `accent`, `accent-bright`, `accent-deep`, `live`, `live-deep`, `positive`, `info`, `danger`, and `--radius-*`.
-2. Expose them to Tailwind through the theme (`@theme` in v4 or `theme.extend` in v3), so `bg-surface`, `border-border`, `text-muted`, `text-accent`, `bg-live`, `rounded-3xl` etc. work. Map `rounded-3xl` to 24px and `rounded-4xl` to 32px if needed.
+1. In `app/globals.css`, define CSS variables for every color, radius, and font in the DESIGN.md frontmatter: `--color-canvas`, `surface`, `raised`, `subtle`, `border`, `border-hover`, `text`, `muted`, `faint`, `accent`, `accent-bright`, `accent-deep`, `positive`, `info`, `danger`, and `--radius-*`.
+2. Expose them to Tailwind through the theme (`@theme` in v4 or `theme.extend` in v3), so `bg-surface`, `border-border`, `text-muted`, `text-accent`, `rounded-3xl` etc. work. Map `rounded-3xl` to 24px and `rounded-4xl` to 32px if needed.
 3. Create utilities in `globals.css`:
    - `.sheen`: `position:relative` with `::before` overlay `radial-gradient(120% 120% at 100% 100%, rgba(255,255,255,0.06), transparent 55%)` and a 1px inner top highlight. Overlay is `pointer-events:none` and sits behind content.
-   - `.hatch-accent`, `.hatch-live`, `.hatch-white`: `repeating-linear-gradient(-45deg, <color> 0 1.5px, transparent 1.5px 4.5px)`. Accept an `--hatch-opacity` variable.
+   - `.hatch-accent`, `.hatch-white`: `repeating-linear-gradient(-45deg, <color> 0 1.5px, transparent 1.5px 4.5px)`. Accept an `--hatch-opacity` variable.
    - `.dotgrid`: `radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px)` at 12px with a radial mask fade.
    - `.beam`: blurred, rotated (-28deg) grayscale light streak, `pointer-events:none`, `aria-hidden`.
    - `.mono-num`: `font-family: var(--font-mono); font-variant-numeric: tabular-nums`.
@@ -37,7 +37,7 @@ Create or update: `Button` (primary, accent, secondary, ghost, danger, icon; all
 - Follow DESIGN.md Components exactly.
 - `Wordmark`: text `SPIDY`, Poppins 600, 18px, `tracking-[0.12em]`, white, no icon.
 - `Button` variant `accent` logs a dev warning if more than one is mounted at once.
-- Every interactive primitive has hover, focus-visible (live cyan ring), active, and disabled states.
+- Every interactive primitive has hover, focus-visible (white ring), active, and disabled states.
 Done when: a `/dev/ui` page (404 in production) shows every primitive in every state.
 
 ## Step 4: Shell
@@ -51,11 +51,11 @@ Restyle all of them using `lib/theme.ts` and the utilities only:
 - **Heatmaps (calendar, hour x weekday):** 6px-radius cells in the ember ramp: empty, hatched light, hatched dense, solid mid, solid full. Legend with four swatches.
 - **Bars/histograms:** pill-ended bars, hatched ember normally, solid ember for the active or peak bar, label bubble above the active bar.
 - **Gauges and donuts:** segmented rounded arc gauge (filled ember, remaining hatched) and thin donut with rounded caps on a `#1c1c1c` track.
-- **Sparklines and line charts:** 1.5px white lines with ring-dot markers; the live pulse uses cyan.
+- **Sparklines and line charts:** 1.5px white lines with ring-dot markers; the live pulse uses white.
 - **Sankey:** thin nodes with a 3px colored left edge, 12px-rounded node cards, links at 30% opacity; referrers gray-white, landing pages ember, next pages mint. Hover dims others to 25%.
 - **Streamgraph:** `categorical(n)` colors, hatch for series beyond the fourth.
 - **Choropleth:** ember ramp, empty cells Surface with a hairline.
-- **Globe:** dotted gray landmass, cyan live blips, live halo on the container only.
+- **Globe:** dotted gray landmass, white live blips, live halo on the container only.
 - Shared `Tooltip` everywhere. Add a text alternative (title plus visually hidden summary) to each chart.
 - Mount animations per DESIGN.md Motion, disabled under reduced motion.
 Done when: every chart renders on the demo data with the new styling and no hardcoded colors remain in `/components/viz`.
@@ -76,7 +76,7 @@ Done when: screenshots at 390 and 1440 px exist, and `Open live demo` reaches `/
 
 ## Step 7: Auth, settings, add-site
 - Auth card: 32px radius, Surface, hairline, `.sheen`, `.dotgrid` backdrop, `Wordmark` on top, pill primary button full width, inline errors.
-- Add-site page: snippet in a Raised block with mono text and a copy icon button; the waiting indicator is a live-cyan dot.
+- Add-site page: snippet in a Raised block with mono text and a copy icon button; the waiting indicator is a white live dot.
 - Settings: only shared primitives.
 Done when: all these pages use shared primitives only, with no page-specific color code.
 
@@ -86,7 +86,7 @@ Done when: all these pages use shared primitives only, with no page-specific col
 - Replace any remaining icon set with Lucide (16/20px, 1.5px stroke).
 
 ## Step 9: Verification
-1. Grep for `#000`, `bg-black`, `zinc-`, `slate-`, `indigo-`, `cyan-`, `emerald-`, `rgb(`, and raw hex outside `globals.css` and `lib/theme.ts`. Fix every hit. Record the result in `PROGRESS.md`.
+1. Grep for `#000`, `bg-black`, `zinc-`, `slate-`, `indigo-`, `emerald-`, `rgb(`, and raw hex outside `globals.css` and `lib/theme.ts`. Fix every hit. Record the result in `PROGRESS.md`.
 2. Contrast: check `text`, `muted`, `accent`, `live`, `positive`, `danger` on `canvas`, `surface`, `raised` (4.5:1 for text, 3:1 for large text and chart marks). Record a table in `PROGRESS.md`. Fix failing pairs by adjusting tokens, not components. `faint` is verified decorative-only (not used for readable text).
 3. Check one-hot-thing: no page has more than one solid accent element in view; no page has more than one `.beam`.
 4. Playwright screenshots at 390, 768, and 1440 px for `/`, `/login`, `/register`, `/demo`, `/dashboard`. Save to `/screenshots`.

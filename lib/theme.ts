@@ -47,8 +47,8 @@ export interface CategoricalColor {
  */
 export const CATEGORICAL_PALETTE: CategoricalColor[] = [
   { color: "#fb5c34", hatch: false, name: "Ember" },
-  { color: "#ffffff", hatch: false, name: "White" },
   { color: "#86d4b2", hatch: false, name: "Mint" },
+  { color: "#ffffff", hatch: false, name: "White" },
   { color: "#2861eb", hatch: false, name: "Blue" },
   { color: "#bdbdbd", hatch: true, name: "Light Gray (Hatched)" },
   { color: "#8d8d8d", hatch: true, name: "Muted Gray (Hatched)" },

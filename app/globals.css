@@ -57,11 +57,15 @@
   --radius-full: 9999px;
 }
 
+html,
 body {
   background-color: var(--color-canvas);
   color: var(--color-text);
   font-family: var(--font-sans), system-ui, sans-serif;
   min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
 }
 
 /* Sheen overlay: radial gradient at bottom-right corner with 1px inner top highlight */

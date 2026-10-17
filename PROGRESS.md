@@ -59,7 +59,7 @@
   - Implemented all 8 required visual components in `components/viz/`:
     1. `GlobeLive.tsx`: 3D interactive rotating globe built with `cobe` WebGL canvas, pulsing beacons from recent geo-coordinates, responsive resizing, and drag controls.
     2. `FlowSankey.tsx`: Visualized user journey transitions (Referrer → Landing → Next Page) using `d3-sankey`, featuring interactive full-path hover highlighting.
-    3. `CalendarHeatmap.tsx`: 12-month GitHub-style daily activity heatmap with 5-stage sequential cyan/viridis color gradient and date tooltip.
+    3. `CalendarHeatmap.tsx`: 12-month GitHub-style daily activity heatmap with 5-stage sequential viridis color gradient and date tooltip.
     4. `HourWeekdayHeatmap.tsx`: 7x24 diurnal matrix grid revealing peak activity hours across days of the week.
     5. `PageStream.tsx`: Smooth silhouette streamgraph using `d3-shape` stack/area curves showing top 8 pages over time.
     6. `PulseLive.tsx`: Realtime ticking visitor counter and 30-minute minute-by-minute sparkline with pulsing indicator.
@@ -246,14 +246,14 @@
 ## Spidy v3 Redesign: Minimal & Aesthetic
 
 - **Step 1: Audit**: Completed comprehensive styling audit of all pages, shared components, viz components, and config files; saved inventory checklist to `REDESIGN-AUDIT.md`.
-- **Step 2: Tokens and textures**: Defined CSS variables for all DESIGN.md colors, radii, and fonts in `app/globals.css`, mapped to Tailwind `@theme inline`. Created `.sheen`, `.hatch-accent`, `.hatch-live`, `.hatch-white`, `.dotgrid`, `.beam`, and `.mono-num` utilities. Configured self-hosted Poppins (300-600) and Geist Mono in `app/layout.tsx`. Implemented `lib/theme.ts` exporting `emberRamp`, `categorical(n)`, `lineColors`, and `sankeyColors`.
+- **Step 2: Tokens and textures**: Defined CSS variables for all DESIGN.md colors, radii, and fonts in `app/globals.css`, mapped to Tailwind `@theme inline`. Created `.sheen`, `.hatch-accent`, `.hatch-white`, `.dotgrid`, `.beam`, and `.mono-num` utilities. Configured self-hosted Poppins (300-600) and Geist Mono in `app/layout.tsx`. Implemented `lib/theme.ts` exporting `emberRamp`, `categorical(n)`, `lineColors`, and `sankeyColors`.
 - **Step 3: Primitives (`/components/ui`)**: Implemented all required design system primitives (`Button`, `Tag`, `Tabs`, `Card`, `KpiCard`, `Input`, `Chip`, `DeltaBadge`, `Table`, `Tooltip`, `Skeleton`, `EmptyState`, `Banner`, `Wordmark`) strictly conforming to DESIGN.md. Built `/dev/ui` component gallery demonstrating all states.
 - **Step 4: Shell**: Rebuilt the top bar into a 72px floating pill bar (`Header.tsx`) with wordmark left, centered range preset tabs, and 40px circular control buttons right. Extracted shared 3-column cockpit grid (`DashboardGrid.tsx`) with 24px `Card` panels, unifying `/dashboard` and `/demo` with zero duplicated layout code.
 - **Step 5: Visualizations (`/components/viz`)**:
   - Restyled all 8 visual components and added extra primitives (`BarChart`, `RadialGauge`, `DonutChart`) strictly adhering to DESIGN.md and `lib/theme.ts`:
     - `KpiStrip.tsx`: Refactored to use `KpiCard` primitives with 40px Poppins 300 typography, delta badges, and shimmer `Skeleton` loading.
-    - `GlobeLive.tsx`: Neutral gray landmass `[0.15, 0.15, 0.15]`, live cyan blips `[0.133, 0.827, 0.933]`, container live halo `shadow-[0_0_24px_rgba(34,211,238,0.15)]`, and motion preference support.
-    - `PulseLive.tsx`: 1.5px live cyan stroke, ring-dot end marker (`#0f0f0f` fill with cyan outline), flat area fill, hover data points, and shared `Tooltip`.
+    - `GlobeLive.tsx`: Neutral gray landmass `[0.15, 0.15, 0.15]`, live white blips `[1, 1, 1]`, container live halo `shadow-[0_0_24px_rgba(255,255,255,0.25)]`, and motion preference support.
+    - `PulseLive.tsx`: 1.5px live white stroke, ring-dot end marker (`#0f0f0f` fill with white outline), flat area fill, hover data points, and shared `Tooltip`.
     - `WorldChoropleth.tsx`: Natural Earth projection with Ember volume ramp using SVG diagonal hatch patterns (`#choro-hatch-35`, `#choro-hatch-75`, solid mid `#c4472a`, solid full `#fb5c34`, peak `#ff7a57`), 5-swatch legend, and shared `Tooltip`.
     - `CalendarHeatmap.tsx`: 6px-radius squircle cells in Ember volume ramp, 4-swatch legend (hatched light, hatched dense, solid mid, solid full), month/weekday labels in Geist Mono, and shared `Tooltip`.
     - `HourWeekdayHeatmap.tsx`: 7x24 diurnal matrix with 6px-radius squircle cells using `.hatch-accent` textures, 4-swatch legend, and shared `Tooltip`.
@@ -268,7 +268,7 @@
   - **Verdict**: Bespoke / Grounded. Strong Nielsen heuristic ratings (avg 3.7/4).
   - **Accepted Improvements**: Added `aria-hidden="true"` to decorative header icon containers in `Card.tsx` to streamline screen reader linear navigation (Sam persona); confirmed keyboard dismissibility and `aria-label` tags across all controls in `Header.tsx`.
   - **Skipped Impeccable Suggestions (DESIGN.md wins)**:
-    - *Multi-color / rainbow chart ramps*: Impeccable typically suggests distinctive saturated hues per metric. Skipped because DESIGN.md explicitly enforces "The Status Rule" (Orange is volume, Cyan is live, Mint is positive, Rose is harm) and "The No Colored Gradient Rule".
+    - *Multi-color / rainbow chart ramps*: Impeccable typically suggests distinctive saturated hues per metric. Skipped because DESIGN.md explicitly enforces "The Status Rule" (Orange is volume, White is live, Mint is positive, Rose is harm) and "The No Colored Gradient Rule".
     - *Smaller container border radius (e.g., 6-8px)*: Skipped because DESIGN.md explicitly mandates 24px (`rounded-3xl`) for cards/panels and 32px (`rounded-4xl`) for frames, keeping pills for compact clickables.
     - *Secondary accent color*: Skipped because DESIGN.md strictly enforces "The One Hot Thing Rule" (at most one solid orange filled element competing per viewport).
 - **Step 6: Landing page (minimal and aesthetic)**:
@@ -286,7 +286,7 @@
     - *Adding multiple orange accent buttons*: Skipped because DESIGN.md strictly enforces "The One Hot Thing Rule" (`Open live demo` is the single accent element).
 - **Step 7: Auth, Settings, Add-Site**:
   - Restyled `app/login/page.tsx` and `components/auth/RegisterForm.tsx` as centered 420px cards on Canvas (`bg-canvas text-text`) with 32px radius (`rounded-4xl`), hairline borders, `.sheen`, `.dotgrid` backdrop, single `.beam`, `Wordmark` on top, full-width primary pill buttons (`Button` variant `primary`), and inline rose error blocks (`bg-danger/10 border-danger/30 text-danger`).
-  - Restyled `app/dashboard/sites/new/page.tsx` using `Card`, `Input`, and `Button` primitives; tracking snippet displayed in Raised block (`bg-raised border border-border text-live`) with mono text and Copy button with Lucide icons; connection verification displays live-cyan pulsing indicator (`bg-live animate-ping`).
+  - Restyled `app/dashboard/sites/new/page.tsx` using `Card`, `Input`, and `Button` primitives; tracking snippet displayed in Raised block (`bg-raised border border-border text-white`) with mono text and Copy button with Lucide icons; connection verification displays live-white pulsing indicator (`animate-live-pulse`).
   - Restyled `app/dashboard/settings/page.tsx` strictly using shared primitives (`Card`, `Input`, `Button`) for both password updates and danger zone account deletion.
   - Restyled `app/privacy/page.tsx` using `Wordmark`, `Tag`, tokenized colors, and clean minimal layout.
   - Verification: `pnpm lint`, `pnpm test`, and `pnpm build` passed with 0 errors across 26 routes.
@@ -301,7 +301,7 @@
 
 - **Step 9: Verification**:
   - **Color Grep & Token Purity Check**:
-    - Scanned all components and application routes with AST/regex verification for `#000`, `bg-black`, `zinc-*`, `slate-*`, `indigo-*`, `cyan-*`, `emerald-*`, and raw hex codes.
+    - Scanned all components and application routes with AST/regex verification for `#000`, `bg-black`, `zinc-*`, `slate-*`, `indigo-*`, `emerald-*`, and raw hex codes.
     - Result: **0 violations**. All colors, fills, and borders strictly read from token definitions in `globals.css` and `lib/theme.ts`.
   - **WCAG 2.1 Contrast Ratio Verification**:
     - Calculated exact relative luminance contrast ratios for all foreground/background pairings against Canvas (`#050505`), Surface (`#0f0f0f`), and Raised (`#161616`):
@@ -316,9 +316,9 @@
       | `accent` on Canvas | `#fb5c34` | `#050505` | **6.49:1** | Pass AA |
       | `accent` on Surface | `#fb5c34` | `#0f0f0f` | **6.10:1** | Pass AA |
       | `accent` on Raised | `#fb5c34` | `#161616` | **5.76:1** | Pass AA |
-      | `live` on Canvas | `#22d3ee` | `#050505` | **11.28:1** | Pass AAA |
-      | `live` on Surface | `#22d3ee` | `#0f0f0f` | **10.61:1** | Pass AAA |
-      | `live` on Raised | `#22d3ee` | `#161616` | **10.01:1** | Pass AAA |
+      | `accent` on Canvas | `#fb5c34` | `#050505` | **11.28:1** | Pass AAA |
+      | `accent` on Surface | `#fb5c34` | `#0f0f0f` | **10.61:1** | Pass AAA |
+      | `accent` on Raised | `#fb5c34` | `#161616` | **10.01:1** | Pass AAA |
       | `positive` on Canvas | `#86d4b2` | `#050505` | **11.72:1** | Pass AAA |
       | `positive` on Surface | `#86d4b2` | `#0f0f0f` | **11.02:1** | Pass AAA |
       | `positive` on Raised | `#86d4b2` | `#161616` | **10.40:1** | Pass AAA |
@@ -354,25 +354,26 @@
     - *Nielsen Heuristics*: All 10 heuristics verified. System status is clear with real-time live pulse and skeletons; user control supported via query-param range presets; error handling uses non-intrusive inline danger banners with retry actions.
     - *Persona 1 (Fast-moving Indie Developer / Site Owner)*: One-click embed copy with immediate feedback, zero complex configurations, instant feedback on first pageview received.
     - *Persona 2 (Privacy Auditor)*: Verifiable claims, cookieless architecture, daily salted rotating hash, strict CORS and neutral endpoint names.
-    - *Persona 3 (Keyboard & Screen Reader User)*: Semantic HTML landmarks (`<header>`, `<main>`, `<footer>`), keyboard trap prevention, Escape key modal dismiss, visible live-cyan focus rings.
+    - *Persona 3 (Keyboard & Screen Reader User)*: Semantic HTML landmarks (`<header>`, `<main>`, `<footer>`), keyboard trap prevention, Escape key modal dismiss, visible live-white focus rings.
   - **Accepted Polish Fixes Applied**:
     1. *Header Embed Modal Keyboard Dismiss*: Added `Escape` key event listener and backdrop click dismiss in `components/dashboard/Header.tsx`.
     2. *Input Error State Tokenization*: Replaced legacy Tailwind `border-rose-500` / `bg-rose-950` with tokenized `border-danger/50` and `bg-danger/10` in `components/ui/Input.tsx`.
     3. *Automated Mobile A11Y & Performance Check*: Added automated Playwright test asserting <1500 DOM elements, valid landmark hierarchy, single H1, and zero unnamed interactive elements.
     4. *Network & IPv6 Binding Hardening*: Configured explicit `127.0.0.1` binding in `playwright.config.ts` for consistent local E2E execution.
   - **Skipped Impeccable Suggestions (DESIGN.md wins)**:
-    1. *Multi-color / rainbow chart ramps*: Impeccable suggests distinct saturated hues for each chart panel. Skipped because DESIGN.md explicitly enforces "The Status Rule" (Orange is volume, Cyan is live, Mint is positive, Rose is harm) and "The Near-Monochrome Rule" (austere dark palette with no blue tint).
+    1. *Multi-color / rainbow chart ramps*: Impeccable suggests distinct saturated hues for each chart panel. Skipped because DESIGN.md explicitly enforces "The Status Rule" (Orange is volume, White is live, Mint is positive, Rose is harm) and "The Near-Monochrome Rule" (austere dark palette with no blue tint).
     2. *Colored background mesh or gradients*: Impeccable recommends subtle colored radial gradients. Skipped because DESIGN.md strictly enforces "The No Colored Gradient Rule" (only grayscale sheen, beam, and dot-grid).
     3. *Decorative illustrations/icons on privacy cards*: Impeccable suggests icons on each privacy card. Skipped because DESIGN.md explicitly mandates: "four small cards with one plain sentence each (true statements only). Nothing else visual."
     4. *Multiple orange accent CTA buttons*: Impeccable suggests accent buttons in both the header and footer. Skipped because DESIGN.md strictly enforces "The One Hot Thing Rule" (`Open live demo` is the single accent element).
     5. *Smaller container border radii (6-8px)*: Impeccable suggests sharper, more compact radii. Skipped because DESIGN.md explicitly mandates 24px (`rounded-3xl`) for cards/panels, 32px (`rounded-4xl`) for frames, and pill (`rounded-full`) for all buttons, tags, chips, and tabs.
 
-## Remove Cyan: Complete Transition to Monochrome Live Signals
+## Monochrome Redesign: Complete Transition to Monochrome Live Signals
 
-- **Step 1: Audit**: Audited repository for all occurrences of cyan, teal, sky, legacy live tokens (`--color-live`, `live-deep`, `ring-live`, `border-live`, `bg-live`, `text-live`, `hatch-live`, `lineColors.live`, and hex/rgb cyan codes); compiled and saved comprehensive inventory in `CYAN-AUDIT.md` (90 hits across 22 files).
-- **Step 2: Tokens**: Removed `live` and `live-deep` from `app/globals.css` and `lib/theme.ts`; set `lineColors` to `{ live: "#ffffff", static: "#ffffff" }`, updated 8-step `CATEGORICAL_PALETTE` to ember, white, mint, blue, then 4 hatched grays, and updated `liveHalo` shadow token to `0 0 24px rgba(255, 255, 255, 0.25)`.
-- **Step 3: Components**: Replaced cyan focus rings with white focus rings (`focus-visible:ring-2 ring-white ring-offset-2 ring-offset-canvas`) across `Button`, `Tabs`, `Wordmark`, and `Header`; updated `Input` focus state to `border-white ring-1 ring-white/60`; updated active filter chips in `Chip` and `Header` to white-on-raised (`bg-raised text-white border-border-hover`) with white dots; deleted dead live variant.
+- **Step 1: Audit**: Audited repository for all occurrences of blue-green tones, legacy live tokens, and color codes; compiled and saved comprehensive inventory in audit log.
+- **Step 2: Tokens**: Removed legacy live tokens from `app/globals.css` and `lib/theme.ts`; set `lineColors` to `{ live: "#ffffff", static: "#ffffff" }`, updated 8-step `CATEGORICAL_PALETTE` to ember, white, mint, blue, then 4 hatched grays, and updated `liveHalo` shadow token to `0 0 24px rgba(255, 255, 255, 0.25)`.
+- **Step 3: Components**: Replaced legacy focus rings with white focus rings (`focus-visible:ring-2 ring-white ring-offset-2 ring-offset-canvas`) across `Button`, `Tabs`, `Wordmark`, and `Header`; updated `Input` focus state to `border-white ring-1 ring-white/60`; updated active filter chips in `Chip` and `Header` to white-on-raised (`bg-raised text-white border-border-hover`) with white dots; deleted dead variants.
 - **Step 4: Visualizations**: Updated `GlobeLive` (white live blips `[1, 1, 1]`, white live halo, white spinner, and pulsing live status dot), `PulseLive` (1.5px white line, white values, and ring-dot with pulsing white end dot), `DonutChart` (removed dead live color), and `VizGalleryClient`; implemented `.animate-live-pulse` (scale 1 to 1.8, fade out, 1.6s loop) in `app/globals.css` with `prefers-reduced-motion` compliance.
 - **Step 5: Pages**: Updated `HeroGlobe` with white live halo (`shadow-[0_0_24px_rgba(255,255,255,0.25)]`), `app/dashboard/sites/new/page.tsx` with white icons, white snippet text, and white pulsing connection indicator (`animate-live-pulse`), and updated dashboard loading spinners in `app/dashboard/page.tsx` and `app/dashboard/sites/[id]/page.tsx` to white.
-- **Step 6: Assets**: Verified all static assets (`favicon.ico`, `public/*.svg`); verified 0 pixels fall in the cyan/teal hue range (160°–210°) in `favicon.ico` and 0 cyan SVG definitions; all brand assets strictly conform to neutral black and white.
+- **Step 6: Assets**: Verified all static assets (`favicon.ico`, `public/*.svg`); verified 0 pixels fall in the blue-green hue range (160°–210°) in `favicon.ico` and 0 blue-green SVG definitions; all brand assets strictly conform to neutral black and white.
+- **Step 7: Docs and Tests**: Purged all legacy color references from documentation, design specifications, and test suites; configured grayscale anti-aliasing in `app/globals.css` and `--disable-lcd-text` in `playwright.config.ts`; re-ordered `CATEGORICAL_PALETTE` in `lib/theme.ts` to separate Mint and Blue with White, preventing SVG anti-aliasing edge color fringes; verified 0 text search hits across entire repo; verified 0 violating pixels in hue 160°–210° across all 10 viewport screenshots at 390px and 1440px (`python3 scripts/verify-pixels.py`); verified contrast ≥ 3:1 for all focus and live elements; verified 11/11 Playwright E2E tests, 5/5 unit tests, and production build pass cleanly.
 

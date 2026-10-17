@@ -49,7 +49,8 @@ describe("Theme Tokens & Data Ramps", () => {
   });
 
   it("defines lineColors with live and static both as white", () => {
-    expect(lineColors.live).toBe("#ffffff");
-    expect(lineColors.static).toBe("#ffffff");
+    const { live, static: staticLine } = lineColors;
+    expect(live).toBe("#ffffff");
+    expect(staticLine).toBe("#ffffff");
   });
 });
