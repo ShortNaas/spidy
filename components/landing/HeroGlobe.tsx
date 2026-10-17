@@ -9,16 +9,19 @@ const GlobeLive = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-[320px] h-[320px] sm:w-[420px] sm:h-[420px] rounded-full bg-cyan-950/20 border border-zinc-800 animate-pulse mx-auto" />
+      <div className="w-[300px] h-[300px] sm:w-[380px] sm:h-[380px] rounded-full border border-border/60 bg-raised/50 animate-pulse mx-auto" />
     ),
   }
 );
 
+/**
+ * Spidy v3 Landing Hero Globe:
+ * Static-seeded 3D globe rendered in a 32px-radius frame with .sheen.
+ */
 export function HeroGlobe() {
   return (
-    <div className="relative w-full max-w-[420px] aspect-square mx-auto flex items-center justify-center">
-      <div className="absolute inset-0 bg-radial from-cyan-500/10 via-transparent to-transparent pointer-events-none" />
-      <GlobeLive markers={demoData.markers} />
+    <div className="relative w-full max-w-[440px] aspect-square mx-auto flex items-center justify-center rounded-4xl bg-surface border border-border p-4 sheen overflow-hidden shadow-[0_0_24px_rgba(34,211,238,0.12)]">
+      <GlobeLive markers={demoData.markers} embedded />
     </div>
   );
 }

@@ -271,6 +271,20 @@
     - *Multi-color / rainbow chart ramps*: Impeccable typically suggests distinctive saturated hues per metric. Skipped because DESIGN.md explicitly enforces "The Status Rule" (Orange is volume, Cyan is live, Mint is positive, Rose is harm) and "The No Colored Gradient Rule".
     - *Smaller container border radius (e.g., 6-8px)*: Skipped because DESIGN.md explicitly mandates 24px (`rounded-3xl`) for cards/panels and 32px (`rounded-4xl`) for frames, keeping pills for compact clickables.
     - *Secondary accent color*: Skipped because DESIGN.md strictly enforces "The One Hot Thing Rule" (at most one solid orange filled element competing per viewport).
+- **Step 6: Landing page (minimal and aesthetic)**:
+  - Rebuilt `app/(marketing)/layout.tsx` and `app/(marketing)/page.tsx` with airy 144px+ vertical rhythm, two-tone headlines, one hot orange CTA button, `.dotgrid` fade, single `.beam`, 32px showcase frame (`ShowcaseFrame.tsx`) featuring ember heatmap and hatched bar chart from `lib/demo-data.json`, connected steps with dot nodes (NEXORA workflow style), 4 privacy cards, closing line, and minimal footer. Static data only, zero DB queries.
+  - Updated `HeroGlobe.tsx` to 32px-radius frame with `.sheen`.
+  - Added Playwright e2e test `tests/e2e/landing.spec.ts`. Verified links `Open live demo` -> `/demo` and `Get started` -> `/register`.
+  - Captured screenshots at 1440px and 390px in `screenshots/landing-1440.png` and `screenshots/landing-390.png`.
+  - Verification: `pnpm lint`, `pnpm test`, and `pnpm build` all passed. `pnpm test:e2e` passed (3/3).
+- **Review Checkpoint 2: `/impeccable critique` (Landing)**:
+  - **Verdict**: Bespoke / Grounded.
+  - **Accepted Improvements**: High-contrast typography, semantic sections, keyboard navigation, and responsive layout verified.
+  - **Skipped Impeccable Suggestions (DESIGN.md wins)**:
+    - *Adding illustrative graphics/icons to each privacy card*: Skipped because DESIGN.md explicitly mandates: "four small cards with one plain sentence each (true statements only). Nothing else visual."
+    - *Adding background colored gradient or mesh*: Skipped because DESIGN.md strictly enforces "The No Colored Gradient Rule" (only grayscale sheen, beam, and dot-grid).
+    - *Adding multiple orange accent buttons*: Skipped because DESIGN.md strictly enforces "The One Hot Thing Rule" (`Open live demo` is the single accent element).
+
 
 
 
