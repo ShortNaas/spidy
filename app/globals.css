@@ -13,8 +13,6 @@
   --color-accent: #fb5c34;
   --color-accent-bright: #ff7a57;
   --color-accent-deep: #7a2a16;
-  --color-live: #22d3ee;
-  --color-live-deep: #083344;
   --color-positive: #86d4b2;
   --color-info: #2861eb;
   --color-danger: #f43f5e;
@@ -42,8 +40,6 @@
   --color-accent: var(--color-accent);
   --color-accent-bright: var(--color-accent-bright);
   --color-accent-deep: var(--color-accent-deep);
-  --color-live: var(--color-live);
-  --color-live-deep: var(--color-live-deep);
   --color-positive: var(--color-positive);
   --color-info: var(--color-info);
   --color-danger: var(--color-danger);
@@ -90,15 +86,6 @@ body {
   background-image: repeating-linear-gradient(
     -45deg,
     var(--color-accent) 0 1.5px,
-    transparent 1.5px 4.5px
-  );
-  opacity: var(--hatch-opacity, 1);
-}
-
-.hatch-live {
-  background-image: repeating-linear-gradient(
-    -45deg,
-    var(--color-live) 0 1.5px,
     transparent 1.5px 4.5px
   );
   opacity: var(--hatch-opacity, 1);

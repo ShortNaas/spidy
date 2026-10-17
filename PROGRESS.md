@@ -370,4 +370,5 @@
 ## Remove Cyan: Complete Transition to Monochrome Live Signals
 
 - **Step 1: Audit**: Audited repository for all occurrences of cyan, teal, sky, legacy live tokens (`--color-live`, `live-deep`, `ring-live`, `border-live`, `bg-live`, `text-live`, `hatch-live`, `lineColors.live`, and hex/rgb cyan codes); compiled and saved comprehensive inventory in `CYAN-AUDIT.md` (90 hits across 22 files).
+- **Step 2: Tokens**: Removed `live` and `live-deep` from `app/globals.css` and `lib/theme.ts`; set `lineColors` to `{ live: "#ffffff", static: "#ffffff" }`, updated 8-step `CATEGORICAL_PALETTE` to ember, white, mint, blue, then 4 hatched grays, and updated `liveHalo` shadow token to `0 0 24px rgba(255, 255, 255, 0.25)`.
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { emberRamp, getEmberRampStep, categorical, tokens } from "@/lib/theme";
+import { emberRamp, getEmberRampStep, categorical, tokens, lineColors } from "@/lib/theme";
 
 describe("Theme Tokens & Data Ramps", () => {
   it("defines all core color tokens without blue tinting", () => {
@@ -8,9 +8,9 @@ describe("Theme Tokens & Data Ramps", () => {
     expect(tokens.colors.raised).toBe("#161616");
     expect(tokens.colors.subtle).toBe("#1c1c1c");
     expect(tokens.colors.accent).toBe("#fb5c34");
-    expect(tokens.colors.live).toBe("#22d3ee");
     expect(tokens.colors.positive).toBe("#86d4b2");
     expect(tokens.colors.danger).toBe("#f43f5e");
+    expect(tokens.shadows.liveHalo).toBe("0 0 24px rgba(255, 255, 255, 0.25)");
   });
 
   it("defines the 6-step Ember volume ramp correctly", () => {
@@ -46,5 +46,10 @@ describe("Theme Tokens & Data Ramps", () => {
     expect(palette[5].hatch).toBe(true);
     expect(palette[6].hatch).toBe(true);
     expect(palette[7].hatch).toBe(true);
+  });
+
+  it("defines lineColors with live and static both as white", () => {
+    expect(lineColors.live).toBe("#ffffff");
+    expect(lineColors.static).toBe("#ffffff");
   });
 });

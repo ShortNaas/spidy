@@ -48,12 +48,12 @@ export interface CategoricalColor {
 export const CATEGORICAL_PALETTE: CategoricalColor[] = [
   { color: "#fb5c34", hatch: false, name: "Ember" },
   { color: "#ffffff", hatch: false, name: "White" },
-  { color: "#22d3ee", hatch: false, name: "Cyan" },
   { color: "#86d4b2", hatch: false, name: "Mint" },
-  { color: "#2861eb", hatch: true, name: "Blue (Hatched)" },
+  { color: "#2861eb", hatch: false, name: "Blue" },
   { color: "#bdbdbd", hatch: true, name: "Light Gray (Hatched)" },
   { color: "#8d8d8d", hatch: true, name: "Muted Gray (Hatched)" },
   { color: "#5f5f5f", hatch: true, name: "Faint Gray (Hatched)" },
+  { color: "#3a3a3a", hatch: true, name: "Deep Gray (Hatched)" },
 ];
 
 export function categorical(n: number): CategoricalColor[] {
@@ -64,7 +64,7 @@ export function categorical(n: number): CategoricalColor[] {
  * Line and stroke styles for sparklines, trends, and real-time feeds
  */
 export const lineColors = {
-  live: "#22d3ee",
+  live: "#ffffff",
   static: "#ffffff",
   track: "#1c1c1c",
   grid: "rgba(255, 255, 255, 0.08)",
@@ -102,11 +102,13 @@ export const tokens = {
     accentBright: "#ff7a57",
     accentMid: "#c4472a",
     accentDeep: "#7a2a16",
-    live: "#22d3ee",
-    liveDeep: "#083344",
     positive: "#86d4b2",
     info: "#2861eb",
     danger: "#f43f5e",
+  },
+  shadows: {
+    liveHalo: "0 0 24px rgba(255, 255, 255, 0.25)",
+    accentHalo: "0 0 28px rgba(251, 92, 52, 0.28)",
   },
   radii: {
     sm: "8px",
