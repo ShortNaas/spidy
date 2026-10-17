@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { Tag } from "@/components/ui/Tag";
+import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: "Privacy Policy · Spidy Analytics",
@@ -17,25 +18,16 @@ export default function PrivacyPage() {
       <header className="border-b border-border bg-surface/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
           <Wordmark href="/" />
-          <nav className="flex items-center gap-3">
-            <Link
-              href="/demo"
-              className="text-[13px] font-sans text-muted hover:text-white px-3 py-1.5 rounded-full transition-colors duration-150"
-            >
+          <nav className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" href="/demo">
               Demo
-            </Link>
-            <Link
-              href="/login"
-              className="text-[13px] font-sans text-muted hover:text-white px-3 py-1.5 rounded-full transition-colors duration-150"
-            >
+            </Button>
+            <Button variant="ghost" size="sm" href="/login">
               Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="text-[13px] font-sans bg-white text-canvas hover:bg-white/90 font-medium px-4 py-2 rounded-full transition-colors duration-150"
-            >
+            </Button>
+            <Button variant="primary" size="sm" href="/register">
               Get started
-            </Link>
+            </Button>
           </nav>
         </div>
       </header>

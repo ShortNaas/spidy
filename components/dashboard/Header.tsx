@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { Wordmark } from "@/components/ui/Wordmark";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
@@ -98,11 +97,11 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
             </span>
           ) : (
             sites.length > 0 && (
-              <div className="relative hidden sm:block">
+              <div className="relative block">
                 <select
                   value={currentSiteId}
                   onChange={(e) => handleSiteChange(e.target.value)}
-                  className="bg-raised border border-border hover:border-border-hover rounded-full px-3.5 py-1.5 text-[12px] font-mono text-white outline-none cursor-pointer appearance-none pr-8 transition-colors duration-150"
+                  className="bg-raised border border-border hover:border-border-hover rounded-full px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-[12px] font-mono text-white outline-none cursor-pointer appearance-none pr-7 sm:pr-8 max-w-[110px] sm:max-w-none truncate transition-colors duration-150"
                   aria-label="Select active site"
                 >
                   {sites.map((s) => (
@@ -150,17 +149,25 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
 
           {!isDemo && (
             <>
-              <Link href="/dashboard/sites/new" title="Add New Site" className="hidden md:inline-flex">
-                <Button variant="icon" aria-label="Add new site">
-                  <Plus size={16} />
-                </Button>
-              </Link>
+              <Button
+                variant="icon"
+                href="/dashboard/sites/new"
+                title="Add New Site"
+                aria-label="Add new site"
+                className="hidden md:inline-flex"
+              >
+                <Plus size={16} />
+              </Button>
 
-              <Link href="/dashboard/settings" title="Account Settings" className="hidden md:inline-flex">
-                <Button variant="icon" aria-label="Settings">
-                  <Settings size={16} />
-                </Button>
-              </Link>
+              <Button
+                variant="icon"
+                href="/dashboard/settings"
+                title="Account Settings"
+                aria-label="Settings"
+                className="hidden md:inline-flex"
+              >
+                <Settings size={16} />
+              </Button>
 
               <Button
                 variant="icon"
@@ -174,11 +181,9 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
           )}
 
           {isDemo && (
-            <Link href="/register">
-              <Button variant="primary" size="sm">
-                Get started
-              </Button>
-            </Link>
+            <Button variant="primary" size="sm" href="/register">
+              Get started
+            </Button>
           )}
         </div>
       </div>

@@ -56,23 +56,17 @@ export default async function LandingPage() {
 
           <div className="flex items-center gap-2">
             {isLoggedIn ? (
-              <Link href="/dashboard">
-                <Button variant="primary" size="sm">
-                  Dashboard
-                </Button>
-              </Link>
+              <Button variant="primary" size="sm" href="/dashboard">
+                Dashboard
+              </Button>
             ) : (
               <>
-                <Link href="/login">
-                  <Button variant="ghost" size="sm">
-                    Log in
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button variant="primary" size="sm">
-                    Get started
-                  </Button>
-                </Link>
+                <Button variant="ghost" size="sm" href="/login">
+                  Log in
+                </Button>
+                <Button variant="primary" size="sm" href="/register">
+                  Get started
+                </Button>
               </>
             )}
           </div>
@@ -106,21 +100,22 @@ export default async function LandingPage() {
 
               {/* Action Buttons: Accent is the ONE hot thing on the page */}
               <div className="flex flex-wrap items-center gap-3 pt-3">
-                <Link href="/demo">
-                  <Button
-                    variant="accent"
-                    size="lg"
-                    className="shadow-[0_0_28px_rgba(251,92,52,0.28)]"
-                  >
-                    Open live demo
-                  </Button>
-                </Link>
+                <Button
+                  variant="accent"
+                  size="lg"
+                  href="/demo"
+                  className="shadow-[0_0_28px_rgba(251,92,52,0.28)]"
+                >
+                  Open live demo
+                </Button>
 
-                <Link href={isLoggedIn ? "/dashboard" : "/register"}>
-                  <Button variant="secondary" size="lg">
-                    {isLoggedIn ? "Open dashboard" : "Get started"}
-                  </Button>
-                </Link>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  href={isLoggedIn ? "/dashboard" : "/register"}
+                >
+                  {isLoggedIn ? "Open dashboard" : "Get started"}
+                </Button>
               </div>
             </div>
 
@@ -261,16 +256,16 @@ export default async function LandingPage() {
           </h2>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Link href="/demo">
-              <Button variant="accent" size="lg">
-                Open live demo
-              </Button>
-            </Link>
-            <Link href={isLoggedIn ? "/dashboard" : "/register"}>
-              <Button variant="secondary" size="lg">
-                {isLoggedIn ? "Open dashboard" : "Get started"}
-              </Button>
-            </Link>
+            <Button variant="accent" size="lg" href="/demo">
+              Open live demo
+            </Button>
+            <Button
+              variant="secondary"
+              size="lg"
+              href={isLoggedIn ? "/dashboard" : "/register"}
+            >
+              {isLoggedIn ? "Open dashboard" : "Get started"}
+            </Button>
           </div>
         </section>
       </main>

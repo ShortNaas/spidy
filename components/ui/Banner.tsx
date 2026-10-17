@@ -1,5 +1,4 @@
 import React from "react";
-import Link from "next/link";
 import { Button } from "./Button";
 
 export interface BannerProps {
@@ -34,13 +33,21 @@ export function Banner({
 
       <div>
         {actionHref ? (
-          <Link href={actionHref}>
-            <Button variant="accent" size="sm" className="!py-1 !px-3 !text-[12px]">
-              {actionText}
-            </Button>
-          </Link>
+          <Button
+            variant="accent"
+            size="sm"
+            href={actionHref}
+            className="!py-1 !px-3 !text-[12px]"
+          >
+            {actionText}
+          </Button>
         ) : (
-          <Button variant="accent" size="sm" onClick={onAction} className="!py-1 !px-3 !text-[12px]">
+          <Button
+            variant="accent"
+            size="sm"
+            onClick={onAction}
+            className="!py-1 !px-3 !text-[12px]"
+          >
             {actionText}
           </Button>
         )}

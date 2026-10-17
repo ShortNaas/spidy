@@ -102,12 +102,12 @@
     "shadows": [
       {
         "name": "phosphor-halo",
-        "value": "0 0 24px rgba(6, 182, 212, 0.25)",
+        "value": "0 0 24px rgba(255, 255, 255, 0.25)",
         "purpose": "Bioluminescent halo around primary catalysts and live beacons."
       },
       {
         "name": "phosphor-subtle",
-        "value": "0 0 12px rgba(6, 182, 212, 0.15)",
+        "value": "0 0 12px rgba(255, 255, 255, 0.15)",
         "purpose": "Faint hover halo on interactive insignia."
       }
     ],

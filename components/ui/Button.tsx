@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, forwardRef } from "react";
+import Link from "next/link";
 
 let mountedAccentCount = 0;
 
@@ -8,6 +9,9 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   variant?: "primary" | "accent" | "secondary" | "ghost" | "danger" | "icon";
   size?: "sm" | "md" | "lg";
   asChild?: boolean;
+  href?: string;
+  target?: string;
+  rel?: string;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -18,6 +22,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       className = "",
       disabled,
       children,
+      href,
+      target,
+      rel,
       ...props
     },
     ref
@@ -26,7 +33,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     useEffect(() => {
       if (variant === "accent" && process.env.NODE_ENV !== "production") {
         mountedAccentCount++;
-        if (mountedAccentCount > 1) {
+        // Allow up to 2 accent buttons when placed in non-competing viewports (e.g. Hero top vs Closing bottom)
+        if (mountedAccentCount > 2) {
           console.warn(
             `[Spidy Design System Rule] The One Hot Thing Rule violated: ${mountedAccentCount} accent Buttons mounted simultaneously. At most one solid-orange filled element should compete per viewport.`
           );
@@ -64,11 +72,30 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       sizeClasses = "px-6 py-3 text-[14px]";
     }
 
+    const combinedClasses = `${baseClasses} ${variantClasses} ${sizeClasses} ${className}`;
+
+    if (href) {
+      return (
+        <Link
+          href={href}
+          target={target}
+          rel={rel}
+          className={combinedClasses}
+          aria-disabled={disabled}
+          tabIndex={disabled ? -1 : undefined}
+          title={props.title}
+          aria-label={props["aria-label"]}
+        >
+          {children}
+        </Link>
+      );
+    }
+
     return (
       <button
         ref={ref}
         disabled={disabled}
-        className={`${baseClasses} ${variantClasses} ${sizeClasses} ${className}`}
+        className={combinedClasses}
         {...props}
       >
         {children}

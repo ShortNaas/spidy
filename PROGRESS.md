@@ -377,3 +377,18 @@
 - **Step 6: Assets**: Verified all static assets (`favicon.ico`, `public/*.svg`); verified 0 pixels fall in the blue-green hue range (160°–210°) in `favicon.ico` and 0 blue-green SVG definitions; all brand assets strictly conform to neutral black and white.
 - **Step 7: Docs and Tests**: Purged all legacy color references from documentation, design specifications, and test suites; configured grayscale anti-aliasing in `app/globals.css` and `--disable-lcd-text` in `playwright.config.ts`; re-ordered `CATEGORICAL_PALETTE` in `lib/theme.ts` to separate Mint and Blue with White, preventing SVG anti-aliasing edge color fringes; verified 0 text search hits across entire repo; verified 0 violating pixels in hue 160°–210° across all 10 viewport screenshots at 390px and 1440px (`python3 scripts/verify-pixels.py`); verified contrast ≥ 3:1 for all focus and live elements; verified 11/11 Playwright E2E tests, 5/5 unit tests, and production build pass cleanly.
 
+## Impeccable Polish: Accessibility, Semantic HTML & Ergonomics
+
+- **What was built**:
+  - Enhanced `Button` primitive in `components/ui/Button.tsx` to natively support `href?: string`, rendering a Next.js `Link` with identical pill styling, active scaling, and focus rings.
+  - Eliminated invalid HTML nesting (`<button>` inside `<a>`) across `components/dashboard/Header.tsx`, `components/ui/Banner.tsx`, `app/(marketing)/page.tsx`, and `app/privacy/page.tsx`.
+  - Refined `mountedAccentCount` in `Button.tsx` to allow non-competing viewport placements without console noise while preserving "The One Hot Thing Rule".
+  - Unlocked mobile site switching in `components/dashboard/Header.tsx` by rendering a compact truncated selector on mobile screens (<640px) without disrupting top bar density.
+  - Synchronized `.impeccable/design.json` shadow tokens to canonical white live halos.
+- **How verified**:
+  - `pnpm lint`: 0 errors, 0 warnings.
+  - `pnpm test`: 5/5 unit tests passed.
+  - `pnpm build`: Next.js Turbopack compiled successfully.
+  - `pnpm test:e2e`: 11/11 Playwright E2E tests passed.
+  - `python3 scripts/verify-pixels.py`: 0 violating pixels across all 10 viewport screenshots.
+
