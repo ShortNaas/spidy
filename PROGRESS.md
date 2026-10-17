@@ -243,4 +243,8 @@
   - `pnpm test:e2e`: All 16 Playwright tests passed across all 5 test files (`auth-dashboard.spec.ts`, `auth-flow.spec.ts`, `hardening.spec.ts`, `landing.spec.ts`, `viz-gallery.spec.ts`), including capturing all 8 visual component screenshots on `/demo` and verifying 404 on `/viz-gallery`.
 - **Status**: ALL 8 TASKS VERIFIED AND COMPLETE.
 
+## Spidy v3 Redesign: Minimal & Aesthetic
+
+- **Step 1: Audit**: Completed comprehensive styling audit of all pages, shared components, viz components, and config files; saved inventory checklist to `REDESIGN-AUDIT.md`.
+
 

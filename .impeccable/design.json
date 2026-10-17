@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T11:20:45.000Z",
+  "title": "Design System: Spidy",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Orbital Cyan",
+        "canonical": "oklch(71.5% 0.143 215.3)",
+        "tonalRamp": ["#04232c", "#083344", "#0e7490", "#06b6d4", "#22d3ee", "#67e8f9", "#a5f3fc", "#ecfeff"]
+      },
+      "primary-bright": {
+        "role": "primary",
+        "displayName": "Bright Phosphor",
+        "canonical": "oklch(79.3% 0.134 212.5)",
+        "tonalRamp": ["#04232c", "#083344", "#0e7490", "#06b6d4", "#22d3ee", "#67e8f9", "#a5f3fc", "#ecfeff"]
+      },
+      "primary-glow": {
+        "role": "primary",
+        "displayName": "Abyssal Tint",
+        "canonical": "oklch(28.4% 0.052 216.8)",
+        "tonalRamp": ["#04232c", "#083344", "#0e7490", "#06b6d4", "#22d3ee", "#67e8f9", "#a5f3fc", "#ecfeff"]
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Journey Indigo",
+        "canonical": "oklch(58.5% 0.233 277.1)",
+        "tonalRamp": ["#1e1b4b", "#312e81", "#4338ca", "#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe", "#e0e7ff"]
+      },
+      "tertiary": {
+        "role": "tertiary",
+        "displayName": "Growth Emerald",
+        "canonical": "oklch(69.6% 0.17 162.4)",
+        "tonalRamp": ["#022c22", "#064e3b", "#047857", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0", "#ecfdf5"]
+      },
+      "danger": {
+        "role": "danger",
+        "displayName": "Flare Rose",
+        "canonical": "oklch(62.8% 0.258 16.4)",
+        "tonalRamp": ["#4c0519", "#881337", "#be123c", "#f43f5e", "#fb7185", "#fda4af", "#fecdd3", "#fff1f2"]
+      },
+      "neutral-canvas": {
+        "role": "neutral",
+        "displayName": "Void Black",
+        "canonical": "oklch(0% 0 0)",
+        "tonalRamp": ["#000000", "#09090b", "#18181b", "#27272a", "#52525b", "#a1a1aa", "#e4e4e7", "#fafafa"]
+      },
+      "neutral-surface": {
+        "role": "neutral",
+        "displayName": "Obsidian Surface",
+        "canonical": "oklch(14.5% 0.005 285.8)",
+        "tonalRamp": ["#000000", "#09090b", "#18181b", "#27272a", "#52525b", "#a1a1aa", "#e4e4e7", "#fafafa"]
+      },
+      "neutral-subtle": {
+        "role": "neutral",
+        "displayName": "Subtle Well",
+        "canonical": "oklch(20.5% 0.006 285.8)",
+        "tonalRamp": ["#000000", "#09090b", "#18181b", "#27272a", "#52525b", "#a1a1aa", "#e4e4e7", "#fafafa"]
+      },
+      "neutral-border": {
+        "role": "neutral",
+        "displayName": "Hairline Wire",
+        "canonical": "oklch(27.4% 0.006 286.0)",
+        "tonalRamp": ["#000000", "#09090b", "#18181b", "#27272a", "#52525b", "#a1a1aa", "#e4e4e7", "#fafafa"]
+      },
+      "neutral-text": {
+        "role": "neutral",
+        "displayName": "Phosphor Text",
+        "canonical": "oklch(93.8% 0.003 285.8)",
+        "tonalRamp": ["#000000", "#09090b", "#18181b", "#27272a", "#52525b", "#a1a1aa", "#e4e4e7", "#fafafa"]
+      },
+      "neutral-muted": {
+        "role": "neutral",
+        "displayName": "Muted Slate",
+        "canonical": "oklch(70.9% 0.01 286.1)",
+        "tonalRamp": ["#000000", "#09090b", "#18181b", "#27272a", "#52525b", "#a1a1aa", "#e4e4e7", "#fafafa"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Hero",
+        "purpose": "Hero statements and marketing value propositions."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Primary section titles and top-level page headers."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Panel headings, card titles, and modal headers."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanatory paragraphs and descriptive text."
+      },
+      "label": {
+        "displayName": "Label / Telemetry",
+        "purpose": "Dynamic metrics, data tables, filter badges, and timestamps."
+      }
+    },
+    "shadows": [
+      {
+        "name": "phosphor-halo",
+        "value": "0 0 24px rgba(6, 182, 212, 0.25)",
+        "purpose": "Bioluminescent halo around primary catalysts and live beacons."
+      },
+      {
+        "name": "phosphor-subtle",
+        "value": "0 0 12px rgba(6, 182, 212, 0.15)",
+        "purpose": "Faint hover halo on interactive insignia."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-telemetry",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Fast-out, gentle-settle curve for interactive transitions."
+      },
+      {
+        "name": "duration-snappy",
+        "value": "150ms",
+        "purpose": "Immediate state response for hover and focus."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "High-contrast action catalyst for primary workflows and landing CTAs.",
+      "html": "<button class=\"ds-btn-primary\">GET STARTED →</button>",
+      "css": ".ds-btn-primary { background: #06b6d4; color: #000; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 0 24px rgba(6,182,212,0.25); } .ds-btn-primary:hover { background: #22d3ee; transform: scale(1.02); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Subdued wireframe button for secondary navigation and modal triggers.",
+      "html": "<button class=\"ds-btn-secondary\">LIVE DEMO →</button>",
+      "css": ".ds-btn-secondary { background: #18181b; color: #e4e4e7; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12px; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(39,39,42,0.8); border-radius: 8px; cursor: pointer; transition: border-color 0.15s ease, color 0.15s ease; } .ds-btn-secondary:hover { border-color: #52525b; color: #fff; }"
+    },
+    {
+      "name": "Telemetry Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Dark recessed input field for domain names, auth credentials, and filter parameters.",
+      "html": "<input class=\"ds-input-field\" type=\"text\" placeholder=\"domain.com\" />",
+      "css": ".ds-input-field { background: #18181b; color: #ededed; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 13px; padding: 8px 12px; border: 1px solid rgba(63,63,70,0.8); border-radius: 8px; outline: none; width: 100%; box-sizing: border-box; transition: border-color 0.15s ease, box-shadow 0.15s ease; } .ds-input-field:focus { border-color: #06b6d4; box-shadow: 0 0 0 1px #06b6d4; }"
+    },
+    {
+      "name": "Live Status Pill",
+      "kind": "chip",
+      "refersTo": "filter-pill",
+      "description": "Continuous real-time telemetry indicator with bioluminescent pulse dot.",
+      "html": "<span class=\"ds-status-pill\"><span class=\"ds-pulse-dot\"></span>LIVE · 34 VISITORS</span>",
+      "css": ".ds-status-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(8,51,68,0.5); color: #67e8f9; border: 1px solid rgba(14,116,144,0.6); padding: 4px 10px; border-radius: 9999px; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 11px; font-weight: 500; } .ds-pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: #22d3ee; box-shadow: 0 0 8px #22d3ee; }"
+    },
+    {
+      "name": "KPI Metric Card",
+      "kind": "card",
+      "refersTo": "card-container",
+      "description": "Precision performance card featuring bold monospace numerals and trend badge.",
+      "html": "<div class=\"ds-kpi-card\"><div class=\"ds-kpi-header\"><span class=\"ds-kpi-title\">TOTAL PAGEVIEWS</span><span class=\"ds-kpi-delta\">+14.2%</span></div><div class=\"ds-kpi-value\">48,520</div><div class=\"ds-kpi-sub\">vs previous period</div></div>",
+      "css": ".ds-kpi-card { background: #09090b; border: 1px solid rgba(39,39,42,0.8); border-radius: 12px; padding: 18px 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: flex; flex-direction: column; gap: 8px; } .ds-kpi-header { display: flex; justify-content: space-between; align-items: center; } .ds-kpi-title { font-size: 11px; font-family: ui-monospace, SFMono-Regular, monospace; color: #a1a1aa; letter-spacing: 0.05em; } .ds-kpi-delta { font-size: 11px; font-family: ui-monospace, SFMono-Regular, monospace; font-variant-numeric: tabular-nums; color: #34d399; background: rgba(6,78,59,0.3); border: 1px solid rgba(4,120,87,0.4); padding: 2px 6px; border-radius: 9999px; } .ds-kpi-value { font-size: 28px; font-weight: 700; color: #ededed; font-family: ui-monospace, SFMono-Regular, monospace; font-variant-numeric: tabular-nums; } .ds-kpi-sub { font-size: 11px; font-family: ui-monospace, SFMono-Regular, monospace; color: #71717a; }"
+    },
+    {
+      "name": "Segmented Preset Bar",
+      "kind": "nav",
+      "refersTo": "nav-presets",
+      "description": "Horizon-fixed temporal range switcher for rapid 24h/7d/30d/12mo slicing.",
+      "html": "<div class=\"ds-preset-bar\"><button class=\"ds-preset-item active\">24H</button><button class=\"ds-preset-item\">7D</button><button class=\"ds-preset-item\">30D</button><button class=\"ds-preset-item\">12MO</button></div>",
+      "css": ".ds-preset-bar { display: inline-flex; background: rgba(24,24,27,0.9); border: 1px solid #27272a; border-radius: 8px; padding: 2px; gap: 2px; } .ds-preset-item { background: transparent; border: none; border-radius: 6px; color: #a1a1aa; font-family: ui-monospace, SFMono-Regular, monospace; font-size: 11px; font-weight: 500; padding: 4px 10px; cursor: pointer; transition: all 0.15s ease; } .ds-preset-item.active { background: #27272a; color: #22d3ee; font-weight: 600; } .ds-preset-item:hover:not(.active) { color: #ededed; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Orbital Observatory",
+    "overview": "Spidy treats web analytics not as commercial surveillance or marketing fluff, but as high-precision telemetry gathered from a deep-space vantage point. The interface is an astronomical cockpit: pitch-black canvases, muted obsidian instrument housings, and bioluminescent cyan vector projections that slice cleanly through the dark. Every element feels measured, silent, and mathematically sound.\n\nInformation is structured with rigorous density and immediate optical clarity. Rather than hiding data behind nested accordions or generic cards, Spidy showcases continuous geographic, diurnal, and navigational motion—rotating 3D WebGL globes, fluid Sankey journey rivers, and 7x24 diurnal matrices. The emotional tone is authoritative, honest, and calm: a nocturnal operations center monitoring live orbital data with zero corporate clutter.\n\nVisual anti-references are strictly rejected: no pastel gradients, no rounded-blob cards, no playful illustration mascots, no light-mode default, and no low-contrast gray-on-white text. If an element does not convey spatial, temporal, or numerical truth, it does not belong in the viewport.",
+    "keyCharacteristics": [
+      "Void Canvas & Phosphor Highlights: Pure pitch black (#000000) canvas paired with radiant Orbital Cyan (#06b6d4) indicators.",
+      "Dual Type Architecture: Modern geometric sans for structural headlines; crisp monospace with tabular figures for all data measurements and telemetry.",
+      "Hairline Precision Borders: 1px zinc outlines (#27272a) replacing heavy drop shadows to create clean, blueprint-like modularity.",
+      "Restrained Phosphor Glow: Soft 24px radiant halos reserved exclusively for live pulse blips, coordinate beacons, and primary catalysts.",
+      "Compact Instrument Ergonomics: Snappy 150ms transitions and 8px/12px corners that evoke precision aerospace controls."
+    ],
+    "rules": [
+      {
+        "name": "The Phosphor Contrast Rule",
+        "body": "Phosphor accents (Orbital Cyan #06b6d4, Growth Emerald #10b981) must strictly appear over pitch-black (#000000) or deep obsidian (#09090b) surfaces, never over mid-tone grays or low-contrast backgrounds.",
+        "section": "colors"
+      },
+      {
+        "name": "The Status Triad Rule",
+        "body": "Cyan (#06b6d4) represents live telemetry and primary navigation, Emerald (#10b981) signifies healthy growth and referrers, and Rose (#f43f5e) is reserved exclusively for destructive actions or metric degradation.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Telemetry Rule",
+        "body": "All dynamic numeric counts, percentages, and metrics must enforce tabular figures (tabular-nums) and monospaced typography (font-mono) to prevent visual jitter during live 5-second polling cycles.",
+        "section": "typography"
+      },
+      {
+        "name": "The Label Uppercase Rule",
+        "body": "Telemetry categories, section badges, and compact action triggers render in monospaced uppercase with wide tracking (tracking-wider or tracking-widest) at 11px or 12px.",
+        "section": "typography"
+      },
+      {
+        "name": "The Cockpit Density Rule",
+        "body": "Visualizations and breakdown telemetry prioritize compact, glanceable instrumentation over expansive whitespace; information density communicates technical rigor.",
+        "section": "layout"
+      },
+      {
+        "name": "The Sticky Horizon Rule",
+        "body": "The navigation bar and time range selector remain pinned at the top viewport edge with backdrop blur, ensuring temporal controls are perpetually accessible during deep scrolling.",
+        "section": "layout"
+      },
+      {
+        "name": "The Hairline Boundary Rule",
+        "body": "Containers and panels establish separation through 1px border-zinc-800/80 outlines rather than drop shadows. Resting surfaces never cast ambient shadows.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Phosphor Halo Rule",
+        "body": "Diffuse cyan halos (0 0 24px rgba(6,182,212,0.25)) are strictly reserved for live pulse beacons, interactive hero catalysts, and active coordinate blips.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Precision Bevel Rule",
+        "body": "Interactive controls employ an 8px radius; observational containers employ a 12px or 16px radius. Geometry remains crisp and controlled, never circular or bulbous.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do format all numerical telemetry, timestamps, and metric counts in font-mono with tabular-nums.",
+      "Do maintain a strict 1px hairline border (border-zinc-800/80) on all cards, panels, and floating containers.",
+      "Do reserve radiant cyan glows (shadow-[0_0_24px_rgba(6,182,212,0.25)]) exclusively for primary action triggers and live beacons.",
+      "Do respect prefers-reduced-motion across all WebGL canvas rotations and SVG stream transitions.",
+      "Do group dashboard telemetry into a consistent 2:1 column proportion (visual canvas vs. analytical table).",
+      "Do provide immediate hover feedback by brightening borders (border-zinc-700/80) and text (text-white)."
+    ],
+    "donts": [
+      "Don't introduce bright white canvas backgrounds, light-mode themes, or low-contrast gray text.",
+      "Don't use multi-color rainbow gradients, pastel cards, or decorative marketing illustrations.",
+      "Don't add heavy multi-stage drop shadows to resting cards or panels.",
+      "Don't use loose, oversized typography scales that compromise data density on dashboard screens.",
+      "Don't render raw IP addresses or personally identifiable information anywhere in the interface.",
+      "Don't introduce external font CDNs or third-party asset libraries."
+    ]
+  }
+}
