@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export interface PulseLiveProps {
   activeVisitors?: number;
@@ -10,6 +12,7 @@ export interface PulseLiveProps {
   className?: string;
   width?: number;
   height?: number;
+  embedded?: boolean;
 }
 
 export function PulseLive({
@@ -20,10 +23,12 @@ export function PulseLive({
   className = "",
   width = 320,
   height = 80,
+  embedded = false,
 }: PulseLiveProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   // Normalize 30 minutes of data points
   const points = useMemo(() => {
-    // Fill to 30 points if fewer
     const rawCounts = perMinute.map((p) => p.count);
     const dataPoints =
       rawCounts.length >= 30
@@ -31,7 +36,7 @@ export function PulseLive({
         : [...Array(30 - rawCounts.length).fill(0), ...rawCounts];
     const max = Math.max(...dataPoints, 5);
 
-    const padX = 4;
+    const padX = 6;
     const padY = 8;
     const innerW = width - padX * 2;
     const innerH = height - padY * 2;
@@ -40,106 +45,173 @@ export function PulseLive({
     const coords = dataPoints.map((val, idx) => {
       const x = padX + idx * step;
       const y = height - padY - (val / max) * innerH;
-      return { x, y, val };
+      const minuteLabel = perMinute[idx]?.minute ? `${perMinute[idx].minute}m ago` : `${30 - idx}m ago`;
+      return { x, y, val, minuteLabel };
     });
 
     const pathD = coords.reduce((acc, pt, idx) => {
       return idx === 0 ? `M ${pt.x} ${pt.y}` : `${acc} L ${pt.x} ${pt.y}`;
     }, "");
 
-    const areaD = coords.length
-      ? `${pathD} L ${coords[coords.length - 1].x} ${height} L ${coords[0].x} ${height} Z`
-      : "";
-
-    return { coords, pathD, areaD, currentMax: max };
+    return { coords, pathD, currentMax: max };
   }, [perMinute, width, height]);
 
   if (loading) {
     return (
       <div
-        className={`flex flex-col justify-between bg-zinc-950 rounded-xl border border-zinc-800/80 p-4 min-h-[140px] animate-pulse ${className}`}
+        className={`flex flex-col justify-between bg-surface border border-border rounded-3xl p-6 min-h-[160px] sheen ${className}`}
         aria-busy="true"
+        aria-label="Loading live pulse"
       >
         <div className="flex items-center justify-between">
-          <div className="h-4 w-28 bg-zinc-800 rounded" />
-          <div className="h-6 w-12 bg-zinc-800 rounded" />
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-6 w-16" />
         </div>
-        <div className="w-full h-12 bg-zinc-900 rounded mt-4" />
+        <Skeleton className="w-full h-16 mt-4" />
       </div>
     );
   }
 
+  const activePoint = hoveredIndex !== null ? points.coords[hoveredIndex] : null;
+  const lastPoint = points.coords[points.coords.length - 1];
+
   return (
     <div
-      className={`relative flex flex-col justify-between bg-zinc-950 rounded-xl border border-zinc-800/80 p-4 overflow-hidden ${className}`}
+      className={
+        embedded
+          ? `relative flex flex-col justify-between w-full ${className}`
+          : `relative flex flex-col justify-between bg-surface border border-border rounded-3xl p-6 sheen overflow-hidden ${className}`
+      }
+      role="region"
+      aria-label="Real-time live telemetry pulse"
     >
       <div className="flex items-start justify-between z-10">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-live opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-live" />
             </span>
-            <span className="text-xs font-semibold text-zinc-300">Active Now</span>
+            <span className="font-sans text-[13px] font-medium text-white">Active Now</span>
           </div>
-          <div className="text-3xl font-bold font-mono tabular-nums text-white tracking-tight">
+          <div className="text-[36px] font-mono font-medium tabular-nums text-white tracking-tight leading-none">
             {activeVisitors.toLocaleString()}
           </div>
-          <div className="text-[11px] font-mono text-zinc-500 mt-0.5">visitors in last 5 min</div>
+          <div className="text-[11px] font-mono text-faint mt-1.5">visitors in last 5 min</div>
         </div>
 
         <div className="text-right">
-          <div className="text-xs font-medium text-zinc-400">Past 30 min</div>
-          <div className="text-xl font-semibold font-mono tabular-nums text-cyan-400">
+          <div className="font-sans text-[12px] text-muted">Past 30 min</div>
+          <div className="text-xl font-mono font-semibold tabular-nums text-live mt-0.5">
             {totalViews.toLocaleString()}
           </div>
-          <div className="text-[11px] font-mono text-zinc-500">total views</div>
+          <div className="text-[11px] font-mono text-faint mt-1">total views</div>
         </div>
       </div>
 
-      {/* Per-minute sparkline */}
-      <div className="mt-3 w-full">
+      {/* Accessible summary */}
+      <div className="sr-only">
+        Active visitors now: {activeVisitors}. Total views in past 30 minutes: {totalViews}.
+      </div>
+
+      {/* Per-minute 1.5px live cyan sparkline */}
+      <div className="relative mt-4 w-full">
         <svg
           viewBox={`0 0 ${width} ${height}`}
           className="w-full h-16 overflow-visible"
           role="img"
           aria-label="Sparkline showing minute-by-minute views for the past 30 minutes"
+          onMouseLeave={() => setHoveredIndex(null)}
         >
-          <defs>
-            <linearGradient id="pulseGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-            </linearGradient>
-          </defs>
+          {/* Subtle baseline */}
+          <line
+            x1="0"
+            y1={height - 2}
+            x2={width}
+            y2={height - 2}
+            stroke="rgba(255, 255, 255, 0.06)"
+            strokeWidth="1"
+          />
 
-          {/* Area fill */}
-          {points.areaD && <path d={points.areaD} fill="url(#pulseGradient)" />}
-
-          {/* Stroke path */}
+          {/* Stroke path: 1.5px live cyan */}
           {points.pathD && (
             <path
               d={points.pathD}
               fill="none"
-              stroke="#10b981"
-              strokeWidth={2}
+              stroke="#22d3ee"
+              strokeWidth={1.5}
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           )}
 
-          {/* Current minute pulsing dot */}
-          {points.coords.length > 0 && (
+          {/* Hover hit targets */}
+          {points.coords.map((pt, idx) => (
             <circle
-              cx={points.coords[points.coords.length - 1].x}
-              cy={points.coords[points.coords.length - 1].y}
-              r={3.5}
-              fill="#34d399"
-              className="animate-pulse"
+              key={idx}
+              cx={pt.x}
+              cy={pt.y}
+              r={8}
+              fill="transparent"
+              className="cursor-pointer"
+              onMouseEnter={() => setHoveredIndex(idx)}
             />
+          ))}
+
+          {/* End marker: ring-dot (hollow circle with live cyan border) */}
+          {lastPoint && hoveredIndex === null && (
+            <g>
+              <circle
+                cx={lastPoint.x}
+                cy={lastPoint.y}
+                r={4}
+                fill="#0f0f0f"
+                stroke="#22d3ee"
+                strokeWidth={1.5}
+              />
+              <circle cx={lastPoint.x} cy={lastPoint.y} r={1.5} fill="#22d3ee" />
+            </g>
+          )}
+
+          {/* Active hover marker */}
+          {activePoint && (
+            <g>
+              <line
+                x1={activePoint.x}
+                y1={0}
+                x2={activePoint.x}
+                y2={height}
+                stroke="rgba(255, 255, 255, 0.15)"
+                strokeDasharray="2 2"
+                strokeWidth={1}
+              />
+              <circle
+                cx={activePoint.x}
+                cy={activePoint.y}
+                r={4.5}
+                fill="#0f0f0f"
+                stroke="#22d3ee"
+                strokeWidth={2}
+              />
+              <circle cx={activePoint.x} cy={activePoint.y} r={2} fill="#ffffff" />
+            </g>
           )}
         </svg>
 
-        <div className="flex justify-between items-center text-[10px] font-mono text-zinc-600 mt-1">
+        {/* Hover Tooltip */}
+        {activePoint && (
+          <div
+            className="absolute -top-12 transform -translate-x-1/2 pointer-events-none"
+            style={{ left: `${(activePoint.x / width) * 100}%` }}
+          >
+            <Tooltip
+              label={activePoint.minuteLabel}
+              value={`${activePoint.val} views`}
+            />
+          </div>
+        )}
+
+        <div className="flex justify-between items-center text-[10px] font-mono text-faint mt-1.5">
           <span>30m ago</span>
           <span>15m ago</span>
           <span>Just now</span>

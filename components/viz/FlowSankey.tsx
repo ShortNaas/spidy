@@ -8,6 +8,8 @@ import {
   type SankeyLink as D3SankeyLink,
 } from "d3-sankey";
 import type { SankeyData, SankeyLink } from "@/lib/queries";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export interface FlowSankeyProps {
   data?: SankeyData;
@@ -15,6 +17,7 @@ export interface FlowSankeyProps {
   className?: string;
   width?: number;
   height?: number;
+  embedded?: boolean;
 }
 
 interface CustomNodeExtra {
@@ -32,11 +35,19 @@ export function FlowSankey({
   className = "",
   width = 680,
   height = 360,
+  embedded = false,
 }: FlowSankeyProps) {
   const [hoveredNode, setHoveredNode] = useState<number | null>(null);
   const [hoveredLink, setHoveredLink] = useState<number | null>(null);
+  const [tooltipInfo, setTooltipInfo] = useState<{
+    label: string;
+    value: string;
+    subtext?: string;
+    x: number;
+    y: number;
+  } | null>(null);
 
-  const margin = { top: 24, right: 100, bottom: 20, left: 100 };
+  const margin = { top: 28, right: 110, bottom: 20, left: 110 };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
@@ -47,12 +58,11 @@ export function FlowSankey({
     }
 
     try {
-      // Clone nodes and links because d3-sankey mutates them
       const nodesCopy: Array<CustomNodeExtra> = data.nodes.map((n) => ({ ...n }));
       const linksCopy: Array<SankeyLink & CustomLinkExtra> = data.links.map((l) => ({ ...l }));
 
       const sankeyGenerator = sankey<CustomNodeExtra, CustomLinkExtra>()
-        .nodeWidth(14)
+        .nodeWidth(16)
         .nodePadding(18)
         .extent([
           [0, 0],
@@ -72,16 +82,17 @@ export function FlowSankey({
   if (loading) {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-zinc-950 rounded-xl border border-zinc-800/80 p-6 min-h-[360px] animate-pulse ${className}`}
+        className={`flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 min-h-[360px] sheen ${className}`}
         aria-busy="true"
+        aria-label="Loading visitor flows"
       >
         <div className="w-full flex justify-between px-12 mb-6">
-          <div className="h-4 w-24 bg-zinc-800 rounded" />
-          <div className="h-4 w-28 bg-zinc-800 rounded" />
-          <div className="h-4 w-24 bg-zinc-800 rounded" />
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-4 w-24" />
         </div>
-        <div className="w-full h-48 bg-zinc-900/50 rounded-lg border border-zinc-800/40" />
-        <span className="text-xs text-zinc-500 font-mono mt-4">
+        <Skeleton className="w-full h-52 rounded-2xl" />
+        <span className="text-xs text-muted font-mono mt-4">
           Computing user journey pathways...
         </span>
       </div>
@@ -91,10 +102,10 @@ export function FlowSankey({
   if (!layout || layout.nodes.length === 0 || layout.links.length === 0) {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-zinc-950 rounded-xl border border-zinc-800/80 p-8 min-h-[360px] text-center ${className}`}
+        className={`flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-8 min-h-[360px] text-center sheen ${className}`}
       >
-        <span className="text-zinc-400 text-sm font-medium mb-1">User Journey Flow</span>
-        <span className="text-zinc-600 text-xs">
+        <span className="text-white text-sm font-medium mb-1">User Journey Flow</span>
+        <span className="text-muted text-xs">
           No multi-step visitor sessions detected in the selected time range.
         </span>
       </div>
@@ -103,28 +114,53 @@ export function FlowSankey({
 
   const pathGenerator = sankeyLinkHorizontal();
 
+  // Category color mapping per DESIGN.md:
+  // Referrers: gray-white (#ffffff / #d4d4d4)
+  // Landing: ember (#fb5c34)
+  // Next: mint (#86d4b2)
+  function getNodeCategoryColor(category: "referrer" | "landing" | "next"): string {
+    if (category === "referrer") return "#ffffff";
+    if (category === "landing") return "#fb5c34";
+    return "#86d4b2";
+  }
+
   return (
     <div
-      className={`relative flex flex-col bg-zinc-950 rounded-xl border border-zinc-800/80 p-4 overflow-hidden ${className}`}
+      className={
+        embedded
+          ? `relative flex flex-col w-full ${className}`
+          : `relative flex flex-col bg-surface border border-border rounded-3xl p-6 sheen overflow-hidden ${className}`
+      }
+      role="region"
+      aria-label="Visitor transition pathways sankey flow"
     >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-zinc-200">Visitor Journey Flows</span>
-          <span className="text-[11px] font-mono tabular-nums text-zinc-500">
-            Referrer → Landing → Next Page
+      <div className={`flex flex-wrap items-center ${embedded ? "justify-end" : "justify-between"} gap-3 mb-3`}>
+        {!embedded && (
+          <div className="flex items-center gap-2">
+            <span className="font-sans text-[13px] font-medium text-white">Journey Transitions</span>
+            <span className="font-mono text-[11px] tabular-nums text-muted">
+              Referrer → Landing → Next Page
+            </span>
+          </div>
+        )}
+
+        {/* Legend */}
+        <div className="flex items-center gap-3 text-[11px] font-mono text-muted">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-white inline-block" /> Referrers
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-accent inline-block" /> Landing
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-positive inline-block" /> Next Action
           </span>
         </div>
-        <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-500">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-sm bg-cyan-500/80 inline-block" /> Referrers
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-sm bg-indigo-500/80 inline-block" /> Landing
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500/80 inline-block" /> Next Action
-          </span>
-        </div>
+      </div>
+
+      {/* Accessible summary */}
+      <div className="sr-only">
+        Sankey diagram displaying {layout.nodes.length} stages and {layout.links.length} transition pathways connecting incoming referrers, landing pages, and subsequent pages.
       </div>
 
       <div className="w-full overflow-x-auto">
@@ -147,31 +183,44 @@ export function FlowSankey({
 
               const isHighlighted =
                 hoveredLink === idx || hoveredNode === sourceIndex || hoveredNode === targetIndex;
+              const isDimmed = (hoveredNode !== null || hoveredLink !== null) && !isHighlighted;
 
               return (
                 <path
                   key={`link-${idx}`}
                   d={pathD}
                   fill="none"
-                  stroke={isHighlighted ? "#38bdf8" : "#334155"}
-                  strokeWidth={Math.max(1.5, link.width || 1)}
-                  strokeOpacity={isHighlighted ? 0.75 : hoveredNode !== null ? 0.1 : 0.35}
+                  stroke={isHighlighted ? "#fb5c34" : "rgba(255, 255, 255, 0.16)"}
+                  strokeWidth={Math.max(2, link.width || 1)}
+                  strokeOpacity={isHighlighted ? 0.7 : isDimmed ? 0.1 : 0.3}
                   className="transition-all duration-200 cursor-pointer"
-                  onMouseEnter={() => setHoveredLink(idx)}
-                  onMouseLeave={() => setHoveredLink(null)}
+                  onMouseEnter={(e) => {
+                    setHoveredLink(idx);
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setTooltipInfo({
+                      label: `${sourceNode.name} → ${targetNode.name}`,
+                      value: `${link.value} sessions`,
+                      x: rect.left + rect.width / 2,
+                      y: rect.top,
+                    });
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredLink(null);
+                    setTooltipInfo(null);
+                  }}
                 >
                   <title>{`${sourceNode.name} → ${targetNode.name}: ${link.value} sessions`}</title>
                 </path>
               );
             })}
 
-            {/* Nodes */}
+            {/* Nodes: 12px-rounded cards with 3px left colored edge */}
             {layout.nodes.map((node, idx) => {
               const x0 = node.x0 ?? 0;
               const x1 = node.x1 ?? 0;
               const y0 = node.y0 ?? 0;
               const y1 = node.y1 ?? 0;
-              const nodeHeight = Math.max(4, y1 - y0);
+              const nodeHeight = Math.max(8, y1 - y0);
 
               const activeLink = hoveredLink !== null ? layout.links[hoveredLink] : null;
               const activeSrc = activeLink
@@ -188,41 +237,62 @@ export function FlowSankey({
               const isHighlighted =
                 hoveredNode === idx ||
                 (hoveredLink !== null && (activeSrc === idx || activeTgt === idx));
+              const isDimmed = (hoveredNode !== null || hoveredLink !== null) && !isHighlighted;
 
-              const nodeColor =
-                node.category === "referrer"
-                  ? "#06b6d4" // Cyan
-                  : node.category === "landing"
-                    ? "#6366f1" // Indigo
-                    : "#10b981"; // Emerald
-
+              const categoryColor = getNodeCategoryColor(node.category);
               const isLeftAligned = x0 < innerWidth / 2;
 
               return (
                 <g
                   key={`node-${idx}`}
                   className="cursor-pointer"
-                  onMouseEnter={() => setHoveredNode(idx)}
-                  onMouseLeave={() => setHoveredNode(null)}
+                  opacity={isDimmed ? 0.25 : 1}
+                  onMouseEnter={(e) => {
+                    setHoveredNode(idx);
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setTooltipInfo({
+                      label: `${node.category.toUpperCase()}: ${node.name}`,
+                      value: `${node.value} sessions`,
+                      x: rect.left + rect.width / 2,
+                      y: rect.top,
+                    });
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredNode(null);
+                    setTooltipInfo(null);
+                  }}
                 >
+                  {/* Node body: 12px rounded card */}
                   <rect
                     x={x0}
                     y={y0}
                     width={x1 - x0}
                     height={nodeHeight}
-                    fill={nodeColor}
-                    fillOpacity={isHighlighted ? 1 : 0.8}
-                    rx={2}
+                    fill="#161616"
+                    stroke={isHighlighted ? "#ffffff" : "rgba(255, 255, 255, 0.12)"}
+                    strokeWidth={1}
+                    rx={6}
                     className="transition-all duration-200"
                   />
+                  {/* 3px colored left edge per DESIGN.md (NEXORA flow style) */}
+                  <rect
+                    x={x0}
+                    y={y0}
+                    width={3}
+                    height={nodeHeight}
+                    fill={categoryColor}
+                    rx={1.5}
+                  />
+
+                  {/* Node Label */}
                   <text
                     x={isLeftAligned ? x0 - 8 : x1 + 8}
                     y={(y0 + y1) / 2}
                     dy="0.35em"
                     textAnchor={isLeftAligned ? "end" : "start"}
                     fontSize={11}
-                    fontFamily="monospace"
-                    fill={isHighlighted ? "#f8fafc" : "#94a3b8"}
+                    fontFamily="var(--font-mono, monospace)"
+                    fill={isHighlighted ? "#ffffff" : "#8d8d8d"}
                     className="select-none pointer-events-none transition-colors duration-200"
                   >
                     {node.name.length > 18 ? `${node.name.slice(0, 16)}…` : node.name}
@@ -234,6 +304,20 @@ export function FlowSankey({
           </g>
         </svg>
       </div>
+
+      {/* Shared Tooltip */}
+      {tooltipInfo && (
+        <div
+          className="fixed pointer-events-none z-50 -translate-x-1/2 -translate-y-full mb-3"
+          style={{ left: tooltipInfo.x, top: tooltipInfo.y }}
+        >
+          <Tooltip
+            label={tooltipInfo.label}
+            value={tooltipInfo.value}
+            subtext={tooltipInfo.subtext}
+          />
+        </div>
+      )}
     </div>
   );
 }

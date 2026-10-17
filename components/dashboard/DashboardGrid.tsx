@@ -81,7 +81,7 @@ export function DashboardGrid({
             icon={<Globe size={18} />}
           >
             <div className="flex items-center justify-center p-2">
-              <GlobeLive markers={globeMarkers} loading={loading && !live} />
+              <GlobeLive markers={globeMarkers} loading={loading && !live} embedded />
             </div>
           </Card>
         </div>
@@ -97,6 +97,7 @@ export function DashboardGrid({
               totalViews={live?.totalViews30Min || 0}
               perMinute={live?.perMinute || []}
               loading={loading && !live}
+              embedded
             />
           </Card>
 
@@ -125,7 +126,7 @@ export function DashboardGrid({
             subtitle="Natural Earth choropleth projection"
             icon={<MapPin size={18} />}
           >
-            <WorldChoropleth data={countries} loading={loading} />
+            <WorldChoropleth data={countries} loading={loading} embedded />
           </Card>
         </div>
 
@@ -176,7 +177,7 @@ export function DashboardGrid({
             subtitle="Categorical streamgraph of top 8 paths over time"
             icon={<BarChart2 size={18} />}
           >
-            <PageStream data={stream} loading={loading} />
+            <PageStream data={stream} loading={loading} embedded />
           </Card>
         </div>
 
@@ -223,7 +224,7 @@ export function DashboardGrid({
             subtitle="Referrer → Landing Page → Subsequent Page flows"
             icon={<GitFork size={18} />}
           >
-            <FlowSankey data={flows} loading={loading} />
+            <FlowSankey data={flows} loading={loading} embedded />
           </Card>
         </div>
 
@@ -270,7 +271,7 @@ export function DashboardGrid({
             subtitle="365-day seasonal activity matrix"
             icon={<Calendar size={18} />}
           >
-            <CalendarHeatmap data={calendarData} loading={loading} />
+            <CalendarHeatmap data={calendarData} loading={loading} embedded />
           </Card>
         </div>
 
@@ -280,7 +281,7 @@ export function DashboardGrid({
             subtitle="Peak hours across days of the week"
             icon={<Clock size={18} />}
           >
-            <HourWeekdayHeatmap data={hourWeekdayData} loading={loading} />
+            <HourWeekdayHeatmap data={hourWeekdayData} loading={loading} embedded />
           </Card>
         </div>
       </section>

@@ -9,6 +9,11 @@ import { PageStream } from "@/components/viz/PageStream";
 import { PulseLive } from "@/components/viz/PulseLive";
 import { WorldChoropleth } from "@/components/viz/WorldChoropleth";
 import { KpiStrip } from "@/components/viz/KpiStrip";
+import { BarChart } from "@/components/viz/BarChart";
+import { RadialGauge } from "@/components/viz/RadialGauge";
+import { DonutChart } from "@/components/viz/DonutChart";
+import { Button } from "@/components/ui/Button";
+import { Tag } from "@/components/ui/Tag";
 
 // Seeded sample dataset for offline gallery and screenshot testing
 const MOCK_KPIS = {
@@ -149,59 +154,65 @@ const MOCK_HOUR_WEEKDAY = Array.from({ length: 7 * 24 }, (_, i) => {
   return { weekday, hour, views };
 });
 
+const MOCK_BARS = [
+  { label: "00h", value: 140 },
+  { label: "04h", value: 85 },
+  { label: "08h", value: 340 },
+  { label: "12h", value: 780 },
+  { label: "16h", value: 650 },
+  { label: "20h", value: 420 },
+];
+
 export function VizGalleryClient() {
   const [loadingToggle, setLoadingToggle] = useState(false);
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 p-6 md:p-10 font-sans selection:bg-cyan-500/20 selection:text-cyan-300">
+    <div className="min-h-screen bg-canvas text-white p-6 md:p-10 font-sans selection:bg-accent/20 selection:text-accent-bright">
       {/* Header */}
-      <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
+      <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/50">
-              Dev Only
-            </span>
-            <h1 className="text-2xl font-bold tracking-tight text-white">
+          <div className="flex items-center gap-2 mb-2">
+            <Tag>Design System Preview</Tag>
+            <h1 className="text-2xl font-semibold tracking-tight text-white font-sans">
               Spidy Visualization Gallery
             </h1>
           </div>
-          <p className="text-xs text-zinc-400">
-            Interactive suite of 8 privacy-first analytics visual components (development preview)
+          <p className="text-xs text-muted font-sans">
+            Suite of privacy-first analytics visual components in the Ember Ramp &amp; NEXORA dark theme.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={() => setLoadingToggle(!loadingToggle)}
-            className="text-xs font-mono px-3 py-1.5 rounded-lg border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 transition-colors cursor-pointer"
           >
             Toggle Skeleton Loading: {loadingToggle ? "ON" : "OFF"}
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto space-y-10">
         {/* 1. KPI Strip */}
-        <section id="viz-kpi-strip" className="space-y-2">
-          <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500">
-            1. KPI Strip
+        <section id="viz-kpi-strip" className="space-y-3">
+          <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+            1. KPI Strip (40px Poppins 300 &amp; Delta Badges)
           </h2>
           <KpiStrip data={MOCK_KPIS} loading={loadingToggle} />
         </section>
 
         {/* 2 & 3. Globe + Realtime Pulse Live */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div id="viz-globe-live" className="lg:col-span-2 space-y-2">
-            <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500">
-              2. Globe Live (Cobe 3D WebGL Canvas)
+          <div id="viz-globe-live" className="lg:col-span-2 space-y-3">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+              2. Globe Live (Pure Gray Landmass &amp; Live Cyan Blips)
             </h2>
             <GlobeLive markers={MOCK_MARKERS} loading={loadingToggle} />
           </div>
 
-          <div id="viz-pulse-live" className="space-y-2">
-            <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500">
-              3. Pulse Live (Active Ticker + 30-Min Sparkline)
+          <div id="viz-pulse-live" className="space-y-3">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+              3. Pulse Live (1.5px Cyan Stroke &amp; Ring-Dot End Marker)
             </h2>
             <PulseLive
               activeVisitors={MOCK_PULSE.activeVisitors}
@@ -213,46 +224,85 @@ export function VizGalleryClient() {
         </section>
 
         {/* 4. World Choropleth */}
-        <section id="viz-world-choropleth" className="space-y-2">
-          <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500">
-            4. World Choropleth (D3-Geo Natural Earth Projection)
+        <section id="viz-world-choropleth" className="space-y-3">
+          <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+            4. World Choropleth (Natural Earth Projection &amp; Ember Hatch Ramp)
           </h2>
           <WorldChoropleth data={MOCK_COUNTRIES} loading={loadingToggle} />
         </section>
 
         {/* 5. Flow Sankey */}
-        <section id="viz-flow-sankey" className="space-y-2">
-          <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500">
-            5. Flow Sankey (D3-Sankey Path Highlighting)
+        <section id="viz-flow-sankey" className="space-y-3">
+          <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+            5. Flow Sankey (3px Left Edge &amp; 30% Link Opacity)
           </h2>
           <FlowSankey data={MOCK_FLOWS} loading={loadingToggle} />
         </section>
 
         {/* 6. Page Stream */}
-        <section id="viz-page-stream" className="space-y-2">
-          <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500">
-            6. Page Stream (D3-Shape Silhouette Streamgraph)
+        <section id="viz-page-stream" className="space-y-3">
+          <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+            6. Page Stream (Categorical Palette &amp; Hatch Beyond Series 4)
           </h2>
           <PageStream data={MOCK_STREAM} loading={loadingToggle} />
         </section>
 
         {/* 7 & 8. Heatmaps (Calendar + Hour Weekday) */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div id="viz-calendar-heatmap" className="space-y-2">
-            <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500">
-              7. Calendar Heatmap (12-Month GitHub Style)
+          <div id="viz-calendar-heatmap" className="space-y-3">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+              7. Calendar Heatmap (6px Radius Squircle Cells &amp; 4 Swatches)
             </h2>
             <CalendarHeatmap data={MOCK_CALENDAR} loading={loadingToggle} />
           </div>
 
-          <div id="viz-hour-weekday" className="space-y-2">
-            <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500">
-              8. Hour-Weekday Heatmap (7x24 Seasonality Grid)
+          <div id="viz-hour-weekday" className="space-y-3">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+              8. Hour-Weekday Heatmap (7x24 Ember Matrix)
             </h2>
             <HourWeekdayHeatmap data={MOCK_HOUR_WEEKDAY} loading={loadingToggle} />
+          </div>
+        </section>
+
+        {/* 9. Extra Primitives: Bar Chart, Radial Gauge, Donut Chart */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-3">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+              9. Bar Chart (Hatched Ember &amp; Peak Pill)
+            </h2>
+            <BarChart
+              data={MOCK_BARS}
+              title="Traffic Distribution"
+              subtitle="Hourly visitor density"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+              10. Radial Gauge (Segmented Arc)
+            </h2>
+            <RadialGauge
+              value={78}
+              label="Bandwidth"
+              subtext="Real-time ingestion rate"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+              11. Donut Chart (Track &amp; Rounded Cap Arc)
+            </h2>
+            <DonutChart
+              value={64}
+              label="Desktop Share"
+              subtext="Platform proportion"
+              color="ember"
+            />
           </div>
         </section>
       </div>
     </div>
   );
 }
+
+export default VizGalleryClient;

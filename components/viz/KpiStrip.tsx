@@ -2,6 +2,8 @@
 
 import React from "react";
 import type { KpiResult } from "@/lib/queries";
+import { KpiCard } from "@/components/ui/KpiCard";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export interface KpiStripProps {
   data?: KpiResult;
@@ -15,15 +17,19 @@ export function KpiStrip({ data, loading = false, className = "" }: KpiStripProp
       <div
         className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${className}`}
         aria-busy="true"
+        aria-label="Loading key performance indicators"
       >
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="flex flex-col justify-between bg-zinc-950 rounded-xl border border-zinc-800/80 p-5 h-32 animate-pulse"
+            className="flex flex-col justify-between bg-surface border border-border rounded-3xl p-6 h-36"
           >
-            <div className="h-4 w-24 bg-zinc-800 rounded" />
-            <div className="h-8 w-32 bg-zinc-800 rounded" />
-            <div className="h-3 w-20 bg-zinc-900 rounded" />
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-3.5 w-24" />
+              <Skeleton className="h-5 w-12 rounded-full" />
+            </div>
+            <Skeleton className="h-10 w-36 my-2" />
+            <Skeleton className="h-3 w-28" />
           </div>
         ))}
       </div>
@@ -34,32 +40,36 @@ export function KpiStrip({ data, loading = false, className = "" }: KpiStripProp
 
   const cards = [
     {
-      title: "Total Pageviews",
+      label: "Total Pageviews",
       value: current.views.toLocaleString(),
       deltaPct: deltas.viewsPct,
       isPositiveGood: true,
       subtext: "vs previous period",
+      isLiveValue: false,
     },
     {
-      title: "Unique Visitors",
+      label: "Unique Visitors",
       value: current.visitors.toLocaleString(),
       deltaPct: deltas.visitorsPct,
       isPositiveGood: true,
       subtext: "salted daily hashes",
+      isLiveValue: false,
     },
     {
-      title: "Bounce Proxy",
+      label: "Bounce Proxy",
       value: `${current.bounceRate}%`,
       deltaPct: deltas.bounceRatePct,
       isPositiveGood: false, // lower bounce rate is good
       subtext: "single-page sessions",
+      isLiveValue: false,
     },
     {
-      title: "Top Country",
+      label: "Top Country",
       value: current.topCountry || "—",
       deltaPct: null,
       isPositiveGood: true,
       subtext: "highest visitor origin",
+      isLiveValue: false,
     },
   ];
 
@@ -69,50 +79,17 @@ export function KpiStrip({ data, loading = false, className = "" }: KpiStripProp
       role="region"
       aria-label="Key Performance Indicators"
     >
-      {cards.map((card) => {
-        let badgeColor = "text-zinc-400 bg-zinc-900 border-zinc-800";
-        let sign = "";
-
-        if (card.deltaPct !== null) {
-          const isGood = card.isPositiveGood ? card.deltaPct >= 0 : card.deltaPct <= 0;
-          sign = card.deltaPct > 0 ? "+" : "";
-
-          if (card.deltaPct === 0) {
-            badgeColor = "text-zinc-400 bg-zinc-900 border-zinc-800";
-          } else if (isGood) {
-            badgeColor = "text-emerald-400 bg-emerald-950/40 border-emerald-800/40";
-          } else {
-            badgeColor = "text-rose-400 bg-rose-950/40 border-rose-800/40";
-          }
-        }
-
-        return (
-          <div
-            key={card.title}
-            className="flex flex-col justify-between bg-zinc-950 rounded-xl border border-zinc-800/80 p-5 shadow-xs hover:border-zinc-700/80 transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-zinc-400">{card.title}</span>
-              {card.deltaPct !== null && (
-                <span
-                  className={`text-[11px] font-mono font-medium px-2 py-0.5 rounded-full border tabular-nums ${badgeColor}`}
-                >
-                  {sign}
-                  {card.deltaPct}%
-                </span>
-              )}
-            </div>
-
-            <div className="my-2">
-              <div className="text-3xl font-bold font-mono tabular-nums text-white tracking-tight">
-                {card.value}
-              </div>
-            </div>
-
-            <div className="text-[11px] font-mono text-zinc-500">{card.subtext}</div>
-          </div>
-        );
-      })}
+      {cards.map((card) => (
+        <KpiCard
+          key={card.label}
+          label={card.label}
+          value={card.value}
+          deltaPct={card.deltaPct}
+          isPositiveGood={card.isPositiveGood}
+          subtext={card.subtext}
+          isLiveValue={card.isLiveValue}
+        />
+      ))}
     </div>
   );
 }

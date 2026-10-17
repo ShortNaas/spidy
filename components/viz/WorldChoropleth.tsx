@@ -3,6 +3,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { geoNaturalEarth1, geoPath, type GeoPermissibleObjects } from "d3-geo";
 import type { ItemCount } from "@/lib/queries";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export interface WorldChoroplethProps {
   data?: ItemCount[];
@@ -10,6 +12,7 @@ export interface WorldChoroplethProps {
   className?: string;
   width?: number;
   height?: number;
+  embedded?: boolean;
 }
 
 interface GeoJsonFeature {
@@ -61,6 +64,7 @@ export function WorldChoropleth({
   className = "",
   width = 680,
   height = 360,
+  embedded = false,
 }: WorldChoroplethProps) {
   const [geoFeatures, setGeoFeatures] = useState<GeoJsonFeature[]>([]);
   const [geoLoading, setGeoLoading] = useState(true);
@@ -136,24 +140,32 @@ export function WorldChoropleth({
     return { paths: projected };
   }, [geoFeatures, countryMap, width, height]);
 
-  // Color scale: perceptual sequential viridis/cyan scale
-  function getChoroplethColor(visitors: number): string {
-    if (visitors === 0) return "#18181b"; // zinc-900 unvisited
+  // Ember volume ramp:
+  // Step 0: empty (#161616 with hairline)
+  // Step 1: hatched ember 35%
+  // Step 2: hatched ember 75%
+  // Step 3: solid #c4472a
+  // Step 4: solid #fb5c34
+  // Peak: solid #ff7a57
+  function getChoroplethFill(visitors: number): string {
+    if (visitors === 0) return "#161616";
     const ratio = visitors / maxVisitors;
-    if (ratio < 0.15) return "#083344"; // deep cyan
-    if (ratio < 0.4) return "#0e7490"; // cyan-700
-    if (ratio < 0.7) return "#06b6d4"; // cyan-500
-    return "#38bdf8"; // sky-400
+    if (ratio < 0.2) return "url(#choro-hatch-35)";
+    if (ratio < 0.45) return "url(#choro-hatch-75)";
+    if (ratio < 0.7) return "#c4472a";
+    if (ratio < 0.9) return "#fb5c34";
+    return "#ff7a57";
   }
 
   if (loading || geoLoading) {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-zinc-950 rounded-xl border border-zinc-800/80 p-6 min-h-[360px] animate-pulse ${className}`}
+        className={`flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 min-h-[360px] sheen ${className}`}
         aria-busy="true"
+        aria-label="Loading world choropleth"
       >
-        <div className="w-full h-56 bg-zinc-900 rounded-lg" />
-        <span className="text-xs text-zinc-500 font-mono mt-4">
+        <Skeleton className="w-full h-56 rounded-2xl" />
+        <span className="text-xs text-muted font-mono mt-4">
           Rendering geographic choropleth projection...
         </span>
       </div>
@@ -162,26 +174,48 @@ export function WorldChoropleth({
 
   return (
     <div
-      className={`relative flex flex-col bg-zinc-950 rounded-xl border border-zinc-800/80 p-4 ${className}`}
+      className={
+        embedded
+          ? `relative flex flex-col w-full ${className}`
+          : `relative flex flex-col bg-surface border border-border rounded-3xl p-6 sheen overflow-hidden ${className}`
+      }
+      role="region"
+      aria-label="Geographic density choropleth projection"
     >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-zinc-200">World Choropleth</span>
-          <span className="text-[11px] font-mono text-zinc-500">
-            Natural Earth Projection (Visitors by Country)
-          </span>
-        </div>
+      <div className={`flex flex-wrap items-center ${embedded ? "justify-end" : "justify-between"} gap-3 mb-3 z-10`}>
+        {!embedded && (
+          <div className="flex items-center gap-2">
+            <span className="font-sans text-[13px] font-medium text-white">Geographic Density</span>
+            <span className="font-mono text-[11px] text-muted">
+              Natural Earth Projection
+            </span>
+          </div>
+        )}
 
-        {/* Legend */}
-        <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono">
+        {/* Ember Ramp Legend */}
+        <div className="flex items-center gap-2 text-[10px] text-muted font-mono">
           <span>0</span>
-          <span className="w-2.5 h-2.5 rounded-xs bg-[#18181b] border border-zinc-800" />
-          <span className="w-2.5 h-2.5 rounded-xs bg-[#083344]" />
-          <span className="w-2.5 h-2.5 rounded-xs bg-[#0e7490]" />
-          <span className="w-2.5 h-2.5 rounded-xs bg-[#06b6d4]" />
-          <span className="w-2.5 h-2.5 rounded-xs bg-[#38bdf8]" />
+          <span className="w-3 h-3 rounded-[3px] bg-raised border border-border" title="Empty (0)" />
+          <span className="w-3 h-3 rounded-[3px] overflow-hidden inline-block" title="Low (35% hatch)">
+            <svg width="12" height="12">
+              <rect width="12" height="12" fill="url(#choro-hatch-35)" />
+            </svg>
+          </span>
+          <span className="w-3 h-3 rounded-[3px] overflow-hidden inline-block" title="Mid-Low (75% hatch)">
+            <svg width="12" height="12">
+              <rect width="12" height="12" fill="url(#choro-hatch-75)" />
+            </svg>
+          </span>
+          <span className="w-3 h-3 rounded-[3px] bg-[#c4472a]" title="Mid (Solid)" />
+          <span className="w-3 h-3 rounded-[3px] bg-accent" title="High (Solid)" />
+          <span className="w-3 h-3 rounded-[3px] bg-accent-bright" title="Peak" />
           <span>{maxVisitors.toLocaleString()}</span>
         </div>
+      </div>
+
+      {/* Accessible summary */}
+      <div className="sr-only">
+        Geographic density map showing visitor counts across {data.length} countries. Peak country has {maxVisitors.toLocaleString()} visitors.
       </div>
 
       <div className="w-full overflow-hidden flex items-center justify-center">
@@ -191,17 +225,41 @@ export function WorldChoropleth({
           role="img"
           aria-label="World map choropleth showing visitor density by country"
         >
+          <defs>
+            <pattern
+              id="choro-hatch-35"
+              width="6"
+              height="6"
+              patternTransform="rotate(-45 0 0)"
+              patternUnits="userSpaceOnUse"
+            >
+              <rect width="6" height="6" fill="#161616" />
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#fb5c34" strokeWidth="1.5" strokeOpacity="0.35" />
+            </pattern>
+            <pattern
+              id="choro-hatch-75"
+              width="6"
+              height="6"
+              patternTransform="rotate(-45 0 0)"
+              patternUnits="userSpaceOnUse"
+            >
+              <rect width="6" height="6" fill="#161616" />
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#fb5c34" strokeWidth="1.5" strokeOpacity="0.75" />
+            </pattern>
+          </defs>
+
           <g>
             {paths.map((p, idx) => {
-              const fill = getChoroplethColor(p.visitors);
+              const fill = getChoroplethFill(p.visitors);
+              const isHovered = hoveredCountry?.name === p.name;
               return (
                 <path
                   key={`${p.id}-${idx}`}
                   d={p.d}
                   fill={fill}
-                  stroke="#27272a"
-                  strokeWidth={0.5}
-                  className="transition-colors hover:stroke-cyan-300 hover:stroke-[1.2px] cursor-pointer"
+                  stroke={isHovered ? "#ffffff" : "rgba(255, 255, 255, 0.08)"}
+                  strokeWidth={isHovered ? 1.5 : 0.5}
+                  className="transition-colors cursor-pointer"
                   onMouseEnter={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     setHoveredCountry({
@@ -224,18 +282,17 @@ export function WorldChoropleth({
         </svg>
       </div>
 
+      {/* Shared Tooltip */}
       {hoveredCountry && (
         <div
-          className="fixed pointer-events-none z-50 bg-zinc-900 text-zinc-100 border border-zinc-700/80 px-2.5 py-1.5 rounded shadow-xl text-xs font-mono -translate-x-1/2 -translate-y-full mb-2"
+          className="fixed pointer-events-none z-50 -translate-x-1/2 -translate-y-full mb-3"
           style={{ left: hoveredCountry.x, top: hoveredCountry.y }}
         >
-          <div className="font-semibold text-cyan-400">{hoveredCountry.name}</div>
-          <div className="text-[11px] text-zinc-300">
-            {hoveredCountry.visitors.toLocaleString()} unique visitors
-          </div>
-          <div className="text-[10px] text-zinc-400">
-            {hoveredCountry.views.toLocaleString()} total views
-          </div>
+          <Tooltip
+            label={hoveredCountry.name}
+            value={`${hoveredCountry.visitors.toLocaleString()} visitors`}
+            subtext={`${hoveredCountry.views.toLocaleString()} views`}
+          />
         </div>
       )}
     </div>

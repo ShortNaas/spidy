@@ -4,6 +4,9 @@ import React, { useMemo, useState } from "react";
 import { stack, stackOffsetSilhouette, stackOrderNone, area, curveBasis } from "d3-shape";
 import { scaleLinear, scalePoint } from "d3-scale";
 import type { StreamDataPoint } from "@/lib/queries";
+import { categorical, CATEGORICAL_PALETTE } from "@/lib/theme";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export interface PageStreamProps {
   data?: StreamDataPoint[];
@@ -11,18 +14,8 @@ export interface PageStreamProps {
   className?: string;
   width?: number;
   height?: number;
+  embedded?: boolean;
 }
-
-const PALETTE = [
-  "#06b6d4", // cyan
-  "#6366f1", // indigo
-  "#10b981", // emerald
-  "#f59e0b", // amber
-  "#ec4899", // pink
-  "#8b5cf6", // violet
-  "#14b8a6", // teal
-  "#3b82f6", // blue
-];
 
 export function PageStream({
   data = [],
@@ -30,15 +23,21 @@ export function PageStream({
   className = "",
   width = 680,
   height = 280,
+  embedded = false,
 }: PageStreamProps) {
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
+  const [tooltipInfo, setTooltipInfo] = useState<{
+    label: string;
+    value: string;
+    x: number;
+    y: number;
+  } | null>(null);
 
   const { paths, dates, series, xScale, areaGenerator } = useMemo(() => {
     if (!data.length) {
       return { paths: [], dates: [], series: [], xScale: null, areaGenerator: null };
     }
 
-    // Unique paths and dates
     const pathSet = new Set<string>();
     const dateSet = new Set<string>();
     const valueMap = new Map<string, number>();
@@ -116,11 +115,12 @@ export function PageStream({
   if (loading) {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-zinc-950 rounded-xl border border-zinc-800/80 p-6 min-h-[280px] animate-pulse ${className}`}
+        className={`flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 min-h-[280px] sheen ${className}`}
         aria-busy="true"
+        aria-label="Loading page trajectory streamgraph"
       >
-        <div className="w-full h-40 bg-zinc-900 rounded" />
-        <span className="text-xs text-zinc-500 font-mono mt-4">
+        <Skeleton className="w-full h-44 rounded-2xl" />
+        <span className="text-xs text-muted font-mono mt-4">
           Generating page traffic streamgraph...
         </span>
       </div>
@@ -130,47 +130,70 @@ export function PageStream({
   if (!series.length || !areaGenerator) {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-zinc-950 rounded-xl border border-zinc-800/80 p-8 min-h-[280px] text-center ${className}`}
+        className={`flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-8 min-h-[280px] text-center sheen ${className}`}
       >
-        <span className="text-zinc-400 text-sm font-medium mb-1">Page Traffic Stream</span>
-        <span className="text-zinc-600 text-xs">
+        <span className="text-white text-sm font-medium mb-1">Page Traffic Stream</span>
+        <span className="text-muted text-xs">
           Insufficient multi-day data for streamgraph visualization.
         </span>
       </div>
     );
   }
 
+  const palette = categorical(paths.length);
+
   return (
     <div
-      className={`relative flex flex-col bg-zinc-950 rounded-xl border border-zinc-800/80 p-4 ${className}`}
+      className={
+        embedded
+          ? `relative flex flex-col w-full ${className}`
+          : `relative flex flex-col bg-surface border border-border rounded-3xl p-6 sheen overflow-hidden ${className}`
+      }
+      role="region"
+      aria-label="Page traffic streamgraph over time"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-zinc-200">Page Traffic Dynamics</span>
-          <span className="text-[11px] font-mono text-zinc-500">Top 8 Pages Stream</span>
-        </div>
+      <div className={`flex flex-wrap items-center ${embedded ? "justify-end" : "justify-between"} gap-3 mb-3`}>
+        {!embedded && (
+          <div className="flex items-center gap-2">
+            <span className="font-sans text-[13px] font-medium text-white">Page Trajectory</span>
+            <span className="font-mono text-[11px] text-muted">Top 8 Pages Stream</span>
+          </div>
+        )}
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono">
+        <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono">
           {paths.map((p, idx) => {
-            const color = PALETTE[idx % PALETTE.length];
+            const item = palette[idx % palette.length] || CATEGORICAL_PALETTE[idx % 8];
             const isHovered = hoveredPath === p;
             return (
               <button
                 key={p}
                 type="button"
-                className={`flex items-center gap-1.5 px-1.5 py-0.5 rounded transition-all ${
-                  isHovered ? "bg-zinc-800 text-zinc-100" : "text-zinc-400 hover:text-zinc-200"
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                  isHovered
+                    ? "bg-white text-[#050505] border-white font-medium"
+                    : "bg-raised border-border text-muted hover:text-white hover:border-border-hover"
                 }`}
                 onMouseEnter={() => setHoveredPath(p)}
                 onMouseLeave={() => setHoveredPath(null)}
               >
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                <span
+                  className="w-2 h-2 rounded-full inline-block"
+                  style={{
+                    backgroundColor: item.color,
+                    border: item.hatch ? "1px dashed rgba(255,255,255,0.4)" : "none",
+                  }}
+                />
                 <span>{p === "/" ? "Home (/)" : p}</span>
               </button>
             );
           })}
         </div>
+      </div>
+
+      {/* Accessible summary */}
+      <div className="sr-only">
+        Streamgraph showing relative pageview trends over time for {paths.length} top paths: {paths.join(", ")}.
       </div>
 
       <div className="w-full overflow-x-auto">
@@ -180,9 +203,34 @@ export function PageStream({
           role="img"
           aria-label="Streamgraph showing relative pageview trends over time for top pages"
         >
+          <defs>
+            {palette.map((cat, idx) =>
+              cat.hatch ? (
+                <pattern
+                  key={`pattern-${idx}`}
+                  id={`stream-hatch-${idx}`}
+                  width="6"
+                  height="6"
+                  patternTransform="rotate(-45 0 0)"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <rect width="6" height="6" fill="#161616" />
+                  <line
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="6"
+                    stroke={cat.color}
+                    strokeWidth="1.5"
+                  />
+                </pattern>
+              ) : null
+            )}
+          </defs>
+
           {series.map((layer, idx) => {
             const pathName = paths[idx];
-            const color = PALETTE[idx % PALETTE.length];
+            const item = palette[idx % palette.length] || CATEGORICAL_PALETTE[idx % 8];
             const isHighlighted = hoveredPath === null || hoveredPath === pathName;
             const pathD =
               areaGenerator(
@@ -191,18 +239,32 @@ export function PageStream({
                 >
               ) || "";
 
+            const fillValue = item.hatch ? `url(#stream-hatch-${idx})` : item.color;
+
             return (
               <path
                 key={pathName}
                 d={pathD}
-                fill={color}
-                fillOpacity={isHighlighted ? 0.75 : 0.15}
-                stroke={color}
+                fill={fillValue}
+                fillOpacity={isHighlighted ? (item.hatch ? 1 : 0.85) : 0.15}
+                stroke={item.color}
                 strokeWidth={isHighlighted ? 1.5 : 0.5}
                 strokeOpacity={isHighlighted ? 1 : 0.2}
                 className="transition-all duration-300 cursor-pointer"
-                onMouseEnter={() => setHoveredPath(pathName)}
-                onMouseLeave={() => setHoveredPath(null)}
+                onMouseEnter={(e) => {
+                  setHoveredPath(pathName);
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setTooltipInfo({
+                    label: pathName,
+                    value: "Active Stream Route",
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + 30,
+                  });
+                }}
+                onMouseLeave={() => {
+                  setHoveredPath(null);
+                  setTooltipInfo(null);
+                }}
               >
                 <title>{`${pathName}`}</title>
               </path>
@@ -223,8 +285,8 @@ export function PageStream({
                     y={0}
                     textAnchor="middle"
                     fontSize={10}
-                    fontFamily="monospace"
-                    fill="#71717a"
+                    fontFamily="var(--font-mono, monospace)"
+                    fill="#8d8d8d"
                   >
                     {date.slice(5)}
                   </text>
@@ -233,6 +295,16 @@ export function PageStream({
           )}
         </svg>
       </div>
+
+      {/* Shared Tooltip */}
+      {tooltipInfo && (
+        <div
+          className="fixed pointer-events-none z-50 -translate-x-1/2 -translate-y-full mb-3"
+          style={{ left: tooltipInfo.x, top: tooltipInfo.y }}
+        >
+          <Tooltip label={tooltipInfo.label} value={tooltipInfo.value} />
+        </div>
+      )}
     </div>
   );
 }

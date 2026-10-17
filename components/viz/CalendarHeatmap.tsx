@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export interface CalendarDayData {
   date: string; // YYYY-MM-DD
@@ -11,6 +13,7 @@ export interface CalendarHeatmapProps {
   data?: CalendarDayData[];
   loading?: boolean;
   className?: string;
+  embedded?: boolean;
 }
 
 const MONTH_NAMES = [
@@ -32,6 +35,7 @@ export function CalendarHeatmap({
   data = [],
   loading = false,
   className = "",
+  embedded = false,
 }: CalendarHeatmapProps) {
   const [hoveredDay, setHoveredDay] = useState<{
     date: string;
@@ -54,7 +58,6 @@ export function CalendarHeatmap({
     const today = new Date(anchorDateStr);
     today.setUTCHours(0, 0, 0, 0);
 
-    // End on the Saturday of the current week (or Sunday)
     const dayOfWeek = today.getUTCDay(); // 0 is Sun
     const endDate = new Date(today.getTime() + (6 - dayOfWeek) * 86400000);
 
@@ -95,64 +98,109 @@ export function CalendarHeatmap({
     return { weeks: weeksArray, monthLabels: monthsArray, maxViews: max };
   }, [data]);
 
-  // Viridis / cyan perceptual 5-step color scale
-  function getColor(views: number): string {
-    if (views === 0) return "#18181b"; // zinc-900
+  // Ember volume ramp: empty (#161616), hatched light (35%), hatched dense (75%), solid mid (#c4472a), solid full (#fb5c34)
+  function getCellFill(views: number): string {
+    if (views === 0) return "#161616";
     const ratio = views / maxViews;
-    if (ratio < 0.2) return "#083344"; // deep cyan
-    if (ratio < 0.45) return "#0e7490"; // cyan-700
-    if (ratio < 0.75) return "#06b6d4"; // cyan-500
-    return "#22d3ee"; // cyan-400 bright
+    if (ratio < 0.25) return "url(#cal-hatch-35)";
+    if (ratio < 0.5) return "url(#cal-hatch-75)";
+    if (ratio < 0.8) return "#c4472a";
+    return "#fb5c34";
   }
 
   if (loading) {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-zinc-950 rounded-xl border border-zinc-800/80 p-6 min-h-[200px] animate-pulse ${className}`}
+        className={`flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 min-h-[220px] sheen ${className}`}
         aria-busy="true"
+        aria-label="Loading calendar heatmap"
       >
-        <div className="w-full h-24 bg-zinc-900 rounded" />
-        <span className="text-xs text-zinc-500 font-mono mt-4">
+        <Skeleton className="w-full h-28 rounded-xl" />
+        <span className="text-xs text-muted font-mono mt-4">
           Loading 12-month calendar activity...
         </span>
       </div>
     );
   }
 
-  const cellSize = 11;
+  const cellSize = 12;
   const cellGap = 3;
+  const totalViews = data.reduce((sum, d) => sum + d.views, 0);
 
   return (
     <div
-      className={`relative flex flex-col bg-zinc-950 rounded-xl border border-zinc-800/80 p-4 ${className}`}
+      className={
+        embedded
+          ? `relative flex flex-col w-full ${className}`
+          : `relative flex flex-col bg-surface border border-border rounded-3xl p-6 sheen overflow-hidden ${className}`
+      }
+      role="region"
+      aria-label="Annual 12-month activity heatmap"
     >
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-zinc-200">12-Month Daily Activity</span>
-          <span className="text-[11px] font-mono tabular-nums text-zinc-500">
-            {data.reduce((sum, d) => sum + d.views, 0).toLocaleString()} total pageviews
-          </span>
-        </div>
+      <div className={`flex flex-wrap items-center ${embedded ? "justify-end" : "justify-between"} gap-3 mb-4`}>
+        {!embedded && (
+          <div className="flex items-center gap-2">
+            <span className="font-sans text-[13px] font-medium text-white">12-Month Activity</span>
+            <span className="font-mono text-[11px] tabular-nums text-muted">
+              {totalViews.toLocaleString()} total pageviews
+            </span>
+          </div>
+        )}
 
-        {/* Legend */}
-        <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono">
+        {/* 4-Swatch Legend per DESIGN.md */}
+        <div className="flex items-center gap-2 text-[10px] text-muted font-mono">
           <span>Less</span>
-          <span className="w-2.5 h-2.5 rounded-xs bg-[#18181b] border border-zinc-800" />
-          <span className="w-2.5 h-2.5 rounded-xs bg-[#083344]" />
-          <span className="w-2.5 h-2.5 rounded-xs bg-[#0e7490]" />
-          <span className="w-2.5 h-2.5 rounded-xs bg-[#06b6d4]" />
-          <span className="w-2.5 h-2.5 rounded-xs bg-[#22d3ee]" />
+          <span className="w-3 h-3 rounded-[3px] overflow-hidden inline-block" title="Hatched Light (35%)">
+            <svg width="12" height="12">
+              <rect width="12" height="12" fill="url(#cal-hatch-35)" />
+            </svg>
+          </span>
+          <span className="w-3 h-3 rounded-[3px] overflow-hidden inline-block" title="Hatched Dense (75%)">
+            <svg width="12" height="12">
+              <rect width="12" height="12" fill="url(#cal-hatch-75)" />
+            </svg>
+          </span>
+          <span className="w-3 h-3 rounded-[3px] bg-[#c4472a]" title="Solid Mid" />
+          <span className="w-3 h-3 rounded-[3px] bg-accent" title="Solid Full" />
           <span>More</span>
         </div>
+      </div>
+
+      {/* Accessible summary */}
+      <div className="sr-only">
+        12-month calendar heatmap showing daily activity. Total views: {totalViews.toLocaleString()}. Peak daily views: {maxViews.toLocaleString()}.
       </div>
 
       <div className="w-full overflow-x-auto pb-1">
         <svg
           viewBox={`0 0 ${weeks.length * (cellSize + cellGap) + 36} ${7 * (cellSize + cellGap) + 24}`}
-          className="min-w-[700px] w-full h-auto select-none"
+          className="min-w-[720px] w-full h-auto select-none"
           role="img"
           aria-label="Calendar heatmap showing daily pageview intensity across 12 months"
         >
+          <defs>
+            <pattern
+              id="cal-hatch-35"
+              width="6"
+              height="6"
+              patternTransform="rotate(-45 0 0)"
+              patternUnits="userSpaceOnUse"
+            >
+              <rect width="6" height="6" fill="#161616" />
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#fb5c34" strokeWidth="1.5" strokeOpacity="0.35" />
+            </pattern>
+            <pattern
+              id="cal-hatch-75"
+              width="6"
+              height="6"
+              patternTransform="rotate(-45 0 0)"
+              patternUnits="userSpaceOnUse"
+            >
+              <rect width="6" height="6" fill="#161616" />
+              <line x1="0" y1="0" x2="0" y2="6" stroke="#fb5c34" strokeWidth="1.5" strokeOpacity="0.75" />
+            </pattern>
+          </defs>
+
           {/* Month labels */}
           <g transform="translate(30, 12)">
             {monthLabels.map((m, idx) => (
@@ -161,8 +209,8 @@ export function CalendarHeatmap({
                 x={m.weekIndex * (cellSize + cellGap)}
                 y={0}
                 fontSize={9}
-                fontFamily="monospace"
-                fill="#71717a"
+                fontFamily="var(--font-mono, monospace)"
+                fill="#8d8d8d"
               >
                 {m.label}
               </text>
@@ -175,8 +223,8 @@ export function CalendarHeatmap({
               x={0}
               y={1 * (cellSize + cellGap) + 9}
               fontSize={8}
-              fontFamily="monospace"
-              fill="#71717a"
+              fontFamily="var(--font-mono, monospace)"
+              fill="#5f5f5f"
             >
               Mon
             </text>
@@ -184,8 +232,8 @@ export function CalendarHeatmap({
               x={0}
               y={3 * (cellSize + cellGap) + 9}
               fontSize={8}
-              fontFamily="monospace"
-              fill="#71717a"
+              fontFamily="var(--font-mono, monospace)"
+              fill="#5f5f5f"
             >
               Wed
             </text>
@@ -193,19 +241,20 @@ export function CalendarHeatmap({
               x={0}
               y={5 * (cellSize + cellGap) + 9}
               fontSize={8}
-              fontFamily="monospace"
-              fill="#71717a"
+              fontFamily="var(--font-mono, monospace)"
+              fill="#5f5f5f"
             >
               Fri
             </text>
           </g>
 
-          {/* Cells */}
+          {/* 6px-radius cells in Ember volume ramp */}
           <g transform="translate(30, 20)">
             {weeks.map((week, wIdx) => (
               <g key={`w-${wIdx}`} transform={`translate(${wIdx * (cellSize + cellGap)}, 0)`}>
                 {week.map((day) => {
                   const y = day.dayOfWeek * (cellSize + cellGap);
+                  const isHovered = hoveredDay?.date === day.date;
                   return (
                     <rect
                       key={day.date}
@@ -213,9 +262,18 @@ export function CalendarHeatmap({
                       y={y}
                       width={cellSize}
                       height={cellSize}
-                      rx={2}
-                      fill={getColor(day.views)}
-                      className="transition-colors hover:stroke hover:stroke-cyan-300 hover:stroke-[1.5px] cursor-pointer"
+                      rx={6}
+                      ry={6}
+                      fill={getCellFill(day.views)}
+                      stroke={
+                        isHovered
+                          ? "#ffffff"
+                          : day.views === 0
+                            ? "rgba(255, 255, 255, 0.05)"
+                            : "none"
+                      }
+                      strokeWidth={isHovered ? 1.5 : 0.5}
+                      className="transition-colors cursor-pointer"
                       onMouseEnter={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         setHoveredDay({
@@ -237,14 +295,16 @@ export function CalendarHeatmap({
         </svg>
       </div>
 
-      {/* Floating tooltip */}
+      {/* Shared Tooltip */}
       {hoveredDay && (
         <div
-          className="fixed pointer-events-none z-50 bg-zinc-900 text-zinc-100 border border-zinc-700/80 px-2.5 py-1.5 rounded shadow-xl text-xs font-mono -translate-x-1/2 -translate-y-full mb-2"
+          className="fixed pointer-events-none z-50 -translate-x-1/2 -translate-y-full mb-3"
           style={{ left: hoveredDay.x, top: hoveredDay.y }}
         >
-          <div className="font-semibold">{hoveredDay.views.toLocaleString()} views</div>
-          <div className="text-[10px] text-zinc-400">{hoveredDay.date}</div>
+          <Tooltip
+            label={hoveredDay.date}
+            value={`${hoveredDay.views.toLocaleString()} views`}
+          />
         </div>
       )}
     </div>

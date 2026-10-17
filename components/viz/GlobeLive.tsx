@@ -16,9 +16,15 @@ export interface GlobeLiveProps {
   markers?: GlobeMarker[];
   loading?: boolean;
   className?: string;
+  embedded?: boolean;
 }
 
-export function GlobeLive({ markers = [], loading = false, className = "" }: GlobeLiveProps) {
+export function GlobeLive({
+  markers = [],
+  loading = false,
+  className = "",
+  embedded = false,
+}: GlobeLiveProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const phiRef = useRef(0);
   const pointerStartRef = useRef<number | null>(null);
@@ -35,15 +41,19 @@ export function GlobeLive({ markers = [], loading = false, className = "" }: Glo
     };
     window.addEventListener("resize", onResize);
 
-    // Map markers into Cobe format: location: [lat, lon], size: 0.04 - 0.1
+    // Map markers into Cobe format: location: [lat, lon], size: 0.05 - 0.08
     const cobeMarkers = markers.slice(0, 50).map((m) => ({
       location: [m.lat, m.lon] as [number, number],
       size: 0.06,
     }));
 
     // Respect user's motion preferences
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    // Cobe WebGL globe configuration per DESIGN.md:
+    // Pure neutral gray landmass [0.15, 0.15, 0.15], cyan live blips [0.133, 0.827, 0.933]
     const globe = createGlobe(canvasRef.current, {
       devicePixelRatio: 2,
       width: width * 2,
@@ -54,9 +64,9 @@ export function GlobeLive({ markers = [], loading = false, className = "" }: Glo
       diffuse: 1.2,
       mapSamples: 16000,
       mapBrightness: 6,
-      baseColor: [0.1, 0.12, 0.15],
-      markerColor: [0.02, 0.71, 0.83], // Cyan accent #06b6d4
-      glowColor: [0.05, 0.15, 0.25],
+      baseColor: [0.15, 0.15, 0.15],
+      markerColor: [0.133, 0.827, 0.933], // Live Cyan #22d3ee
+      glowColor: [0.08, 0.08, 0.08],
       markers: cobeMarkers,
     });
 
@@ -86,12 +96,12 @@ export function GlobeLive({ markers = [], loading = false, className = "" }: Glo
   if (loading) {
     return (
       <div
-        className={`relative flex items-center justify-center bg-zinc-950/60 rounded-xl border border-zinc-800/80 p-6 aspect-square ${className}`}
+        className={`relative flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 aspect-square sheen ${className}`}
         aria-busy="true"
         aria-label="Loading realtime globe"
       >
-        <div className="w-48 h-48 rounded-full border-2 border-cyan-500/20 border-t-cyan-500 animate-spin" />
-        <span className="absolute bottom-6 text-xs text-zinc-500 font-mono tabular-nums">
+        <div className="w-48 h-48 rounded-full border border-live/20 border-t-live animate-spin" />
+        <span className="absolute bottom-6 text-xs text-muted font-mono tabular-nums">
           Initializing 3D coordinates...
         </span>
       </div>
@@ -100,20 +110,34 @@ export function GlobeLive({ markers = [], loading = false, className = "" }: Glo
 
   return (
     <div
-      className={`relative flex flex-col items-center justify-center bg-zinc-950 rounded-xl border border-zinc-800/80 overflow-hidden p-4 ${className}`}
+      className={
+        embedded
+          ? `relative flex flex-col items-center justify-center w-full ${className}`
+          : `relative flex flex-col items-center justify-center bg-surface border border-border rounded-3xl p-6 sheen overflow-hidden shadow-[0_0_24px_rgba(34,211,238,0.15)] ${className}`
+      }
+      role="region"
+      aria-label="Real-time planetary globe telemetry"
     >
-      <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-        <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
-        </span>
-        <span className="text-xs font-medium text-zinc-300">Live Global Traffic</span>
-        <span className="text-[11px] font-mono tabular-nums text-zinc-500 bg-zinc-900 px-1.5 py-0.5 rounded">
+      {/* Live Badge and Beacon count */}
+      <div className={embedded ? "w-full flex items-center justify-between mb-2" : "absolute top-5 left-5 z-10 flex items-center gap-2.5"}>
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-live opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-live" />
+          </span>
+          <span className="font-sans text-[13px] font-medium text-white">Live Global Traffic</span>
+        </div>
+        <span className="font-mono text-[11px] tabular-nums text-muted bg-raised px-2 py-0.5 rounded-full border border-border">
           {markers.length} {markers.length === 1 ? "beacon" : "beacons"}
         </span>
       </div>
 
-      <div className="w-full max-w-[420px] aspect-square flex items-center justify-center">
+      {/* Accessible summary */}
+      <div className="sr-only">
+        Interactive 3D globe displaying {markers.length} real-time active visitor locations.
+      </div>
+
+      <div className="w-full max-w-[420px] aspect-square flex items-center justify-center mt-2">
         <canvas
           ref={canvasRef}
           style={{ width: "100%", height: "100%", contain: "layout paint size" }}
@@ -146,11 +170,12 @@ export function GlobeLive({ markers = [], loading = false, className = "" }: Glo
             }
           }}
           className="cursor-grab transition-opacity duration-500"
+          aria-hidden="true"
         />
       </div>
 
       {markers.length === 0 && (
-        <div className="absolute bottom-4 text-xs text-zinc-500 font-mono">
+        <div className="absolute bottom-5 text-xs text-muted font-mono">
           Awaiting live beacons in current window
         </div>
       )}

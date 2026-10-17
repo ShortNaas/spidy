@@ -249,5 +249,21 @@
 - **Step 2: Tokens and textures**: Defined CSS variables for all DESIGN.md colors, radii, and fonts in `app/globals.css`, mapped to Tailwind `@theme inline`. Created `.sheen`, `.hatch-accent`, `.hatch-live`, `.hatch-white`, `.dotgrid`, `.beam`, and `.mono-num` utilities. Configured self-hosted Poppins (300-600) and Geist Mono in `app/layout.tsx`. Implemented `lib/theme.ts` exporting `emberRamp`, `categorical(n)`, `lineColors`, and `sankeyColors`.
 - **Step 3: Primitives (`/components/ui`)**: Implemented all required design system primitives (`Button`, `Tag`, `Tabs`, `Card`, `KpiCard`, `Input`, `Chip`, `DeltaBadge`, `Table`, `Tooltip`, `Skeleton`, `EmptyState`, `Banner`, `Wordmark`) strictly conforming to DESIGN.md. Built `/dev/ui` component gallery demonstrating all states.
 - **Step 4: Shell**: Rebuilt the top bar into a 72px floating pill bar (`Header.tsx`) with wordmark left, centered range preset tabs, and 40px circular control buttons right. Extracted shared 3-column cockpit grid (`DashboardGrid.tsx`) with 24px `Card` panels, unifying `/dashboard` and `/demo` with zero duplicated layout code.
+- **Step 5: Visualizations (`/components/viz`)**:
+  - Restyled all 8 visual components and added extra primitives (`BarChart`, `RadialGauge`, `DonutChart`) strictly adhering to DESIGN.md and `lib/theme.ts`:
+    - `KpiStrip.tsx`: Refactored to use `KpiCard` primitives with 40px Poppins 300 typography, delta badges, and shimmer `Skeleton` loading.
+    - `GlobeLive.tsx`: Neutral gray landmass `[0.15, 0.15, 0.15]`, live cyan blips `[0.133, 0.827, 0.933]`, container live halo `shadow-[0_0_24px_rgba(34,211,238,0.15)]`, and motion preference support.
+    - `PulseLive.tsx`: 1.5px live cyan stroke, ring-dot end marker (`#0f0f0f` fill with cyan outline), flat area fill, hover data points, and shared `Tooltip`.
+    - `WorldChoropleth.tsx`: Natural Earth projection with Ember volume ramp using SVG diagonal hatch patterns (`#choro-hatch-35`, `#choro-hatch-75`, solid mid `#c4472a`, solid full `#fb5c34`, peak `#ff7a57`), 5-swatch legend, and shared `Tooltip`.
+    - `CalendarHeatmap.tsx`: 6px-radius squircle cells in Ember volume ramp, 4-swatch legend (hatched light, hatched dense, solid mid, solid full), month/weekday labels in Geist Mono, and shared `Tooltip`.
+    - `HourWeekdayHeatmap.tsx`: 7x24 diurnal matrix with 6px-radius squircle cells using `.hatch-accent` textures, 4-swatch legend, and shared `Tooltip`.
+    - `FlowSankey.tsx`: 12px-rounded node cards with 3px left edge (NEXORA flow style: referrers white, landing pages ember, next pages mint), 30% link opacity, hover dimming to 25%, and shared `Tooltip`.
+    - `PageStream.tsx`: 8-step `categorical(n)` palette with diagonal hatch textures for series beyond the 4th, hover highlight, and date labels.
+    - `BarChart.tsx`, `RadialGauge.tsx`, `DonutChart.tsx`: Built reusable primitives matching DESIGN.md specs (pill-ended hatched bars with solid peak and label bubble; segmented rounded arc gauge; `#1c1c1c` track donut with rounded caps).
+    - Added accessible alternatives (`role="region"`, `aria-label`, and `.sr-only` descriptions) across all charts.
+    - Added `embedded?: boolean` mode across all charts for seamless integration in `DashboardGrid`.
+    - Added unit test suite `tests/unit/theme.test.ts` (4 tests) verifying color tokens, ramp ratios, and categorical hatching.
+  - Verification: `pnpm lint`, `pnpm test`, and `pnpm build` all passed with 0 errors across 26 routes.
+
 
 
