@@ -31,7 +31,7 @@ export default async function SiteDashboardPage(props: { params: Promise<{ id: s
     <Suspense
       fallback={
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="w-8 h-8 rounded-full border-2 border-cyan-500 border-t-transparent animate-spin" />
+          <div className="w-8 h-8 rounded-full border-2 border-live border-t-transparent animate-spin" />
         </div>
       }
     >

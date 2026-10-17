@@ -72,6 +72,19 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
     setTimeout(() => setCopied(false), 2000);
   }
 
+  // Dismiss embed modal with Escape key
+  React.useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && showEmbedModal) {
+        setShowEmbedModal(false);
+      }
+    }
+    if (showEmbedModal) {
+      window.addEventListener("keydown", onKeyDown);
+      return () => window.removeEventListener("keydown", onKeyDown);
+    }
+  }, [showEmbedModal]);
+
   return (
     <header className="border-b border-border bg-surface/80 backdrop-blur-md sticky top-0 z-40 transition-colors duration-150">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between gap-4">
@@ -197,6 +210,9 @@ export function Header({ currentSiteId = "", sites = [], isDemo = false }: Heade
         <div
           role="dialog"
           aria-modal="true"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowEmbedModal(false);
+          }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/80 backdrop-blur-sm"
         >
           <div className="bg-surface border border-border rounded-3xl p-6 max-w-lg w-full space-y-4 sheen relative z-10 shadow-2xl">

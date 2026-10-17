@@ -10,6 +10,7 @@ import {
 import type { SankeyData, SankeyLink } from "@/lib/queries";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { tokens, sankeyColors } from "@/lib/theme";
 
 export interface FlowSankeyProps {
   data?: SankeyData;
@@ -117,13 +118,10 @@ export function FlowSankey({
   const pathGenerator = sankeyLinkHorizontal();
 
   // Category color mapping per DESIGN.md:
-  // Referrers: gray-white (#ffffff / #d4d4d4)
-  // Landing: ember (#fb5c34)
-  // Next: mint (#86d4b2)
   function getNodeCategoryColor(category: "referrer" | "landing" | "next"): string {
-    if (category === "referrer") return "#ffffff";
-    if (category === "landing") return "#fb5c34";
-    return "#86d4b2";
+    if (category === "referrer") return sankeyColors.referrer;
+    if (category === "landing") return sankeyColors.landing;
+    return sankeyColors.next;
   }
 
   return (
@@ -192,7 +190,7 @@ export function FlowSankey({
                   key={`link-${idx}`}
                   d={pathD}
                   fill="none"
-                  stroke={isHighlighted ? "#fb5c34" : "rgba(255, 255, 255, 0.16)"}
+                  stroke={isHighlighted ? tokens.colors.accent : sankeyColors.link}
                   strokeWidth={Math.max(2, link.width || 1)}
                   strokeOpacity={isHighlighted ? 0.7 : isDimmed ? 0.1 : 0.3}
                   className="transition-all duration-200 cursor-pointer"
@@ -270,8 +268,8 @@ export function FlowSankey({
                     y={y0}
                     width={x1 - x0}
                     height={nodeHeight}
-                    fill="#161616"
-                    stroke={isHighlighted ? "#ffffff" : "rgba(255, 255, 255, 0.12)"}
+                    fill={tokens.colors.raised}
+                    stroke={isHighlighted ? tokens.colors.text : tokens.colors.border}
                     strokeWidth={1}
                     rx={6}
                     className="transition-all duration-200"
@@ -294,7 +292,7 @@ export function FlowSankey({
                     textAnchor={isLeftAligned ? "end" : "start"}
                     fontSize={11}
                     fontFamily="var(--font-mono, monospace)"
-                    fill={isHighlighted ? "#ffffff" : "#8d8d8d"}
+                    fill={isHighlighted ? tokens.colors.text : tokens.colors.muted}
                     className="select-none pointer-events-none transition-colors duration-200"
                   >
                     {node.name.length > 18 ? `${node.name.slice(0, 16)}…` : node.name}

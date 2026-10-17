@@ -35,7 +35,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               icon ? "pl-10" : ""
             } ${
               error
-                ? "border-rose-500/50 bg-rose-950/30 focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                ? "border-danger/50 bg-danger/10 focus:border-danger focus:ring-1 focus:ring-danger"
                 : "border-border hover:border-border-hover focus:border-live focus:ring-1 focus:ring-live"
             } disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
             {...props}

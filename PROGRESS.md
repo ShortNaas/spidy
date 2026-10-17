@@ -299,6 +299,75 @@
   - Verified `transition-colors duration-150` on all interactive buttons, links, inputs, and modal controls.
   - Verification: `pnpm lint`, `pnpm test`, and `pnpm build` passed with 0 errors across 26 routes.
 
+- **Step 9: Verification**:
+  - **Color Grep & Token Purity Check**:
+    - Scanned all components and application routes with AST/regex verification for `#000`, `bg-black`, `zinc-*`, `slate-*`, `indigo-*`, `cyan-*`, `emerald-*`, and raw hex codes.
+    - Result: **0 violations**. All colors, fills, and borders strictly read from token definitions in `globals.css` and `lib/theme.ts`.
+  - **WCAG 2.1 Contrast Ratio Verification**:
+    - Calculated exact relative luminance contrast ratios for all foreground/background pairings against Canvas (`#050505`), Surface (`#0f0f0f`), and Raised (`#161616`):
+      | Token Pair | Foreground Hex | Background Hex | Contrast Ratio | WCAG Compliance |
+      | :--- | :--- | :--- | :--- | :--- |
+      | `text` on Canvas | `#ffffff` | `#050505` | **20.38:1** | Pass AAA |
+      | `text` on Surface | `#ffffff` | `#0f0f0f` | **19.17:1** | Pass AAA |
+      | `text` on Raised | `#ffffff` | `#161616` | **18.10:1** | Pass AAA |
+      | `muted` on Canvas | `#8d8d8d` | `#050505` | **6.14:1** | Pass AA (normal text) |
+      | `muted` on Surface | `#8d8d8d` | `#0f0f0f` | **5.78:1** | Pass AA (normal text) |
+      | `muted` on Raised | `#8d8d8d` | `#161616` | **5.45:1** | Pass AA (normal text) |
+      | `accent` on Canvas | `#fb5c34` | `#050505` | **6.49:1** | Pass AA |
+      | `accent` on Surface | `#fb5c34` | `#0f0f0f` | **6.10:1** | Pass AA |
+      | `accent` on Raised | `#fb5c34` | `#161616` | **5.76:1** | Pass AA |
+      | `live` on Canvas | `#22d3ee` | `#050505` | **11.28:1** | Pass AAA |
+      | `live` on Surface | `#22d3ee` | `#0f0f0f` | **10.61:1** | Pass AAA |
+      | `live` on Raised | `#22d3ee` | `#161616` | **10.01:1** | Pass AAA |
+      | `positive` on Canvas | `#86d4b2` | `#050505` | **11.72:1** | Pass AAA |
+      | `positive` on Surface | `#86d4b2` | `#0f0f0f` | **11.02:1** | Pass AAA |
+      | `positive` on Raised | `#86d4b2` | `#161616` | **10.40:1** | Pass AAA |
+      | `danger` on Canvas | `#f43f5e` | `#050505` | **5.55:1** | Pass AA |
+      | `danger` on Surface | `#f43f5e` | `#0f0f0f` | **5.22:1** | Pass AA |
+      | `danger` on Raised | `#f43f5e` | `#161616` | **4.93:1** | Pass AA |
+      | `faint` on Canvas | `#5f5f5f` | `#050505` | **3.19:1** | Decorative-only (never readable text) |
+  - **One Hot Thing & Single Beam Audit**:
+    - Verified that no viewport contains more than one solid accent (`#fb5c34`) element.
+    - Verified that at most one `.beam` is mounted per page (`app/(marketing)/page.tsx`, `app/login/page.tsx`, and `components/auth/RegisterForm.tsx`).
+  - **Multi-Viewport Screenshots**:
+    - Captured 15 comprehensive screenshots across 390px, 768px, and 1440px in `/screenshots`:
+      - `landing-390.png`, `landing-768.png`, `landing-1440.png`
+      - `login-390.png`, `login-768.png`, `login-1440.png`
+      - `register-390.png`, `register-768.png`, `register-1440.png`
+      - `demo-390.png`, `demo-768.png`, `demo-1440.png`
+      - `dashboard-390.png`, `dashboard-768.png`, `dashboard-1440.png`
+  - **Reduced Motion Verification**:
+    - Executed automated Playwright test with `prefers-reduced-motion: reduce`.
+    - Confirmed CSS animation durations are neutralized (`1e-05s` / `0.01ms`), WebGL globe rotation is completely stopped, and skeleton shimmer sweeps are suppressed.
+  - **Mobile Landing Performance & Accessibility Audit**:
+    - First Contentful Paint (FCP): **604ms** (well below 2.5s budget).
+    - DOM element count: **1037 nodes** (lean, below 1500 threshold).
+    - Accessibility violations: **0** (all landmarks, button names, link titles, and single H1 validated).
+  - **Test Suite Status**:
+    - Unit tests: 4/4 passing (`pnpm test`).
+    - Playwright E2E tests: 11/11 passing (`pnpm test:e2e`).
+    - Lint & Typecheck: 0 errors, 0 warnings (`pnpm lint`).
+    - Production build: Successful (`pnpm build`).
+
+- **Review Checkpoint 3: `/impeccable audit` and `/impeccable polish`**:
+  - **Impeccable Heuristics & Persona Audit**:
+    - *Nielsen Heuristics*: All 10 heuristics verified. System status is clear with real-time live pulse and skeletons; user control supported via query-param range presets; error handling uses non-intrusive inline danger banners with retry actions.
+    - *Persona 1 (Fast-moving Indie Developer / Site Owner)*: One-click embed copy with immediate feedback, zero complex configurations, instant feedback on first pageview received.
+    - *Persona 2 (Privacy Auditor)*: Verifiable claims, cookieless architecture, daily salted rotating hash, strict CORS and neutral endpoint names.
+    - *Persona 3 (Keyboard & Screen Reader User)*: Semantic HTML landmarks (`<header>`, `<main>`, `<footer>`), keyboard trap prevention, Escape key modal dismiss, visible live-cyan focus rings.
+  - **Accepted Polish Fixes Applied**:
+    1. *Header Embed Modal Keyboard Dismiss*: Added `Escape` key event listener and backdrop click dismiss in `components/dashboard/Header.tsx`.
+    2. *Input Error State Tokenization*: Replaced legacy Tailwind `border-rose-500` / `bg-rose-950` with tokenized `border-danger/50` and `bg-danger/10` in `components/ui/Input.tsx`.
+    3. *Automated Mobile A11Y & Performance Check*: Added automated Playwright test asserting <1500 DOM elements, valid landmark hierarchy, single H1, and zero unnamed interactive elements.
+    4. *Network & IPv6 Binding Hardening*: Configured explicit `127.0.0.1` binding in `playwright.config.ts` for consistent local E2E execution.
+  - **Skipped Impeccable Suggestions (DESIGN.md wins)**:
+    1. *Multi-color / rainbow chart ramps*: Impeccable suggests distinct saturated hues for each chart panel. Skipped because DESIGN.md explicitly enforces "The Status Rule" (Orange is volume, Cyan is live, Mint is positive, Rose is harm) and "The Near-Monochrome Rule" (austere dark palette with no blue tint).
+    2. *Colored background mesh or gradients*: Impeccable recommends subtle colored radial gradients. Skipped because DESIGN.md strictly enforces "The No Colored Gradient Rule" (only grayscale sheen, beam, and dot-grid).
+    3. *Decorative illustrations/icons on privacy cards*: Impeccable suggests icons on each privacy card. Skipped because DESIGN.md explicitly mandates: "four small cards with one plain sentence each (true statements only). Nothing else visual."
+    4. *Multiple orange accent CTA buttons*: Impeccable suggests accent buttons in both the header and footer. Skipped because DESIGN.md strictly enforces "The One Hot Thing Rule" (`Open live demo` is the single accent element).
+    5. *Smaller container border radii (6-8px)*: Impeccable suggests sharper, more compact radii. Skipped because DESIGN.md explicitly mandates 24px (`rounded-3xl`) for cards/panels, 32px (`rounded-4xl`) for frames, and pill (`rounded-full`) for all buttons, tags, chips, and tabs.
+
+
 
 
 

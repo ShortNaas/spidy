@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import type { HourWeekdayCell } from "@/lib/queries";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { tokens } from "@/lib/theme";
 
 export interface HourWeekdayHeatmapProps {
   data?: HourWeekdayCell[];
@@ -47,12 +48,12 @@ export function HourWeekdayHeatmap({
   }, [data]);
 
   // Ember volume ramp:
-  // Step 0: empty (#161616)
+  // Step 0: empty
   // Step 1: hatched light (35%)
   // Step 2: hatched dense (75%)
-  // Step 3: solid mid (#c4472a)
-  // Step 4: solid full (#fb5c34)
-  // Peak: #ff7a57
+  // Step 3: solid mid
+  // Step 4: solid full
+  // Peak: peak solid
   function renderCellContent(views: number) {
     if (views === 0) {
       return <div className="w-full h-full bg-raised border border-white/5 rounded-[6px]" />;
@@ -73,7 +74,7 @@ export function HourWeekdayHeatmap({
       );
     }
     if (ratio < 0.8) {
-      return <div className="w-full h-full bg-[#c4472a] rounded-[6px]" />;
+      return <div className="w-full h-full rounded-[6px]" style={{ backgroundColor: tokens.colors.accentMid }} />;
     }
     if (ratio < 0.95) {
       return <div className="w-full h-full bg-accent rounded-[6px]" />;
@@ -127,7 +128,7 @@ export function HourWeekdayHeatmap({
           <div className="w-3 h-3 rounded-[3px] bg-raised relative overflow-hidden border border-white/10" title="Hatched Dense (75%)">
             <div className="absolute inset-0 hatch-accent opacity-75" />
           </div>
-          <span className="w-3 h-3 rounded-[3px] bg-[#c4472a]" title="Solid Mid" />
+          <span className="w-3 h-3 rounded-[3px]" style={{ backgroundColor: tokens.colors.accentMid }} title="Solid Mid" />
           <span className="w-3 h-3 rounded-[3px] bg-accent" title="Solid Full" />
           <span>Peak</span>
         </div>

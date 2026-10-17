@@ -42,11 +42,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     let variantClasses = "";
     if (variant === "primary") {
-      variantClasses = "bg-white text-[#050505] hover:bg-white/90 shadow-xs";
+      variantClasses = "bg-white text-canvas hover:bg-white/90 shadow-xs";
     } else if (variant === "accent") {
-      variantClasses = "bg-accent text-[#050505] hover:bg-accent-bright shadow-[0_0_28px_rgba(251,92,52,0.28)]";
+      variantClasses = "bg-accent text-canvas hover:bg-accent-bright shadow-[0_0_28px_rgba(251,92,52,0.28)]";
     } else if (variant === "secondary") {
-      variantClasses = "bg-raised border border-border text-white hover:border-border-hover hover:bg-[#1a1a1a]";
+      variantClasses = "bg-raised border border-border text-white hover:border-border-hover hover:bg-subtle";
     } else if (variant === "ghost") {
       variantClasses = "bg-transparent text-muted hover:text-white hover:bg-white/5";
     } else if (variant === "danger") {

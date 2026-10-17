@@ -1,6 +1,5 @@
-"use client";
-
 import React from "react";
+import { tokens } from "@/lib/theme";
 
 export interface DonutChartProps {
   value: number; // percentage 0 - 100
@@ -15,7 +14,7 @@ export interface DonutChartProps {
 
 /**
  * Spidy v3 Donut Chart:
- * Gray track #1c1c1c, white or ember arc with rounded caps, centered Poppins 300 KPI.
+ * Gray track subtle, white or ember arc with rounded caps, centered Poppins 300 KPI.
  */
 export function DonutChart({
   value = 72,
@@ -32,10 +31,10 @@ export function DonutChart({
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (clamped / 100) * circumference;
 
-  let strokeColor = "#fb5c34";
-  if (color === "white") strokeColor = "#ffffff";
-  if (color === "live") strokeColor = "#22d3ee";
-  if (color === "mint") strokeColor = "#86d4b2";
+  let strokeColor: string = tokens.colors.accent;
+  if (color === "white") strokeColor = tokens.colors.text;
+  if (color === "live") strokeColor = tokens.colors.live;
+  if (color === "mint") strokeColor = tokens.colors.positive;
 
   return (
     <div
@@ -45,13 +44,13 @@ export function DonutChart({
     >
       <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="rotate-[-90deg]">
-          {/* Track: #1c1c1c */}
+          {/* Track: subtle */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#1c1c1c"
+            stroke={tokens.colors.subtle}
             strokeWidth={strokeWidth}
           />
           {/* Arc with rounded caps */}

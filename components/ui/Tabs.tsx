@@ -40,7 +40,7 @@ export function Tabs({
             onClick={() => onChange(tab.id)}
             className={`rounded-full font-sans font-medium transition-all duration-150 outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-live focus-visible:ring-offset-2 focus-visible:ring-offset-canvas ${padClass} ${
               isActive
-                ? "bg-white text-[#050505] font-semibold shadow-xs"
+                ? "bg-white text-canvas font-semibold shadow-xs"
                 : "text-muted hover:text-white hover:bg-white/5"
             }`}
           >

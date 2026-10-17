@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { tokens } from "@/lib/theme";
 
 export interface BarDataPoint {
   label: string;
@@ -108,13 +109,13 @@ export function BarChart({
               patternTransform="rotate(-45 0 0)"
               patternUnits="userSpaceOnUse"
             >
-              <rect width="6" height="6" fill="#161616" />
+              <rect width="6" height="6" fill={tokens.colors.raised} />
               <line
                 x1="0"
                 y1="0"
                 x2="0"
                 y2="6"
-                stroke="#fb5c34"
+                stroke={tokens.colors.accent}
                 strokeWidth="1.5"
                 strokeOpacity="0.75"
               />
@@ -126,13 +127,13 @@ export function BarChart({
               patternTransform="rotate(-45 0 0)"
               patternUnits="userSpaceOnUse"
             >
-              <rect width="10" height="10" fill="#161616" />
+              <rect width="10" height="10" fill={tokens.colors.raised} />
               <line
                 x1="0"
                 y1="0"
                 x2="0"
                 y2="10"
-                stroke="#fb5c34"
+                stroke={tokens.colors.accent}
                 strokeWidth="1.5"
                 strokeOpacity="0.75"
               />
@@ -149,7 +150,7 @@ export function BarChart({
                 y1={y}
                 x2={svgWidth - paddingX}
                 y2={y}
-                stroke="rgba(255, 255, 255, 0.04)"
+                stroke={tokens.colors.borderHalf}
                 strokeDasharray="3 3"
                 strokeWidth="1"
               />
@@ -178,8 +179,8 @@ export function BarChart({
                   height={barH}
                   rx={barWidth / 2}
                   ry={barWidth / 2}
-                  fill={isActive ? "#fb5c34" : "url(#barchart-hatch)"}
-                  stroke={isActive ? "#ff7a57" : "rgba(255, 255, 255, 0.08)"}
+                  fill={isActive ? tokens.colors.accent : "url(#barchart-hatch)"}
+                  stroke={isActive ? tokens.colors.accentBright : tokens.colors.border}
                   strokeWidth={isActive ? 1.5 : 0.5}
                   className="transition-all duration-200"
                 />
@@ -193,8 +194,8 @@ export function BarChart({
                       width="36"
                       height="16"
                       rx="8"
-                      fill="#161616"
-                      stroke="#fb5c34"
+                      fill={tokens.colors.raised}
+                      stroke={tokens.colors.accent}
                       strokeWidth="1"
                     />
                     <text
@@ -203,7 +204,7 @@ export function BarChart({
                       textAnchor="middle"
                       fontSize="9"
                       fontFamily="var(--font-mono, monospace)"
-                      fill="#ffffff"
+                      fill={tokens.colors.text}
                       fontWeight="500"
                     >
                       {d.value}
@@ -218,7 +219,7 @@ export function BarChart({
                   textAnchor="middle"
                   fontSize="10"
                   fontFamily="var(--font-mono, monospace)"
-                  fill={isActive ? "#ffffff" : "#8d8d8d"}
+                  fill={isActive ? tokens.colors.text : tokens.colors.muted}
                   className="transition-colors"
                 >
                   {d.label}

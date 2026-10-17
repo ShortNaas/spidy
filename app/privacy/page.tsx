@@ -32,7 +32,7 @@ export default function PrivacyPage() {
             </Link>
             <Link
               href="/register"
-              className="text-[13px] font-sans bg-white text-[#050505] hover:bg-white/90 font-medium px-4 py-2 rounded-full transition-colors duration-150"
+              className="text-[13px] font-sans bg-white text-canvas hover:bg-white/90 font-medium px-4 py-2 rounded-full transition-colors duration-150"
             >
               Get started
             </Link>

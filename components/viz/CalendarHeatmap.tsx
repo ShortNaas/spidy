@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { tokens } from "@/lib/theme";
 
 export interface CalendarDayData {
   date: string; // YYYY-MM-DD
@@ -98,14 +99,14 @@ export function CalendarHeatmap({
     return { weeks: weeksArray, monthLabels: monthsArray, maxViews: max };
   }, [data]);
 
-  // Ember volume ramp: empty (#161616), hatched light (35%), hatched dense (75%), solid mid (#c4472a), solid full (#fb5c34)
+  // Ember volume ramp: empty, hatched light (35%), hatched dense (75%), solid mid, solid full
   function getCellFill(views: number): string {
-    if (views === 0) return "#161616";
+    if (views === 0) return tokens.colors.raised;
     const ratio = views / maxViews;
     if (ratio < 0.25) return "url(#cal-hatch-35)";
     if (ratio < 0.5) return "url(#cal-hatch-75)";
-    if (ratio < 0.8) return "#c4472a";
-    return "#fb5c34";
+    if (ratio < 0.8) return tokens.colors.accentMid;
+    return tokens.colors.accent;
   }
 
   if (loading) {
@@ -162,7 +163,7 @@ export function CalendarHeatmap({
               <rect width="12" height="12" fill="url(#cal-hatch-75)" />
             </svg>
           </span>
-          <span className="w-3 h-3 rounded-[3px] bg-[#c4472a]" title="Solid Mid" />
+          <span className="w-3 h-3 rounded-[3px]" style={{ backgroundColor: tokens.colors.accentMid }} title="Solid Mid" />
           <span className="w-3 h-3 rounded-[3px] bg-accent" title="Solid Full" />
           <span>More</span>
         </div>
@@ -188,8 +189,8 @@ export function CalendarHeatmap({
               patternTransform="rotate(-45 0 0)"
               patternUnits="userSpaceOnUse"
             >
-              <rect width="6" height="6" fill="#161616" />
-              <line x1="0" y1="0" x2="0" y2="6" stroke="#fb5c34" strokeWidth="1.5" strokeOpacity="0.35" />
+              <rect width="6" height="6" fill={tokens.colors.raised} />
+              <line x1="0" y1="0" x2="0" y2="6" stroke={tokens.colors.accent} strokeWidth="1.5" strokeOpacity="0.35" />
             </pattern>
             <pattern
               id="cal-hatch-75"
@@ -198,8 +199,8 @@ export function CalendarHeatmap({
               patternTransform="rotate(-45 0 0)"
               patternUnits="userSpaceOnUse"
             >
-              <rect width="6" height="6" fill="#161616" />
-              <line x1="0" y1="0" x2="0" y2="6" stroke="#fb5c34" strokeWidth="1.5" strokeOpacity="0.75" />
+              <rect width="6" height="6" fill={tokens.colors.raised} />
+              <line x1="0" y1="0" x2="0" y2="6" stroke={tokens.colors.accent} strokeWidth="1.5" strokeOpacity="0.75" />
             </pattern>
           </defs>
 
@@ -212,7 +213,7 @@ export function CalendarHeatmap({
                 y={0}
                 fontSize={9}
                 fontFamily="var(--font-mono, monospace)"
-                fill="#8d8d8d"
+                fill={tokens.colors.muted}
               >
                 {m.label}
               </text>
@@ -226,7 +227,7 @@ export function CalendarHeatmap({
               y={1 * (cellSize + cellGap) + 9}
               fontSize={8}
               fontFamily="var(--font-mono, monospace)"
-              fill="#5f5f5f"
+              fill={tokens.colors.faint}
             >
               Mon
             </text>
@@ -235,7 +236,7 @@ export function CalendarHeatmap({
               y={3 * (cellSize + cellGap) + 9}
               fontSize={8}
               fontFamily="var(--font-mono, monospace)"
-              fill="#5f5f5f"
+              fill={tokens.colors.faint}
             >
               Wed
             </text>
@@ -244,7 +245,7 @@ export function CalendarHeatmap({
               y={5 * (cellSize + cellGap) + 9}
               fontSize={8}
               fontFamily="var(--font-mono, monospace)"
-              fill="#5f5f5f"
+              fill={tokens.colors.faint}
             >
               Fri
             </text>
@@ -269,9 +270,9 @@ export function CalendarHeatmap({
                       fill={getCellFill(day.views)}
                       stroke={
                         isHovered
-                          ? "#ffffff"
+                          ? tokens.colors.text
                           : day.views === 0
-                            ? "rgba(255, 255, 255, 0.05)"
+                            ? tokens.colors.borderHalf
                             : "none"
                       }
                       strokeWidth={isHovered ? 1.5 : 0.5}

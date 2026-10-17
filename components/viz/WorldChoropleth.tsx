@@ -5,6 +5,7 @@ import { geoNaturalEarth1, geoPath, type GeoPermissibleObjects } from "d3-geo";
 import type { ItemCount } from "@/lib/queries";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { tokens } from "@/lib/theme";
 
 export interface WorldChoroplethProps {
   data?: ItemCount[];
@@ -141,20 +142,14 @@ export function WorldChoropleth({
   }, [geoFeatures, countryMap, width, height]);
 
   // Ember volume ramp:
-  // Step 0: empty (#161616 with hairline)
-  // Step 1: hatched ember 35%
-  // Step 2: hatched ember 75%
-  // Step 3: solid #c4472a
-  // Step 4: solid #fb5c34
-  // Peak: solid #ff7a57
   function getChoroplethFill(visitors: number): string {
-    if (visitors === 0) return "#161616";
+    if (visitors === 0) return tokens.colors.raised;
     const ratio = visitors / maxVisitors;
     if (ratio < 0.2) return "url(#choro-hatch-35)";
     if (ratio < 0.45) return "url(#choro-hatch-75)";
-    if (ratio < 0.7) return "#c4472a";
-    if (ratio < 0.9) return "#fb5c34";
-    return "#ff7a57";
+    if (ratio < 0.7) return tokens.colors.accentMid;
+    if (ratio < 0.9) return tokens.colors.accent;
+    return tokens.colors.accentBright;
   }
 
   if (loading || geoLoading) {
@@ -208,7 +203,7 @@ export function WorldChoropleth({
               <rect width="12" height="12" fill="url(#choro-hatch-75)" />
             </svg>
           </span>
-          <span className="w-3 h-3 rounded-[3px] bg-[#c4472a]" title="Mid (Solid)" />
+          <span className="w-3 h-3 rounded-[3px]" style={{ backgroundColor: tokens.colors.accentMid }} title="Mid (Solid)" />
           <span className="w-3 h-3 rounded-[3px] bg-accent" title="High (Solid)" />
           <span className="w-3 h-3 rounded-[3px] bg-accent-bright" title="Peak" />
           <span>{maxVisitors.toLocaleString()}</span>
@@ -235,8 +230,8 @@ export function WorldChoropleth({
               patternTransform="rotate(-45 0 0)"
               patternUnits="userSpaceOnUse"
             >
-              <rect width="6" height="6" fill="#161616" />
-              <line x1="0" y1="0" x2="0" y2="6" stroke="#fb5c34" strokeWidth="1.5" strokeOpacity="0.35" />
+              <rect width="6" height="6" fill={tokens.colors.raised} />
+              <line x1="0" y1="0" x2="0" y2="6" stroke={tokens.colors.accent} strokeWidth="1.5" strokeOpacity="0.35" />
             </pattern>
             <pattern
               id="choro-hatch-75"
@@ -245,8 +240,8 @@ export function WorldChoropleth({
               patternTransform="rotate(-45 0 0)"
               patternUnits="userSpaceOnUse"
             >
-              <rect width="6" height="6" fill="#161616" />
-              <line x1="0" y1="0" x2="0" y2="6" stroke="#fb5c34" strokeWidth="1.5" strokeOpacity="0.75" />
+              <rect width="6" height="6" fill={tokens.colors.raised} />
+              <line x1="0" y1="0" x2="0" y2="6" stroke={tokens.colors.accent} strokeWidth="1.5" strokeOpacity="0.75" />
             </pattern>
           </defs>
 
@@ -259,7 +254,7 @@ export function WorldChoropleth({
                   key={`${p.id}-${idx}`}
                   d={p.d}
                   fill={fill}
-                  stroke={isHovered ? "#ffffff" : "rgba(255, 255, 255, 0.08)"}
+                  stroke={isHovered ? tokens.colors.text : tokens.colors.border}
                   strokeWidth={isHovered ? 1.5 : 0.5}
                   className="transition-colors cursor-pointer"
                   onMouseEnter={(e) => {

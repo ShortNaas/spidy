@@ -9,7 +9,7 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   use: {
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || "http://localhost:3000",
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || "http://127.0.0.1:3000",
     trace: "on-first-retry",
   },
   projects: [
@@ -19,10 +19,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "./node_modules/.bin/next start",
-    url: "http://localhost:3000",
+    command: "./node_modules/.bin/next start -H 127.0.0.1 -p 3000",
+    url: "http://127.0.0.1:3000",
     reuseExistingServer: false,
-    timeout: 30000,
+    timeout: 60000,
     env: {
       NODE_ENV: "production",
       SALT: process.env.SALT || "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",

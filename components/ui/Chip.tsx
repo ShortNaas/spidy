@@ -22,7 +22,7 @@ export function Chip({
 
   if (variant === "live") {
     styleClasses = "bg-live-deep/60 border-live/40 text-live";
-    dotColor = "bg-live shadow-[0_0_8px_#22d3ee]";
+    dotColor = "bg-live shadow-[0_0_8px_var(--color-live)]";
   } else if (variant === "accent") {
     styleClasses = "bg-accent-deep/50 border-accent/40 text-accent-bright";
     dotColor = "bg-accent";

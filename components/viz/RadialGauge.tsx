@@ -1,6 +1,5 @@
-"use client";
-
 import React from "react";
+import { tokens } from "@/lib/theme";
 
 export interface RadialGaugeProps {
   value: number; // percentage (0-100) or ratio
@@ -76,7 +75,7 @@ export function RadialGauge({
               patternTransform="rotate(-45 0 0)"
               patternUnits="userSpaceOnUse"
             >
-              <line x1="0" y1="0" x2="0" y2="4" stroke="#fb5c34" strokeWidth="1" strokeOpacity="0.4" />
+              <line x1="0" y1="0" x2="0" y2="4" stroke={tokens.colors.accent} strokeWidth="1" strokeOpacity="0.4" />
             </pattern>
           </defs>
 
@@ -85,7 +84,7 @@ export function RadialGauge({
               key={s.idx}
               d={s.d}
               fill="none"
-              stroke={s.isFilled ? "#fb5c34" : "rgba(255, 255, 255, 0.1)"}
+              stroke={s.isFilled ? tokens.colors.accent : tokens.colors.borderHover}
               strokeWidth={strokeWidth}
               strokeLinecap="round"
               className="transition-colors duration-200"

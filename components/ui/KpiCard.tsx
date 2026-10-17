@@ -84,7 +84,7 @@ export function KpiCard({
           strokeLinejoin="round"
         />
         {/* Ring-dot end marker: hollow circle with filled center */}
-        <circle cx={lastPoint.x} cy={lastPoint.y} r="3" fill="#0f0f0f" stroke="#ffffff" strokeWidth="1.5" />
+        <circle cx={lastPoint.x} cy={lastPoint.y} r="3" fill="var(--color-surface)" stroke="var(--color-text)" strokeWidth="1.5" />
       </svg>
     );
   }

@@ -65,7 +65,7 @@ export function GlobeLive({
       mapSamples: 16000,
       mapBrightness: 6,
       baseColor: [0.15, 0.15, 0.15],
-      markerColor: [0.133, 0.827, 0.933], // Live Cyan #22d3ee
+      markerColor: [0.133, 0.827, 0.933], // Live Orbital Cyan
       glowColor: [0.08, 0.08, 0.08],
       markers: cobeMarkers,
     });

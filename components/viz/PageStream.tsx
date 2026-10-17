@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { stack, stackOffsetSilhouette, stackOrderNone, area, curveBasis } from "d3-shape";
 import { scaleLinear, scalePoint } from "d3-scale";
 import type { StreamDataPoint } from "@/lib/queries";
-import { categorical, CATEGORICAL_PALETTE } from "@/lib/theme";
+import { categorical, CATEGORICAL_PALETTE, tokens } from "@/lib/theme";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { Skeleton } from "@/components/ui/Skeleton";
 
@@ -173,7 +173,7 @@ export function PageStream({
                 type="button"
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
                   isHovered
-                    ? "bg-white text-[#050505] border-white font-medium"
+                    ? "bg-white text-canvas border-white font-medium"
                     : "bg-raised border-border text-muted hover:text-white hover:border-border-hover"
                 }`}
                 onMouseEnter={() => setHoveredPath(p)}
@@ -216,7 +216,7 @@ export function PageStream({
                   patternTransform="rotate(-45 0 0)"
                   patternUnits="userSpaceOnUse"
                 >
-                  <rect width="6" height="6" fill="#161616" />
+                  <rect width="6" height="6" fill={tokens.colors.raised} />
                   <line
                     x1="0"
                     y1="0"
@@ -288,7 +288,7 @@ export function PageStream({
                     textAnchor="middle"
                     fontSize={10}
                     fontFamily="var(--font-mono, monospace)"
-                    fill="#8d8d8d"
+                    fill={tokens.colors.muted}
                   >
                     {date.slice(5)}
                   </text>

@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { tokens } from "@/lib/theme";
 
 export interface PulseLiveProps {
   activeVisitors?: number;
@@ -140,7 +141,7 @@ export function PulseLive({
             <path
               d={points.pathD}
               fill="none"
-              stroke="#22d3ee"
+              stroke={tokens.colors.live}
               strokeWidth={1.5}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -167,11 +168,11 @@ export function PulseLive({
                 cx={lastPoint.x}
                 cy={lastPoint.y}
                 r={4}
-                fill="#0f0f0f"
-                stroke="#22d3ee"
+                fill={tokens.colors.surface}
+                stroke={tokens.colors.live}
                 strokeWidth={1.5}
               />
-              <circle cx={lastPoint.x} cy={lastPoint.y} r={1.5} fill="#22d3ee" />
+              <circle cx={lastPoint.x} cy={lastPoint.y} r={1.5} fill={tokens.colors.live} />
             </g>
           )}
 
@@ -183,7 +184,7 @@ export function PulseLive({
                 y1={0}
                 x2={activePoint.x}
                 y2={height}
-                stroke="rgba(255, 255, 255, 0.15)"
+                stroke={tokens.colors.borderHover}
                 strokeDasharray="2 2"
                 strokeWidth={1}
               />
@@ -191,11 +192,11 @@ export function PulseLive({
                 cx={activePoint.x}
                 cy={activePoint.y}
                 r={4.5}
-                fill="#0f0f0f"
-                stroke="#22d3ee"
+                fill={tokens.colors.surface}
+                stroke={tokens.colors.live}
                 strokeWidth={2}
               />
-              <circle cx={activePoint.x} cy={activePoint.y} r={2} fill="#ffffff" />
+              <circle cx={activePoint.x} cy={activePoint.y} r={2} fill={tokens.colors.text} />
             </g>
           )}
         </svg>
