@@ -525,4 +525,30 @@ Applied all 5 ponytail review findings with 1 commit per finding, accompanied by
     - `middleware.ts`
   - **Conclusion**: None of `lib/auth.ts`, `lib/rate-limit.ts`, `lib/theme.ts`, `app/api/sites/route.ts`, or `app/api/cron/rollup/route.ts` run on Edge. All run in the Node.js server runtime where `node:crypto` standard library is fully available.
 
+## Ponytail Audit: Stdlib Replacement & Starter Asset Elimination
+
+Applied all 7 ponytail audit findings with 1 commit per finding, accompanied by strict verification (`pnpm lint`, `pnpm test`, `pnpm build`, and `pnpm test:e2e`):
+
+1. **`chore(public): remove unused Next.js starter SVGs`** (`public/file.svg`, `public/globe.svg`, `public/next.svg`, `public/vercel.svg`, `public/window.svg`):
+   - Confirmed 0 references across source, CSS, metadata, `next.config`, README, and tests. Removed 5 starter SVG template files. Favicon and GeoJSON assets preserved.
+2. **`chore(theme): remove unused getEmberRampStep helper`** (`lib/theme.ts`, `tests/unit/theme.test.ts`):
+   - Confirmed heatmaps, choropleth, and bar components style ember steps directly via `.hatch-accent` and color tokens. Removed speculative `getEmberRampStep` helper and its unit tests. `emberRamp`, `categorical`, `lineColors`, and `sankeyColors` preserved.
+3. **`refactor(cron): export GET handler directly as POST in rollup route`** (`app/api/cron/rollup/route.ts`):
+   - Replaced boilerplate async `POST` wrapper with `export { GET as POST }`. Both methods remain bearer-authenticated; `vercel.json` cron config unchanged.
+4. **`refactor(auth): make hashToken synchronous and remove redundant awaits`** (`lib/auth.ts`, `app/api/auth/password/route.ts`, `tests/unit/auth.test.ts`):
+   - Made `hashToken` synchronous returning lowercase hex SHA-256 string. Removed unneeded `await`s. Added unit tests in `tests/unit/auth.test.ts` asserting exact byte-for-byte SHA-256 test vectors (`"hello world"`, empty string, 64-char token).
+5. **`refactor(rate-limit): replace hand-rolled bufferToHex with synchronous node:crypto`** (`lib/rate-limit.ts`, `tests/unit/rate-limit.test.ts`):
+   - Replaced manual `bufferToHex`, `TextEncoder`, and Web Crypto `subtle.digest` with synchronous `crypto.createHash("sha256").update(value).digest("hex").slice(0, 32)`. Added unit tests in `tests/unit/rate-limit.test.ts` asserting exact 32-char lowercase hex vectors for IP and email inputs. Raw IP/email is never stored.
+6. **`refactor(sites): replace manual byte mapping with crypto.randomBytes and add collision retry`** (`app/api/sites/route.ts`, `tests/unit/sites.test.ts`):
+   - Replaced manual 5-byte `Uint8Array` allocation and `.map().join("")` in `generateSiteId` with `crypto.randomBytes(5).toString("hex")`. Confirmed 10 lowercase hex characters length and charset, ensured "demo" is never generated, verified collector's Zod schema accepts it, and added a 3-attempt retry loop on primary key constraint collision. Added unit test suite in `tests/unit/sites.test.ts`.
+7. **`refactor(cron): use crypto.timingSafeEqual for cron bearer token verification`** (`app/api/cron/rollup/route.ts`, `tests/unit/cron.test.ts`):
+   - Replaced manual XOR loop with `crypto.timingSafeEqual(tokenBuf, secretBuf)` with defensive guards: immediate 401 on missing or empty `CRON_SECRET`, missing `Authorization: Bearer <token>`, and length mismatch (preventing throw). Added unit test suite in `tests/unit/cron.test.ts` verifying 200 on correct secret, 401 on wrong secret of same length, 401 (not 500) on wrong secret of different length, 401 on missing header, 401 on unset/empty secret, and identical POST export.
+
+- **Verification**:
+  - Findings skipped: **0** (all 7 applied and verified).
+  - Vitest Unit Tests: **38/38 passed** across all 8 suites (`tests/unit/auth.test.ts`, `button.test.tsx`, `cron.test.ts`, `delta-badge.test.tsx`, `export.test.ts`, `rate-limit.test.ts`, `sites.test.ts`, `theme.test.ts`).
+  - Playwright E2E Tests: **15/15 passed** across all suites (`tests/e2e/delta-badges.spec.ts`, `embed-modal.spec.ts`, `landing.spec.ts`, `screenshots.spec.ts`).
+  - Linter & Build: `pnpm lint` (0 errors, 0 warnings) and Next.js Turbopack production build (26/26 routes) clean.
+
+
 
