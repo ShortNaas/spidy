@@ -516,3 +516,13 @@ Applied all 5 ponytail review findings with 1 commit per finding, accompanied by
   - Playwright E2E Tests: 15/15 passed (`pnpm test:e2e`).
   - CI Quality: `pnpm lint` (0 errors) and `pnpm build` (26/26 routes compiled) clean.
 
+## Edge Runtime Audit
+
+- **Edge runtime check**:
+  - `middleware.ts` runs on the Next.js Edge/proxy runtime. It imports only `{ NextRequest, NextResponse } from "next/server"` and defines its local `SESSION_COOKIE_NAME` with zero project imports.
+  - No routes across `app/` declare `export const runtime = 'edge'`.
+  - **Files on Edge list**:
+    - `middleware.ts`
+  - **Conclusion**: None of `lib/auth.ts`, `lib/rate-limit.ts`, `lib/theme.ts`, `app/api/sites/route.ts`, or `app/api/cron/rollup/route.ts` run on Edge. All run in the Node.js server runtime where `node:crypto` standard library is fully available.
+
+

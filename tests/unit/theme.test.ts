@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { emberRamp, getEmberRampStep, categorical, tokens, lineColors } from "@/lib/theme";
+import { emberRamp, categorical, tokens, lineColors } from "@/lib/theme";
 
 describe("Theme Tokens & Data Ramps", () => {
   it("defines all core color tokens without blue tinting", () => {
@@ -25,15 +25,6 @@ describe("Theme Tokens & Data Ramps", () => {
     expect(emberRamp[3].fill).toBe("#c4472a");
     expect(emberRamp[4].fill).toBe("#fb5c34");
     expect(emberRamp[5].fill).toBe("#ff7a57");
-  });
-
-  it("maps ratios to ember ramp steps", () => {
-    expect(getEmberRampStep(0).step).toBe(0);
-    expect(getEmberRampStep(0.1).step).toBe(1);
-    expect(getEmberRampStep(0.3).step).toBe(2);
-    expect(getEmberRampStep(0.6).step).toBe(3);
-    expect(getEmberRampStep(0.85).step).toBe(4);
-    expect(getEmberRampStep(0.99).step).toBe(5);
   });
 
   it("provides 8 categorical series with hatch textures for series beyond 4", () => {

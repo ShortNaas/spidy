@@ -23,18 +23,6 @@ export const emberRamp: RampStep[] = [
   { step: 5, fill: "#ff7a57", hatch: false, opacity: 1, label: "Peak (Solid)" },
 ];
 
-/**
- * Maps a ratio (0.0 to 1.0) to an Ember volume ramp step
- */
-export function getEmberRampStep(ratio: number): RampStep {
-  if (ratio <= 0) return emberRamp[0];
-  if (ratio < 0.2) return emberRamp[1];
-  if (ratio < 0.45) return emberRamp[2];
-  if (ratio < 0.7) return emberRamp[3];
-  if (ratio < 0.9) return emberRamp[4];
-  return emberRamp[5];
-}
-
 export interface CategoricalColor {
   color: string;
   hatch: boolean;
