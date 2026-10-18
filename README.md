@@ -25,11 +25,11 @@ Spidy was architected from the ground up to respect user sovereignty and comply 
 | Layer               | Choice                                                                   |
 | ------------------- | ------------------------------------------------------------------------ |
 | Framework           | Next.js (App Router, strict TypeScript, Tailwind CSS v4)                 |
-| Hosting & Edge      | Vercel (Fluid/Serverless Functions, Vercel Cron)                         |
+| Hosting & Edge      | Vercel (Serverless Functions, Vercel Cron)                               |
 | Database            | Neon Serverless Postgres via `@neondatabase/serverless`                  |
-| Visualizations (2D) | D3 (`d3-geo`, `d3-scale`, `d3-sankey`, `d3-shape`), `@observablehq/plot` |
+| Visualizations (2D) | D3 (`d3-geo`, `d3-scale`, `d3-sankey`, `d3-shape`), custom React SVG      |
 | 3D Globe            | `cobe` (WebGL interactive globe)                                         |
-| Animations          | `framer-motion`                                                          |
+| Password Hashing    | `@node-rs/argon2`                                                        |
 | Validation          | `zod`                                                                    |
 | Testing             | Vitest (unit), Playwright (E2E)                                          |
 
@@ -141,7 +141,7 @@ A nightly rollup function runs via Vercel Cron (configured in `vercel.json` at `
 ## 🧪 Testing & Verification
 
 ```bash
-# Run all Vitest unit tests (46 tests)
+# Run all Vitest unit tests (38 tests)
 pnpm test
 
 # Run ESLint check
@@ -156,6 +156,20 @@ pnpm test:e2e
 
 ---
 
+## 🤖 Built with AI
+
+This project was engineered through collaborative human-AI pair programming using **Google DeepMind's Antigravity** autonomous coding agent.
+
+AI agents were utilized throughout the project lifecycle for:
+- **Architecture & Privacy Enforcement**: Designing strict cookieless data models, Neon Postgres schemas, daily rotating salted SHA-256 visitor hashing, and edge-isolated authentication.
+- **Visual Engineering**: Crafting responsive 2D/3D visualizations using D3, Cobe WebGL, and accessible SVG primitives with custom ember-themed volume ramps and hatch textures.
+- **Full-Stack Implementation**: Implementing Next.js App Router API endpoints, server actions, CSRF protection, and accessible WCAG-compliant UI components.
+- **Auditing & Complexity Reduction**: Conducting systematic code reviews and audits (Ponytail) to ruthlessly prune speculative features, strip unused abstractions, eliminate dead dependencies, and maximize standard library usage.
+
+---
+
 ## 📄 License
 
-MIT
+This program is free software: you can redistribute it and/or modify it under the terms of the **GNU General Public License** as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+See the [LICENSE](LICENSE) file for the full license text.

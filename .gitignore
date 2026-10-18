@@ -8,11 +8,14 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
+# testing & visual artifacts
 /coverage
 /test-results/
 /playwright-report/
 /blob-report/
+/screenshots/
+/design-refs/
+scripts/verify-pixels.py
 
 # next.js
 /.next/
@@ -43,5 +46,12 @@ yarn-error.log*
 next-env.d.ts
 .neon
 
-# impeccable local config
-.impeccable/*.local.*
+# design tools
+/.impeccable/
+
+# agent scratch & prompt files
+AGENT-PROMPT-*.md
+AGENTS-*.md
+REDESIGN-AUDIT.md
+BLOCKERS.md
+PROGRESS.md
