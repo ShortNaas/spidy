@@ -114,30 +114,3 @@ export function parseUserAgent(uaString: string): ParsedUserAgent {
 
   return { device, browser, os };
 }
-
-/**
- * Checks if incoming origin is permitted by ALLOWED_ORIGINS.
- */
-export function isOriginAllowed(
-  origin: string | null | undefined,
-  allowedOriginsConfig?: string
-): boolean {
-  const config = allowedOriginsConfig ?? process.env.ALLOWED_ORIGINS;
-
-  // If no ALLOWED_ORIGINS specified or set to '*', allow all origins
-  if (!config || config.trim() === "" || config.trim() === "*") {
-    return true;
-  }
-
-  if (!origin) {
-    return false;
-  }
-
-  const allowedList = config
-    .split(",")
-    .map((o) => o.trim().toLowerCase())
-    .filter((o) => o.length > 0);
-
-  const cleanOrigin = origin.trim().toLowerCase();
-  return allowedList.includes(cleanOrigin) || allowedList.includes("*");
-}
