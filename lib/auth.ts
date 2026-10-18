@@ -16,7 +16,7 @@ import crypto from "node:crypto";
 /**
  * Computes SHA-256 hash of a string (used for session tokens and attempt tracking).
  */
-export async function hashToken(token: string): Promise<string> {
+export function hashToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
@@ -69,7 +69,7 @@ export async function dummyPasswordVerify(): Promise<void> {
  */
 export async function createSession(userId: string): Promise<string> {
   const rawToken = generateRawToken();
-  const tokenHash = await hashToken(rawToken);
+  const tokenHash = hashToken(rawToken);
   const expiresAt = new Date(Date.now() + SESSION_MAX_AGE_SECONDS * 1000).toISOString();
 
   await sql`
@@ -96,7 +96,7 @@ export async function getSessionUser(
     return null;
   }
 
-  const tokenHash = await hashToken(token.trim());
+  const tokenHash = hashToken(token.trim());
 
   const rows = (await sql`
     SELECT users.id, users.email
@@ -124,7 +124,7 @@ export async function destroySession(token: string | null | undefined): Promise<
     return;
   }
 
-  const tokenHash = await hashToken(token.trim());
+  const tokenHash = hashToken(token.trim());
   await sql`
     DELETE FROM sessions
     WHERE token_hash = ${tokenHash};

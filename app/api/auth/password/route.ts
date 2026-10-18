@@ -65,7 +65,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   `;
 
   // Invalidate all OTHER sessions for this user
-  const currentTokenHash = await hashToken(token);
+  const currentTokenHash = hashToken(token);
   await sql`
     DELETE FROM sessions
     WHERE user_id = ${user.id}::uuid
