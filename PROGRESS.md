@@ -487,3 +487,32 @@ Applied all 9 ponytail audit findings with 1 commit per finding, accompanied by 
   - Dependencies pruned: **2 direct dependencies** (`@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`) and **24 transitive packages** (-26 packages total).
   - Findings skipped: **0** (all 9 applied and verified).
   - Test suites: 17/17 unit tests passed, 14/14 Playwright E2E tests passed, `pnpm lint` and Next.js Turbopack production build clean.
+
+## Ponytail Review: Clean Primitives & Single-Branch Banner
+
+Applied all 5 ponytail review findings with 1 commit per finding, accompanied by strict verification (`pnpm lint`, `pnpm test`, and `pnpm build`):
+
+1. **`chore(validate): remove unused CollectPayload type export`** (`lib/validate.ts`):
+   - Removed unused type export. Confirmed zero callers in codebase or tests.
+2. **`chore(ui): remove unused asChild prop from ButtonProps`** (`components/ui/Button.tsx`):
+   - Removed unused `asChild` prop and interface field. Confirmed no Slot dependencies.
+3. **`refactor(ui): inline isPreviousZero in DeltaBadge`** (`components/ui/DeltaBadge.tsx`):
+   - Inlined redundant `isNew` boolean flag directly into the badge formatting logic while preserving all formatting invariants (real minus sign U+2212, "New", en dash, "0%").
+4. **`refactor(ui): replace isPositiveGood with invert on KpiCard`** (`components/ui/KpiCard.tsx`, `components/viz/KpiStrip.tsx`):
+   - Removed dead `isPositiveGood` prop. Replaced with direct pass-through `invert?: boolean` prop connected to `DeltaBadge`.
+   - Bounce rate KPI explicitly passes `invert={true}`. Added unit tests in `tests/unit/delta-badge.test.tsx` verifying a decrease in bounce rate produces the positive (mint) style and an increase produces soft rose.
+5. **`refactor(ui): collapse Banner button branches and define sm size in Button`** (`components/ui/Banner.tsx`, `components/ui/Button.tsx`, `tests/unit/button.test.tsx`, `tests/e2e/delta-badges.spec.ts`):
+   - Collapsed Banner's two button branches into a single `<Button variant="accent" size="sm" href={actionHref} onClick={onAction}>{actionText}</Button>`.
+   - Removed all `!important` class overrides (`!py-1 !px-3 !text-[12px]`).
+   - Defined `size="sm"` directly in `Button.tsx` as `px-3 py-1 text-[12px]` and moved font sizing into `sizeClasses` to prevent class-list conflicts.
+   - Guaranteed identical disabled interaction and styling on both `<button>` and `<Link>` modes (`opacity-40 cursor-not-allowed pointer-events-none`).
+   - Added unit test suite `tests/unit/button.test.tsx` (7 tests).
+   - Verified on `/demo` via Playwright test at 390px and 1440px that the "Create your own" pill navigates to `/register`, displays identical font size and styling, and complies with "The One Hot Thing Rule" as the sole solid-accent action in the viewport.
+
+- **Verification & Status**:
+  - All 5 findings completed and verified.
+  - Findings skipped: **0**.
+  - Vitest Unit Tests: 25/25 passed (`pnpm test`).
+  - Playwright E2E Tests: 15/15 passed (`pnpm test:e2e`).
+  - CI Quality: `pnpm lint` (0 errors) and `pnpm build` (26/26 routes compiled) clean.
+
