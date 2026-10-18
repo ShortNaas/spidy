@@ -32,25 +32,14 @@ export function Banner({
       </div>
 
       <div>
-        {actionHref ? (
-          <Button
-            variant="accent"
-            size="sm"
-            href={actionHref}
-            className="!py-1 !px-3 !text-[12px]"
-          >
-            {actionText}
-          </Button>
-        ) : (
-          <Button
-            variant="accent"
-            size="sm"
-            onClick={onAction}
-            className="!py-1 !px-3 !text-[12px]"
-          >
-            {actionText}
-          </Button>
-        )}
+        <Button
+          variant="accent"
+          size="sm"
+          href={actionHref}
+          onClick={onAction}
+        >
+          {actionText}
+        </Button>
       </div>
     </div>
   );

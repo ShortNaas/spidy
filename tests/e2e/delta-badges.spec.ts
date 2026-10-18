@@ -71,4 +71,34 @@ test.describe("Delta Badges on /demo Verification", () => {
       });
     });
   }
+
+  test("Banner 'Create your own' pill navigates to /register, looks identical at 390px and 1440px, and is the single accent element", async ({
+    page,
+  }) => {
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/demo");
+      await page.waitForLoadState("networkidle");
+
+      const bannerLink = page.locator('a:has-text("Create your own")');
+      await expect(bannerLink).toBeVisible();
+      await expect(bannerLink).toHaveAttribute("href", "/register");
+
+      const bg = await bannerLink.evaluate((el) => window.getComputedStyle(el).backgroundColor);
+      expect(bg).toBe("rgb(251, 92, 52)");
+
+      // Check font size is 12px
+      const fontSize = await bannerLink.evaluate((el) => window.getComputedStyle(el).fontSize);
+      expect(fontSize).toBe("12px");
+
+      // Verify that it is the only solid-accent button/action element in the viewport (The One Hot Thing Rule)
+      const accentActions = page.locator("a.bg-accent, button.bg-accent");
+      await expect(accentActions).toHaveCount(1);
+    }
+
+    // Verify navigation to /register
+    const bannerLink = page.locator('a:has-text("Create your own")');
+    await bannerLink.click();
+    await expect(page).toHaveURL(/\/register$/);
+  });
 });

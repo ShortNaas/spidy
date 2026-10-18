@@ -45,7 +45,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     }, [variant]);
 
     const baseClasses =
-      "inline-flex items-center justify-center font-sans font-medium text-[13px] rounded-full transition-all duration-150 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none";
+      "inline-flex items-center justify-center font-sans font-medium rounded-full transition-all duration-150 outline-none select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none";
 
     let variantClasses = "";
     if (variant === "primary") {
@@ -62,16 +62,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variantClasses = "w-10 h-10 rounded-full bg-raised border border-border text-text hover:border-border-hover hover:text-white p-0 shrink-0";
     }
 
-    let sizeClasses = "px-5 py-2.5";
+    let sizeClasses = "px-5 py-2.5 text-[13px]";
     if (variant === "icon") {
-      sizeClasses = "";
+      sizeClasses = "text-[13px]";
     } else if (size === "sm") {
-      sizeClasses = "px-3.5 py-1.5 text-[12px]";
+      sizeClasses = "px-3 py-1 text-[12px]";
     } else if (size === "lg") {
       sizeClasses = "px-6 py-3 text-[14px]";
     }
 
-    const combinedClasses = `${baseClasses} ${variantClasses} ${sizeClasses} ${className}`;
+    const disabledClasses = disabled ? "opacity-40 cursor-not-allowed pointer-events-none" : "";
+    const combinedClasses = `${baseClasses} ${variantClasses} ${sizeClasses} ${disabledClasses} ${className}`.trim();
 
     if (href) {
       return (
@@ -80,10 +81,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           target={target}
           rel={rel}
           className={combinedClasses}
-          aria-disabled={disabled}
+          aria-disabled={disabled ? "true" : undefined}
           tabIndex={disabled ? -1 : undefined}
           title={props.title}
           aria-label={props["aria-label"]}
+          onClick={(e) => {
+            if (disabled) {
+              e.preventDefault();
+              return;
+            }
+            if (props.onClick) {
+              (props.onClick as unknown as React.MouseEventHandler<HTMLAnchorElement>)(e);
+            }
+          }}
         >
           {children}
         </Link>
