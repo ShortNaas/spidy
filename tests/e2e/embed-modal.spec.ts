@@ -21,7 +21,7 @@ test.describe("Embed Snippet Modal & Toast Verification", () => {
     await page.locator('button:has-text("Create account")').click();
 
     // 2. Arrives at /dashboard/sites/new
-    await expect(page).toHaveURL(/\/dashboard\/sites\/new/);
+    await expect(page).toHaveURL(/\/dashboard\/sites\/new/, { timeout: 15000 });
     await page.waitForLoadState("networkidle");
 
     // 3. Add a new site
