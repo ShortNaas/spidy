@@ -28,9 +28,8 @@ export function DeltaBadge({
 }: DeltaBadgeProps) {
   // Handle null, undefined, NaN, Infinity, or previous was zero
   if (value === null || value === undefined || !Number.isFinite(value) || isPreviousZero) {
-    const isNew = isPreviousZero;
-    const displayText = isNew ? "New" : "\u2013";
-    const ariaLabel = isNew ? "New metric" : "No previous data";
+    const displayText = isPreviousZero ? "New" : "\u2013";
+    const ariaLabel = isPreviousZero ? "New metric" : "No previous data";
 
     return (
       <span
