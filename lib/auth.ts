@@ -11,30 +11,20 @@ export const SESSION_COOKIE_OPTIONS = {
   path: "/",
   maxAge: SESSION_MAX_AGE_SECONDS,
 };
-
-const enc = new TextEncoder();
-
-function bufferToHex(buffer: ArrayBuffer): string {
-  return Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+import crypto from "node:crypto";
 
 /**
  * Computes SHA-256 hash of a string (used for session tokens and attempt tracking).
  */
 export async function hashToken(token: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", enc.encode(token));
-  return bufferToHex(digest);
+  return crypto.createHash("sha256").update(token).digest("hex");
 }
 
 /**
  * Generates a cryptographically secure random 32-byte hex token.
  */
 export function generateRawToken(): string {
-  const bytes = new Uint8Array(32);
-  crypto.getRandomValues(bytes);
-  return bufferToHex(bytes.buffer as ArrayBuffer);
+  return crypto.randomBytes(32).toString("hex");
 }
 
 /**
