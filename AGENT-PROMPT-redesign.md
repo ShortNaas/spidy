@@ -50,7 +50,6 @@ Done when: `/dashboard` and `/demo` share one shell with no duplicated layout co
 Restyle all of them using `lib/theme.ts` and the utilities only:
 - **Heatmaps (calendar, hour x weekday):** 6px-radius cells in the ember ramp: empty, hatched light, hatched dense, solid mid, solid full. Legend with four swatches.
 - **Bars/histograms:** pill-ended bars, hatched ember normally, solid ember for the active or peak bar, label bubble above the active bar.
-- **Gauges and donuts:** segmented rounded arc gauge (filled ember, remaining hatched) and thin donut with rounded caps on a `#1c1c1c` track.
 - **Sparklines and line charts:** 1.5px white lines with ring-dot markers; the live pulse uses white.
 - **Sankey:** thin nodes with a 3px colored left edge, 12px-rounded node cards, links at 30% opacity; referrers gray-white, landing pages ember, next pages mint. Hover dims others to 25%.
 - **Streamgraph:** `categorical(n)` colors, hatch for series beyond the fourth.

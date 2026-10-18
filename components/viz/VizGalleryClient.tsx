@@ -10,8 +10,6 @@ import { PulseLive } from "@/components/viz/PulseLive";
 import { WorldChoropleth } from "@/components/viz/WorldChoropleth";
 import { KpiStrip } from "@/components/viz/KpiStrip";
 import { BarChart } from "@/components/viz/BarChart";
-import { RadialGauge } from "@/components/viz/RadialGauge";
-import { DonutChart } from "@/components/viz/DonutChart";
 import { Button } from "@/components/ui/Button";
 import { Tag } from "@/components/ui/Tag";
 
@@ -274,29 +272,6 @@ export function VizGalleryClient() {
               data={MOCK_BARS}
               title="Traffic Distribution"
               subtitle="Hourly visitor density"
-            />
-          </div>
-
-          <div className="space-y-3">
-            <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
-              10. Radial Gauge (Segmented Arc)
-            </h2>
-            <RadialGauge
-              value={78}
-              label="Bandwidth"
-              subtext="Real-time ingestion rate"
-            />
-          </div>
-
-          <div className="space-y-3">
-            <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
-              11. Donut Chart (Track &amp; Rounded Cap Arc)
-            </h2>
-            <DonutChart
-              value={64}
-              label="Desktop Share"
-              subtext="Platform proportion"
-              color="ember"
             />
           </div>
         </section>

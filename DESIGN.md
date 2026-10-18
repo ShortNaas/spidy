@@ -247,8 +247,6 @@ Label (muted 13px), value (Poppins 300, 40px; live values in mono), delta pill (
 ### Charts
 - **Bars:** pill-shaped (full-radius tops), hatched ember for normal values, solid ember for the active or peak value, a small label bubble above the active bar. Gridlines are `border` at 50%.
 - **Heatmaps:** 6px-radius cells in the Ember volume ramp; legend as four small swatches with thresholds (hatch light, hatch dense, solid mid, solid full).
-- **Radial gauge:** segmented arc with rounded segments (Dribbble style) filled in ember, remaining segments hatched; the value centered in Poppins 300.
-- **Donut:** gray track `#1c1c1c`, white or ember arc with rounded caps.
 - **Line charts:** 1.5px strokes, ring-dot markers at the hovered point and the last point, soft vertical highlight band on hover.
 - **Sankey:** thin nodes with a 3px colored left edge (NEXORA flow style), rounded 12px node cards, links in 30% opacity.
 - **Globe:** dotted gray landmass, white live blips with a pulsing ring, container with live halo.
