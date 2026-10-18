@@ -72,23 +72,6 @@ export interface KpiResult {
   };
 }
 
-export class SiteNotFoundError extends Error {
-  constructor(message = "Site not found") {
-    super(message);
-    this.name = "SiteNotFoundError";
-  }
-}
-
-export async function verifySiteOwnership(siteId: string, userId?: string): Promise<void> {
-  if (!userId) return;
-  const rows = (await sql`
-    SELECT id FROM sites WHERE id = ${siteId} AND user_id = ${userId}::uuid;
-  `) as Array<{ id: string }>;
-  if (!rows || rows.length === 0) {
-    throw new SiteNotFoundError();
-  }
-}
-
 /**
  * 1. Timeseries (views, visitors) by hour or day
  */
@@ -96,10 +79,8 @@ export async function getTimeseries(
   siteId: string,
   from: Date,
   to: Date,
-  interval: "hour" | "day" = "day",
-  userId?: string
+  interval: "hour" | "day" = "day"
 ): Promise<TimeseriesPoint[]> {
-  await verifySiteOwnership(siteId, userId);
   const fromIso = from.toISOString();
   const toIso = to.toISOString();
 
