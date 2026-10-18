@@ -1,9 +1,10 @@
+import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { performRollup } from "@/lib/rollup";
 
-function checkCronAuth(request: NextRequest): boolean {
+export function checkCronAuth(request: NextRequest): boolean {
   const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
+  if (!cronSecret || cronSecret.trim().length === 0) {
     return false;
   }
 
@@ -18,15 +19,18 @@ function checkCronAuth(request: NextRequest): boolean {
   }
 
   const token = match[1];
-  if (token.length !== cronSecret.length) {
+  if (!token) {
     return false;
   }
 
-  let mismatch = 0;
-  for (let i = 0; i < token.length; i++) {
-    mismatch |= token.charCodeAt(i) ^ cronSecret.charCodeAt(i);
+  const tokenBuf = Buffer.from(token);
+  const secretBuf = Buffer.from(cronSecret);
+
+  if (tokenBuf.length !== secretBuf.length) {
+    return false;
   }
-  return mismatch === 0;
+
+  return crypto.timingSafeEqual(tokenBuf, secretBuf);
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
