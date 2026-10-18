@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DeltaBadge } from "@/components/ui/DeltaBadge";
+import { KpiCard } from "@/components/ui/KpiCard";
 
 describe("DeltaBadge Primitive", () => {
   it("renders positive delta with positive token styling and + sign", () => {
@@ -101,5 +102,23 @@ describe("DeltaBadge Primitive", () => {
     // 1234.5: >= 100%, 0 decimals -> 1,235 -> +1,235%
     const html1234 = renderToStaticMarkup(<DeltaBadge value={1234.5} />);
     expect(html1234).toMatch(/\+(1,235|1235)%/);
+  });
+
+  it("passes invert={true} from KpiCard to DeltaBadge correctly for bounce rate", () => {
+    // Decrease in bounce rate (-4%) with invert={true} -> mint positive style
+    const htmlDecrease = renderToStaticMarkup(
+      <KpiCard label="Bounce Proxy" value="36%" deltaPct={-4} invert={true} />
+    );
+    expect(htmlDecrease).toContain("text-positive");
+    expect(htmlDecrease).toContain("bg-positive/15");
+    expect(htmlDecrease).toContain("\u22124%");
+
+    // Increase in bounce rate (+4%) with invert={true} -> soft rose negative style
+    const htmlIncrease = renderToStaticMarkup(
+      <KpiCard label="Bounce Proxy" value="44%" deltaPct={4} invert={true} />
+    );
+    expect(htmlIncrease).toContain("text-negative");
+    expect(htmlIncrease).toContain("bg-negative/15");
+    expect(htmlIncrease).toContain("+4%");
   });
 });

@@ -5,8 +5,7 @@ export interface KpiCardProps {
   label: string;
   value: string | number;
   deltaPct?: number | null;
-  invertDelta?: boolean;
-  isPositiveGood?: boolean; // legacy prop compatibility: if false, invert is true
+  invert?: boolean;
   isLiveValue?: boolean;
   subtext?: string;
   sparklineData?: number[];
@@ -23,15 +22,12 @@ export function KpiCard({
   label,
   value,
   deltaPct,
-  invertDelta,
-  isPositiveGood = true,
+  invert = false,
   isLiveValue = false,
   subtext,
   sparklineData,
   className = "",
 }: KpiCardProps) {
-  // Determine if delta should be inverted (lower is better, e.g. bounce rate)
-  const invert = invertDelta ?? !isPositiveGood;
 
   // Mini sparkline (28px high) with ring-dot end marker
   let sparklineSvg: React.ReactNode = null;

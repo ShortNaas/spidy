@@ -43,7 +43,7 @@ export function KpiStrip({ data, loading = false, className = "" }: KpiStripProp
       label: "Total Pageviews",
       value: current.views.toLocaleString(),
       deltaPct: deltas.viewsPct,
-      invertDelta: false,
+      invert: false,
       subtext: "vs previous period",
       isLiveValue: false,
     },
@@ -51,7 +51,7 @@ export function KpiStrip({ data, loading = false, className = "" }: KpiStripProp
       label: "Unique Visitors",
       value: current.visitors.toLocaleString(),
       deltaPct: deltas.visitorsPct,
-      invertDelta: false,
+      invert: false,
       subtext: "salted daily hashes",
       isLiveValue: false,
     },
@@ -59,7 +59,7 @@ export function KpiStrip({ data, loading = false, className = "" }: KpiStripProp
       label: "Bounce Proxy",
       value: `${current.bounceRate}%`,
       deltaPct: deltas.bounceRatePct,
-      invertDelta: true, // lower bounce rate is better
+      invert: true, // lower bounce rate is better
       subtext: "single-page sessions",
       isLiveValue: false,
     },
@@ -67,7 +67,7 @@ export function KpiStrip({ data, loading = false, className = "" }: KpiStripProp
       label: "Top Country",
       value: current.topCountry || "—",
       deltaPct: null,
-      invertDelta: false,
+      invert: false,
       subtext: "highest visitor origin",
       isLiveValue: false,
     },
@@ -85,7 +85,7 @@ export function KpiStrip({ data, loading = false, className = "" }: KpiStripProp
           label={card.label}
           value={card.value}
           deltaPct={card.deltaPct}
-          invertDelta={card.invertDelta}
+          invert={card.invert}
           subtext={card.subtext}
           isLiveValue={card.isLiveValue}
         />
