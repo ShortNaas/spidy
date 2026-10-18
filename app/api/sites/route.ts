@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { sql } from "@/lib/db";
@@ -18,12 +19,12 @@ function normalizeDomain(rawDomain: string): string {
   return domain;
 }
 
-function generateSiteId(): string {
-  const bytes = new Uint8Array(5);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+export function generateSiteId(): string {
+  let id = crypto.randomBytes(5).toString("hex");
+  while (id === "demo" || id.startsWith("demo")) {
+    id = crypto.randomBytes(5).toString("hex");
+  }
+  return id;
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -102,19 +103,36 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // 4. Create site with public site_id
-  const siteId = generateSiteId();
+  // 4. Create site with public site_id (retries on unique-constraint conflict)
+  let attempts = 0;
+  while (attempts < 3) {
+    attempts++;
+    const siteId = generateSiteId();
 
-  try {
-    const rows = (await sql`
-      INSERT INTO sites (id, domain, user_id)
-      VALUES (${siteId}, ${domain}, ${user.id}::uuid)
-      RETURNING id, domain, created_at;
-    `) as Array<{ id: string; domain: string; created_at: string }>;
+    try {
+      const rows = (await sql`
+        INSERT INTO sites (id, domain, user_id)
+        VALUES (${siteId}, ${domain}, ${user.id}::uuid)
+        RETURNING id, domain, created_at;
+      `) as Array<{ id: string; domain: string; created_at: string }>;
 
-    return NextResponse.json({ site: rows[0] }, { status: 201 });
-  } catch (err) {
-    console.error("Failed to create site:", err);
-    return NextResponse.json({ error: "Failed to create site" }, { status: 500 });
+      return NextResponse.json({ site: rows[0] }, { status: 201 });
+    } catch (err: unknown) {
+      const isPkConflict =
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        (err as { code?: string }).code === "23505" &&
+        ((err as { constraint_name?: string }).constraint_name === "sites_pkey" ||
+          (err as { message?: string }).message?.includes("sites_pkey"));
+
+      if (isPkConflict && attempts < 3) {
+        continue;
+      }
+      console.error("Failed to create site:", err);
+      return NextResponse.json({ error: "Failed to create site" }, { status: 500 });
+    }
   }
+
+  return NextResponse.json({ error: "Failed to create site" }, { status: 500 });
 }
