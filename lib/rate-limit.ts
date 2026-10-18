@@ -1,16 +1,8 @@
+import crypto from "node:crypto";
 import { sql } from "@/lib/db";
 
-const enc = new TextEncoder();
-
-function bufferToHex(buffer: ArrayBuffer): string {
-  return Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-async function hashKey(value: string): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", enc.encode(value));
-  return bufferToHex(digest).slice(0, 32);
+export function hashKey(value: string): string {
+  return crypto.createHash("sha256").update(value).digest("hex").slice(0, 32);
 }
 
 /**
@@ -23,7 +15,7 @@ export async function checkRateLimit(
   maxAttempts: number,
   windowSeconds: number
 ): Promise<{ allowed: boolean; remaining: number }> {
-  const hashedIdentifier = await hashKey(identifier);
+  const hashedIdentifier = hashKey(identifier);
   const key = `${keyPrefix}${hashedIdentifier}`;
   const windowStart = new Date(Date.now() - windowSeconds * 1000).toISOString();
 
