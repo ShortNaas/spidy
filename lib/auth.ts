@@ -140,11 +140,3 @@ export async function destroySession(token: string | null | undefined): Promise<
     WHERE token_hash = ${tokenHash};
   `;
 }
-
-/**
- * Backward compatibility helper for legacy middleware/routes checking validity.
- */
-export async function verifySessionToken(token: string | null | undefined): Promise<boolean> {
-  const user = await getSessionUser(token);
-  return user !== null;
-}
