@@ -4,7 +4,6 @@ export interface RollupResult {
   date: string;
   upsertedRows: number;
   deletedOldEvents: number;
-  archivedToStorage?: boolean;
 }
 
 /**
@@ -65,34 +64,9 @@ export async function performRollup(targetDateStr?: string): Promise<RollupResul
     // If tables are not provisioned in older branch schemas
   }
 
-  // 3. Archive rollup snapshot to Neon Object Storage if configured
-  let archivedToStorage = false;
-  if (process.env.AWS_ENDPOINT_URL_S3 && process.env.AWS_ACCESS_KEY_ID) {
-    try {
-      const { uploadObject } = await import("@/lib/storage");
-      await uploadObject(
-        `rollups/${date}.json`,
-        JSON.stringify(
-          {
-            date,
-            upsertedRows,
-            deletedOldEvents,
-            archivedAt: new Date().toISOString(),
-          },
-          null,
-          2
-        )
-      );
-      archivedToStorage = true;
-    } catch (storageErr) {
-      console.warn("Neon Object Storage archival skipped:", storageErr);
-    }
-  }
-
   return {
     date,
     upsertedRows,
     deletedOldEvents,
-    archivedToStorage,
   };
 }
