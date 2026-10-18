@@ -10,8 +10,6 @@ export const collectPayloadSchema = z.object({
   session: z.string().max(64).optional().nullable(),
 });
 
-export type CollectPayload = z.infer<typeof collectPayloadSchema>;
-
 /**
  * Strips query strings, URL fragments, and normalizes paths.
  * Hard constraint 3: Query strings and URL fragments are stripped.
