@@ -8,7 +8,6 @@ let mountedAccentCount = 0;
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "accent" | "secondary" | "ghost" | "danger" | "icon";
   size?: "sm" | "md" | "lg";
-  asChild?: boolean;
   href?: string;
   target?: string;
   rel?: string;
