@@ -1,10 +1,5 @@
 import { sql } from "@/lib/db";
 
-export interface DateRangeParams {
-  siteId: string;
-  from: Date;
-  to: Date;
-}
 
 export interface TimeseriesPoint {
   ts: string;
