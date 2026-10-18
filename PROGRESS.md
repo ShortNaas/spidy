@@ -455,3 +455,35 @@
   - **Pixel & Hue Verification (`scripts/verify-pixels.py`)**: 0 violating pixels in hue 160°–210° across all viewport screenshots (100% PASSED).
   - **Grep Audit**: 0 hardcoded delta styles outside `DeltaBadge.tsx`, 0 instances of `green`, `red`, `emerald`, or raw hex in delta code.
   - **CI & Build**: `pnpm lint`, `pnpm test`, and `pnpm build` passed with 0 errors across all 26 routes.
+
+## Ponytail Audit: Complexity Elimination & Native Pruning
+
+Applied all 9 ponytail audit findings with 1 commit per finding, accompanied by strict verification (`pnpm lint`, `pnpm test`, and `pnpm build`):
+
+1. **`chore(queries): remove unused DateRangeParams interface`** (`lib/queries.ts`):
+   - Deleted unused exported interface. 0 callers across repo.
+2. **`chore(auth): remove dead verifySessionToken helper`** (`lib/auth.ts`):
+   - Deleted legacy session verification helper with 0 callers across repo.
+3. **`chore(queries): remove dead verifySiteOwnership and SiteNotFoundError`** (`lib/queries.ts`):
+   - Removed dead ownership helper and unused error class. All multi-tenant ownership queries are directly and strictly enforced in SQL (`SELECT id FROM sites WHERE id = ${siteId} AND user_id = ${user.id}::uuid`).
+4. **`chore(validate): remove dead isOriginAllowed utility`** (`lib/validate.ts`):
+   - Removed unused CSV/wildcard origin helper. Event collector continues enforcing origin validation live via `isOriginAllowedForSite` in `app/api/collect/route.ts`.
+5. **`chore(viz): delete unused DonutChart and RadialGauge components`** (`components/viz/DonutChart.tsx`, `components/viz/RadialGauge.tsx`, `DESIGN.md`, `AGENT-PROMPT-redesign.md`, `components/viz/VizGalleryClient.tsx`):
+   - Confirmed neither component is used on dashboard, demo, or landing page. Removed files and documentation references.
+6. **`refactor(auth): use node:crypto stdlib for random token and sha256 hashing`** (`lib/auth.ts`):
+   - Replaced hand-rolled `bufferToHex` and manual byte iteration with native `crypto.randomBytes(32).toString("hex")` and `crypto.createHash("sha256").update(token).digest("hex")`.
+7. **`refactor(db): remove mock injection and dual query wrapper, export neon client directly`** (`lib/db.ts`):
+   - Removed `customClient`, `setDbClient`, and dual template/string query wrapper. Export `neon(process.env.DATABASE_URL!)` directly.
+8. **`chore(rollup): remove S3 snapshot archival branch and archivedToStorage field`** (`lib/rollup.ts`):
+   - Removed speculative S3 upload branch and `archivedToStorage` interface field. Rollup remains self-contained with Postgres `daily_stats` upsert and 90-day retention cleanup.
+9. **`feat(export): remove S3 dependencies and storage.ts, return native in-memory attachment`** (`lib/storage.ts`, `app/api/export/route.ts`, `package.json`, `tests/unit/export.test.ts`):
+   - Removed `@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`, and `lib/storage.ts`.
+   - Updated `GET /api/export` to generate JSON report in-memory and stream directly via native `Response` with `Content-Type: application/json; charset=utf-8` and `Content-Disposition: attachment; filename="${siteId}-export-${date}.json"`.
+   - Preserved session authentication and site ownership scoping (HTTP 401 on unauthorized, HTTP 404 on unowned site).
+   - Added unit test suite `tests/unit/export.test.ts` asserting 401, 404, headers, and payload structure.
+
+- **Metrics**:
+  - Net lines removed: **-726 lines** (842 deletions vs 116 insertions).
+  - Dependencies pruned: **2 direct dependencies** (`@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`) and **24 transitive packages** (-26 packages total).
+  - Findings skipped: **0** (all 9 applied and verified).
+  - Test suites: 17/17 unit tests passed, 14/14 Playwright E2E tests passed, `pnpm lint` and Next.js Turbopack production build clean.
